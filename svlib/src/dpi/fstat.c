@@ -158,9 +158,11 @@ extern int SvLib_globNext(void *hnd, int *number, const char **path) {
   if (p->sanity_check != p) {
     return ENOMEM;
   }
-  *path = *(p->scan);
-  *number = p->gb->gl_pathc - (p->scan - p->gb->gl_pathv);
-  p->scan++;
+  if (p->scan != NULL) {
+    *path = *(p->scan);
+    *number = p->gb->gl_pathc - (p->scan - p->gb->gl_pathv);
+    p->scan++;
+  }
   if (*path == NULL) {
     gbuf_free(p);
   }

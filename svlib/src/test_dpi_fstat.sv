@@ -27,9 +27,12 @@ module test_dpi_fstat;
       $display("         s=\"%s\"", s);
     end
     
-    result = SvLib_globStart("../*", hnd);
+    result = SvLib_globStart("*", hnd);
     if (result) begin
       $display("globStart failed, result=%0d", result);
+    end
+    else if (hnd==null) begin
+      $display("globStart returns no result");
     end
     else begin
       forever begin
