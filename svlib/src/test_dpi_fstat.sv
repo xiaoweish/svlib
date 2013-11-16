@@ -1,12 +1,13 @@
 module test_dpi_fstat;
 
+  import "DPI-C" function string SvLib_getCErrStr(input int errnum);
   import "DPI-C" function int SvLib_getcwd(output string result);
   import "DPI-C" function int SvLib_globStart(
                             input  string pattern,
-                            output chandle hnd );
+                            output chandle hnd,
+                            output int     count);
   import "DPI-C" function int SvLib_globNext(
-                            input  chandle hnd,
-                            output int     count,
+                            inout  chandle hnd,
                             output string  path );
   import "DPI-C" function int SvLib_mtime(input string path, output int mtime);
   
@@ -27,23 +28,21 @@ module test_dpi_fstat;
       $display("         s=\"%s\"", s);
     end
     
-    result = SvLib_globStart("*", hnd);
+    result = SvLib_globStart("../*", hnd, count);
     if (result) begin
       $display("globStart failed, result=%0d", result);
     end
-    else if (hnd==null) begin
-      $display("globStart returns no result");
-    end
     else begin
+      $display("globStart: number=%0d", count);
       forever begin
-        result = SvLib_globNext(hnd, count, s);
+        result = SvLib_globNext(hnd, s);
         if (result) begin
           $display("globNext failed, result=%0d", result);
           break;
         end
         else begin
-          $display("globNext(hnd, %0d, \"%s\")", count, s);
-          if (s == "") break;
+          $display("globNext(hnd, \"%s\")", s);
+          if (hnd == null) break;
         end
       end
     end

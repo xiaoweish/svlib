@@ -61,6 +61,14 @@ static int getLibStringBufferSize() {
   }
 }
 
+//-------------------------------------------------------------------
+// import "DPI-C" function string SvLib_getCErrStr(input int errnum);
+//-------------------------------------------------------------------
+
+extern const char* SvLib_getCErrStr(int errnum) {
+  return strerror(errnum);
+}
+
 //----------------------------------------------------------------
 // import "DPI-C" function int SvLib_getcwd(output string result);
 //----------------------------------------------------------------
@@ -97,10 +105,10 @@ typedef struct stat s_stat, *p_stat;
 //----------------------------------------------------------------
 //   import "DPI-C" function int SvLib_globStart(
 //                            input  string pattern,
-//                            output chandle hnd );
+//                            output chandle hnd,
+//                            output int     count );
 //   import "DPI-C" function int SvLib_globNext(
-//                            input  chandle hnd,
-//                            output int     count,
+//                            inout  chandle hnd,
 //                            output string  path );
 //----------------------------------------------------------------
 
@@ -116,8 +124,9 @@ static void gbuf_free(gbuf_p p) {
   free(p);
 }
 
-extern int SvLib_globStart(const char *pattern, void **hnd) {
+extern int SvLib_globStart(const char *pattern, void **hnd, int *number) {
   int result;
+  *number = 0;
   gbuf_p gbuf = malloc(sizeof(gbuf_s));
   *hnd = NULL;
   if (gbuf == NULL) {
@@ -141,6 +150,7 @@ extern int SvLib_globStart(const char *pattern, void **hnd) {
     case 0:
       gbuf->scan = gbuf->gb->gl_pathv;
       *hnd = (void*) gbuf;
+      *number = gbuf->gb->gl_pathc;
       return 0;
     default:
       gbuf_free(gbuf);
@@ -148,23 +158,20 @@ extern int SvLib_globStart(const char *pattern, void **hnd) {
   }
 }
 
-extern int SvLib_globNext(void *hnd, int *number, const char **path) {
-  *number = 0;
+extern int SvLib_globNext(void **hnd, const char **path) {
   *path = NULL;
-  if (hnd == NULL) {
+  if (*hnd == NULL) {
     return 0;
   }
-  gbuf_p p = (gbuf_p)hnd;
+  gbuf_p p = (gbuf_p)(*hnd);
   if (p->sanity_check != p) {
     return ENOMEM;
   }
-  if (p->scan != NULL) {
-    *path = *(p->scan);
-    *number = p->gb->gl_pathc - (p->scan - p->gb->gl_pathv);
-    p->scan++;
-  }
+  *path = *(p->scan);
+  p->scan++;
   if (*path == NULL) {
     gbuf_free(p);
+    *hnd = NULL;
   }
   return 0;
 }

@@ -1,0 +1,4 @@
+pushd ${HOME}/external/svunit/ > /dev/null
+source Setup.bsh
+popd > /dev/null
+export SVUNIT_USER_INCDIR=../src
