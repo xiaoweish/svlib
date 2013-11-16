@@ -62,15 +62,80 @@ module Str_unit_test;
   `SVUNIT_TESTS_BEGIN
   
   `SVTEST(Str_create_check)
+    
     string test_str;
+  
     test_str = "";
-    `FAIL_IF(my_Str.get() != test_str)
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str)
+    `FAIL_UNLESS_EQUAL(my_Str.len(), test_str.len)
+    
     test_str = "hello world";
     my_Str = Str::create(test_str);
-    `FAIL_IF(my_Str.get() != test_str)
-    test_str = "bye";
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str)
+    `FAIL_UNLESS_EQUAL(my_Str.len(), test_str.len)
+    
+  `SVTEST_END
+  
+  `SVTEST(Str_trim_check)
+    
+    string test_str;
+    test_str = "    bye bye  ";
+    
     my_Str.set(test_str);
-    `FAIL_IF(my_Str.get() != test_str)
+    my_Str.trim(Str::BOTH);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "bye bye")
+    my_Str.trim(Str::BOTH);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "bye bye")
+    
+    my_Str.set(test_str);
+    my_Str.trim(Str::NONE);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str)
+    
+    my_Str.set(test_str);
+    my_Str.trim(Str::LEFT);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "bye bye  ")
+    
+    my_Str.set(test_str);
+    my_Str.trim(Str::RIGHT);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "    bye bye")
+    
+    my_Str.set("");
+    my_Str.trim(Str::BOTH);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "")
+    
+    my_Str.set("a   b");
+    my_Str.trim(Str::BOTH);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "a   b")
+    
+  `SVTEST_END
+  
+  `SVTEST(Str_just_check)
+  
+    string test_str;
+    
+    test_str = "test";
+    my_Str.set(test_str);
+    
+    my_Str.just(6,Str::NONE);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str)
+    `FAIL_UNLESS_EQUAL(my_Str.len(), test_str.len)
+    
+    my_Str.just(6,Str::RIGHT);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "  test")
+    `FAIL_UNLESS_EQUAL(my_Str.len(), 6)
+    
+    my_Str.just(10,Str::LEFT);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "test      ")
+    `FAIL_UNLESS_EQUAL(my_Str.len(), 10)
+
+    my_Str.just(12,Str::BOTH);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "    test    ")
+    `FAIL_UNLESS_EQUAL(my_Str.len(), 12)
+
+    my_Str.just(.width(9), .side(Str::RIGHT), .pre_trim(Str::RIGHT));
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "     test")
+    `FAIL_UNLESS_EQUAL(my_Str.len(), 9)
+
   `SVTEST_END
 
 
