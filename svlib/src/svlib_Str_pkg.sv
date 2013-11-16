@@ -7,6 +7,10 @@ package svlib_Str_pkg;
 
   typedef string qs[$];
   
+  function automatic bit isspace(byte unsigned ch);
+    return (ch inside {"\t", "\n", "\r", " ", 160});  // nbsp
+  endfunction
+  
   virtual class svlib_base;
   endclass
   
@@ -20,13 +24,14 @@ package svlib_Str_pkg;
   //
   class Str extends svlib_base;
   
-    typedef enum {NONE, LEFT, RIGHT, BOTH} side;
+    typedef enum {NONE, LEFT, RIGHT, BOTH} side_e;
   
     // Save a string as an object so that further manipulations can
     // be performed on it.  Get and set the object's string value.
     extern static function Str create(string s = "");
     extern function string get();
     extern function void   set(string s);
+    extern function int    len();
     
     // Find the first occurrence of substr in s, starting from the "start"
     // position. If a match is found, return the index of the first character
@@ -46,7 +51,10 @@ package svlib_Str_pkg;
     extern function qs     tokens();
     
     // Trim a string (remove leading and/or trailing whitespace)
-    extern function void   trim(string s, side sd=BOTH);
+    extern function void   trim(side_e side=BOTH);
+    
+    // Justify a string (pad to width with spaces on left/right/both)
+    extern function void   just(int width, side_e side=BOTH, side_e pre_trim=BOTH);
     
 /*
     // Filename manipulations
@@ -79,6 +87,10 @@ package svlib_Str_pkg;
       value = s;
     endfunction
     
+    function int Str::len();
+      return value.len;
+    endfunction
+    
     // Find the first occurrence of substr in s, starting from the "start"
     // position. If a match is found, return the index of the first character
     // of the match.  If no match is found, return -1.
@@ -95,7 +107,13 @@ package svlib_Str_pkg;
     function void Str::replace(int l, int r, string rs);
     endfunction
     
-    // Return the n characters from position p. If p<0, count back from [length].
+    // Replace contents with the n characters from position p.
+    // If p<0, count back from [length].
+    // If n<0, take characters from (p+1-|n|) to (p).
+    // If n>=0, take characters from (p) to (p+n-1).
+    // In case of falling off either end of the string, 
+    // take as much as possible up to and including the end.
+    // If |p| >= [length], result is empty string.
     function void Str::range(int p, int n);
     endfunction
     
@@ -104,10 +122,39 @@ package svlib_Str_pkg;
       return {};
     endfunction
     
-    // Trim a string (remove leading and/or trailing whitespace)
-    function void Str::trim(string s, side sd=BOTH);
+    // a string (remove leading and/or trailing whitespace)
+    function void Str::trim(side_e side=BOTH);
+      int first = 0;
+      int last  = value.len-1;
+      if (side inside {LEFT, BOTH}) begin
+        while ((first <= last) && isspace(value[first])) first++;
+      end
+      if (side inside {RIGHT, BOTH}) begin
+        while ((first <= last) && isspace(value[last])) last--;
+      end
+      value = value.substr(first, last);
     endfunction
   
+    // Justify a string (pad to width with spaces on left/right/both)
+    function void Str::just(int width, side_e side=BOTH, side_e pre_trim=BOTH);
+      int n, n2;
+      if (side == NONE) return;
+      trim(pre_trim);
+      n = width - signed'(value.len);
+      if (n <= 0) return;
+      case (side)
+        RIGHT:
+          value = { {n{" "}}, value };
+        LEFT:
+          value = { value, {n{" "}} };
+        BOTH:
+          begin
+            n2 = n/2;
+            value = { {n2{" "}}, value, {n-n/2{" "}} };
+          end
+      endcase
+    endfunction
+    
 endpackage
 
 `endif
