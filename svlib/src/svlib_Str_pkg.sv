@@ -79,24 +79,38 @@ package svlib_Str_pkg;
     extern static  function Str    create(string s = "");
     extern virtual function string get();
     extern virtual function int    len();
+    extern virtual function Str    copy();
     
     extern virtual function void   set(string s);
+    
+    extern virtual function void   append(string s);
+
     // Find the first occurrence of substr in s, starting from the "start"
     // position. If a match is found, return the index of the first character
     // of the match.  If no match is found, return -1.
-    
-    extern virtual function void   append(string s);
-    extern virtual function void   insert(string s, int where=0, origin_e origin=START);
-
-    extern virtual function int    locate(string substr, int start=0, origin_e origin=START);
+    extern virtual function int    first(string substr, int ignore=0);
+    extern virtual function int    last (string substr, int ignore=0);
     
     // Split a string on every occurrence of a given character
     extern virtual function qs     split(string splitset);
     
-    // Replace the range [l:r] with some other string, not necessarily same length
-    extern virtual function void   replace(int l, int r, string rs);
+    // Get a range (substring). The starting position 'p' is an anchor point,
+    // like an I-beam cursor, just to the left of the specified character.
+    // If 'origin' is START, count 'p' from the left end of the string, 
+    // with its value increasing towards the right. If 'origin' is END, 
+    // count 'p' from the right end of the string, with its value increasing
+    // towards the left.
+    // The range size 'n' specifies a count of characters to the right of 'p',
+    // or to the left of 'p' if 'n' is negative; n==0 specifies an empty string.
+    // If p<0, treat it as the corresponding number of character positions
+    // beyond the end (or start) of the string.
+    // Clip result to smaller than n if necessary so that the result remains
+    // entirely within the bounds of the original string.
+    extern virtual function void   range(int p, int n, origin_e origin=START);
     
-    extern virtual function void   range(int p, int n);
+    // Replace the range p/n with some other string, not necessarily same length.
+    // If n==0 this is an insert operation.
+    extern virtual function void   replace(string rs, int p, int n, origin_e origin=START);
     
     // Tokenize a string on whitespace boundaries
     extern virtual function qs     tokens();
@@ -108,6 +122,35 @@ package svlib_Str_pkg;
     extern virtual function void   just(int width, side_e side=BOTH);
     
     protected string value;
+    
+    protected function void get_range_positions(
+      int p, int n, origin_e origin=START,
+      output int L, output int R
+    );
+      int len = value.len;
+      // establish start position "just to the left of"
+      if (origin==END) begin
+        L = len - p;
+      end
+      else begin
+        L = p;
+      end
+      // establish L/R boundaries
+      R = L;
+      if (n<0) begin
+        // 'p' is right end, push L leftwards appropriately
+        L += n;
+      end
+      else begin
+        // 'p' is left end, push R rightwards appropriately
+        R += n;
+      end
+    endfunction
+    
+    protected function void clip_to_bounds(inout int n);
+      if (n<0) n=0; else if (n>value.len) n=value.len;
+    endfunction
+
     
   endclass
   
@@ -132,55 +175,65 @@ package svlib_Str_pkg;
   function int Str::len();
     return value.len;
   endfunction
+  
+  function Str Str::copy(); 
+    return create(value);
+  endfunction
 
   function void Str::set(string s);
     value = s;
   endfunction
 
   function void Str::append(string s);
-    insert(s, 0, END);
+    replace(s, 0, 0, END);
   endfunction
 
-  function void Str::insert(string s, int where=0, origin_e origin=START);
-    int len = value.len;
-    if (where < 0)
-      where = 0;
-    else if (where > len)
-      where = len;
-    if (origin == END)
-      where = len - where;
-    value = {value.substr(0, where-1), s, value.substr(where, len-1)};
-  endfunction
-  //
-  function automatic string str_insert(
-      string orig, string s, int where=0, Str::origin_e origin=Str::START
-    );
-    Str obj = Obstack#(Str)::get();
-    obj.set(orig);
-    obj.insert(s, where, origin);
-    str_insert = obj.get();
-    Obstack#(Str)::put(obj);
-  endfunction
 
   // Find the first occurrence of substr in s, starting from the "start"
   // position. If a match is found, return the index of the first character
   // of the match.  If no match is found, return -1.
-  function int Str::locate(string substr, int start=0, origin_e origin=START);
+  function int Str::first(string substr, int ignore=0);
+    for (int i=ignore; i<=(value.len-substr.len); i++) begin
+      if (substr == value.substr(i, i+substr.len-1)) return i;
+    end
     return -1;
   endfunction
 
-  // Replace the range [l:r] with some other string, not necessarily same length
-  function void Str::replace(int l, int r, string rs);
+  function int Str::last(string substr, int ignore=0);
+    for (int i=(value.len-substr.len)-ignore; i>=0; i--) begin
+      if (substr == value.substr(i, i+substr.len-1)) return i;
+    end
+    return -1;
   endfunction
 
-  // Replace contents with the n characters from position p.
-  // If p<0, count back from [length].
-  // If n<0, take characters from (p+1-|n|) to (p).
-  // If n>=0, take characters from (p) to (p+n-1).
-  // In case of falling off either end of the string, 
-  // take as much as possible up to and including the end.
-  // If |p| >= [length], result is empty string.
-  function void Str::range(int p, int n);
+  // Replace the range p/n with some other string, not necessarily same length
+  function void Str::replace(string rs, int p, int n, origin_e origin=START);
+    int len = value.len;
+    int L, R;
+    get_range_positions(p, n, origin, L, R);
+    clip_to_bounds(L);
+    clip_to_bounds(R);
+    value = {value.substr(0, L-1), rs, value.substr(R, len-1)};
+  endfunction
+  //
+  function automatic string str_replace(
+      string orig, string rs, int p, int n=0, Str::origin_e origin=Str::START
+    );
+    Str obj = Obstack#(Str)::get();
+    obj.set(orig);
+    obj.replace(rs, p, n, origin);
+    str_replace = obj.get();
+    Obstack#(Str)::put(obj);
+  endfunction
+
+  function void Str::range(int p, int n, origin_e origin=START);
+    int L, R;
+    get_range_positions(p, n, origin, L, R);
+    clip_to_bounds(L);
+    clip_to_bounds(R);
+    // adjust for substr conventions
+    R--;
+    value = value.substr(L, R);
   endfunction
 
   // Split a string on every occurrence of a given character

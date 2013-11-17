@@ -64,6 +64,8 @@ module Str_unit_test;
   
   `SVTEST(Str_create_check)
 
+    Str str;
+    
     test_str = "";
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str)
     `FAIL_UNLESS_EQUAL(my_Str.len(), test_str.len)
@@ -72,6 +74,9 @@ module Str_unit_test;
     my_Str = Str::create(test_str);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str)
     `FAIL_UNLESS_EQUAL(my_Str.len(), test_str.len)
+    
+    str = my_Str.copy();
+    `FAIL_UNLESS_STR_EQUAL(str.get(), test_str)
     
   `SVTEST_END
   
@@ -107,68 +112,67 @@ module Str_unit_test;
     
   `SVTEST_END
   
-  `SVTEST(Str_insert_check)
+  `SVTEST(Str_replace_check)
   
     my_Str.set("abc");
     my_Str.append("def");
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "abcdef")
-    my_Str.insert("123", 0);
+    my_Str.replace("123", 0, 0);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "123abcdef")
-    my_Str.insert("", -1);
+    my_Str.replace("", -1, 0);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "123abcdef")
-    my_Str.insert("0", -1);
+    my_Str.replace("0", -1, 0);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0123abcdef")
-    my_Str.insert("", -1, Str::END);
+    my_Str.replace("", -1, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0123abcdef")
-    my_Str.insert("z", -1, Str::END);
+    my_Str.replace("z", -1, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0123abcdefz")
-    my_Str.insert("EXTRA", 1, Str::START);
+    my_Str.replace("EXTRA", 1, 0);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0EXTRA123abcdefz")
-    my_Str.insert("EXTRA", 1, Str::END);
+    my_Str.replace("EXTRA", 1, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0EXTRA123abcdefEXTRAz")
-    my_Str.insert("-", 100, Str::START);
+    my_Str.replace("-", 100, 0);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0EXTRA123abcdefEXTRAz-")
-    my_Str.insert("=", 100, Str::END);
+    my_Str.replace("=", 100, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "=0EXTRA123abcdefEXTRAz-")
     
   `SVTEST_END
   
-  `SVTEST(Str_insert_global_check)
+  `SVTEST(Str_replace_global_check)
   
     string S;
     int D, C, G, P;
     
     Obstack#(Str)::stats(D, C, G, P);
-    `INFO($sformatf("depth=%0d, constructed=%0d, get_calls=%0d, put_calls=%0d", D, C, G, P));
-//     `FAIL_UNLESS(D==0)
-//     `FAIL_UNLESS(C==0)
-//     `FAIL_UNLESS(G==0)
-//     `FAIL_UNLESS(P==0)
+    //`INFO($sformatf("depth=%0d, constructed=%0d, get_calls=%0d, put_calls=%0d", D, C, G, P));
+    `FAIL_UNLESS(G>=P)
+    `FAIL_UNLESS(D+G-P==C)
     
     S = "abcdef";
-    S = str_insert(S, "123", 0);
+    S = str_replace(S, "123", 0);
     `FAIL_UNLESS_STR_EQUAL(S, "123abcdef")
-    S = str_insert(S, "", -1);
+    S = str_replace(S, "", -1);
     `FAIL_UNLESS_STR_EQUAL(S, "123abcdef")
-    S = str_insert(S, "0", -1);
+    S = str_replace(S, "0", -1);
     `FAIL_UNLESS_STR_EQUAL(S, "0123abcdef")
-    S = str_insert(S, "", -1, Str::END);
+    S = str_replace(S, "", -1, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(S, "0123abcdef")
-    S = str_insert(S, "z", -1, Str::END);
+    S = str_replace(S, "z", 0, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(S, "0123abcdefz")
-    S = str_insert(S, "EXTRA", 1, Str::START);
+    S = str_replace(S, "EXTRA", 1, 0, Str::START);
     `FAIL_UNLESS_STR_EQUAL(S, "0EXTRA123abcdefz")
-    S = str_insert(S, "EXTRA", 1, Str::END);
+    S = str_replace(S, "EXTRA", 1, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(S, "0EXTRA123abcdefEXTRAz")
-    S = str_insert(S, "-", 100, Str::START);
+    S = str_replace(S, "-", 100, 0, Str::START);
     `FAIL_UNLESS_STR_EQUAL(S, "0EXTRA123abcdefEXTRAz-")
-    S = str_insert(S, "=", 100, Str::END);
+    S = str_replace(S, "=", 100, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(S, "=0EXTRA123abcdefEXTRAz-")
     
     Obstack#(Str)::stats(D, C, G, P);
-    `INFO($sformatf("depth=%0d, constructed=%0d, get_calls=%0d, put_calls=%0d", D, C, G, P));
-//     `FAIL_UNLESS(D==1)
-//     `FAIL_UNLESS(C==1)
+    //`INFO($sformatf("depth=%0d, constructed=%0d, get_calls=%0d, put_calls=%0d", D, C, G, P));
+    `FAIL_UNLESS(G>=P)
+    `FAIL_UNLESS(C>0)
+    `FAIL_UNLESS(D+G-P==C)
     
   `SVTEST_END
   
@@ -200,8 +204,140 @@ module Str_unit_test;
 
   `SVTEST_END
 
+  `SVTEST(Str_range_check)
+  
+    test_str = "0123456789";
 
+    my_Str.set(test_str);
+    
+    // Calls that should return the whole string
+    my_Str.range(0,10);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
+    my_Str.range(0,-10, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
+    my_Str.range(-1,11);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
+    my_Str.range(-1,12);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
+    my_Str.range(-1,-11, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
+    my_Str.range(-1,-12, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
+    
+    // Calls that should return an empty string
+    my_Str.set(test_str);
+    my_Str.range(0,-10);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
+    my_Str.set(test_str);
+    my_Str.range(0,10, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
+    my_Str.set(test_str);
+    my_Str.range(5,0);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
+    my_Str.set(test_str);
+    my_Str.range(5,0, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
+    my_Str.set(test_str);
+    my_Str.range(28,5);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
+    
+    // Slices including the left end
+    my_Str.set(test_str);
+    my_Str.range(0, 5, Str::START);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "01234");
+    my_Str.set(test_str);
+    my_Str.range(-2, 7, Str::START);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "01234");
+    my_Str.set(test_str);
+    my_Str.range(0, 1, Str::START);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0");
+    my_Str.set(test_str);
+    my_Str.range(5, -5, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "01234");
+    my_Str.set(test_str);
+    my_Str.range(5, -6, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "01234");
+    my_Str.set(test_str);
+    my_Str.range(10, 1, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0");
+    
+    // Slices including the right end
+    my_Str.set(test_str);
+    my_Str.range(0, -5, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56789");
+    my_Str.set(test_str);
+    my_Str.range(-2, -7, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56789");
+    my_Str.set(test_str);
+    my_Str.range(0, -1, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "9");
+    my_Str.set(test_str);
+    my_Str.range(5, 5, Str::START);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56789");
+    my_Str.set(test_str);
+    my_Str.range(5, 6, Str::START);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56789");
+    my_Str.set(test_str);
+    my_Str.range(10, -1, Str::START);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "9");
+    
+    // Slices from the middle
+    my_Str.set(test_str);
+    my_Str.range(1, 5, Str::START);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "12345");
+    my_Str.set(test_str);
+    my_Str.range(5, 2, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56");
+    my_Str.set(test_str);
+    my_Str.range(5, -2, Str::END);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "34");
 
+  `SVTEST_END
+
+  `SVTEST(Str_locate_check)
+
+  int located;
+  string sought;
+  
+  my_Str.set("012345678901234567890");
+  // Seek something that's not in the string
+  sought = "A";
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought), -1)
+  sought = "1235";
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought), -1)
+  
+  // Find occurrences of a single character
+  sought = "0";
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought), 0);
+  `FAIL_UNLESS_EQUAL(my_Str.last(sought), 20);
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought, 1), 10);
+  `FAIL_UNLESS_EQUAL(my_Str.last(sought, 1), 10);
+  
+  // Find occurrences of a longer string
+  sought = "0123";
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought),      0);
+  `FAIL_UNLESS_EQUAL(my_Str.last (sought),     10);
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought, 1),  10);
+  `FAIL_UNLESS_EQUAL(my_Str.last (sought, 1),  10);
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought, 10), 10);
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought, 11), -1);
+  `FAIL_UNLESS_EQUAL(my_Str.last (sought, 11),  0);
+  `FAIL_UNLESS_EQUAL(my_Str.last (sought, 18), -1);
+  //
+  sought = "890";
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought),      8);
+  `FAIL_UNLESS_EQUAL(my_Str.last (sought),     18);
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought, 1),   8);
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought, 9),  18);
+  `FAIL_UNLESS_EQUAL(my_Str.last (sought, 1),   8);
+
+  // Matching but too long
+  sought = "0123456789012345678901";
+  `FAIL_UNLESS_EQUAL(my_Str.first(sought),     -1);
+  `FAIL_UNLESS_EQUAL(my_Str.last (sought),     -1);
+
+  `SVTEST_END
+  
   `SVUNIT_TESTS_END
 
 endmodule
