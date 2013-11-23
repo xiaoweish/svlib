@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <glob.h>
+#include <time.h>
 
 #include <veriuser.h>
 #include <svdpi.h>
@@ -13,7 +14,7 @@
 #define STRINGIFY(x) MACROHASH(x)
 #define MACROHASH(x) #x
 
-#define SVLIB_STRING_BUFFER_START_SIZE       (1024)
+#define SVLIB_STRING_BUFFER_START_SIZE       (8)
 #define SVLIB_STRING_BUFFER_LONGEST_PATHNAME (8192)
 
 #ifdef _CPLUSPLUS
@@ -163,6 +164,42 @@ extern int SvLib_getcwd(char ** p_result) {
   }
 }
 
+//----------------------------------------------------------------
+// import "DPI-C" function int SvLib_timeFormat(
+//                                       input  string format, 
+//                                       input  int    time, 
+//                                       output string formatted);
+//----------------------------------------------------------------
+
+extern int SvLib_timeFormat(int t, const char *fs, const char ** p_result) {
+  
+  int  bSize = SVLIB_STRING_BUFFER_START_SIZE;
+  char *buf;
+  
+  // There is no way to determine overflow error unless we can 
+  // guarantee the result string is non-empty. So we prefix the
+  // result string with a space to ensure non-emptiness. Ugh.
+  char * fss = malloc(strlen(fs)+2);
+  *fss = ' ';
+  strcpy(&(fss[1]), fs);  
+
+  while (1) {
+    buf   = getLibStringBuffer(bSize);
+    bSize = getLibStringBufferSize();
+    if (0 != strftime(buf, bSize, fss, localtime(&t))) {
+      *p_result = &(buf[1]); // skip added space
+      free(fss);
+      return 0;
+    } else if (bSize >= SVLIB_STRING_BUFFER_LONGEST_PATHNAME) {
+      *p_result = "timeFormat result exceeds maximum buffer length " 
+                  STRINGIFY(SVLIB_STRING_BUFFER_LONGEST_PATHNAME);
+      free(fss);
+      return ERANGE;
+    } else {
+      bSize *= 2;
+    }
+  }
+}
 
 //----------------------------------------------------------------
 //   import "DPI-C" function int SvLib_globStart(
@@ -224,6 +261,12 @@ extern int SvLib_mtime(const char *path, int *mtime) {
     *mtime = s.st_mtime;
     return 0;
   }
+}
+
+extern int SvLib_dayTime() {
+  time_t t = time(NULL);
+  int ti = t;
+  return ti;
 }
 
 #ifdef _CPLUSPLUS

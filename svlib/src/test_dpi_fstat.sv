@@ -10,6 +10,8 @@ module test_dpi_fstat;
                             output chandle hnd,
                             output int     count);
   import "DPI-C" function int SvLib_mtime(input string path, output int mtime);
+  import "DPI-C" function int SvLib_dayTime();
+  import "DPI-C" function int SvLib_timeFormat(input int tm, input string format, output string formatted);
   
   typedef string qS[$];
   function int SvLib_getQS(input chandle hnd, output qS ss);
@@ -69,6 +71,13 @@ module test_dpi_fstat;
       $display("mtime success, mtime=%0d", mtime);
     end
     
+    mtime = SvLib_dayTime();
+    $display("unix time now = %0d", mtime);
+    result = SvLib_timeFormat(mtime, "%c", s);
+    if (result != 0)
+      $display("  Oops, timeFormat result = %0d (%s)", result, SvLib_getCErrStr(result));
+    else
+      $display("  That's \"%s\"", s);
     
 
     $display("Finishing");
