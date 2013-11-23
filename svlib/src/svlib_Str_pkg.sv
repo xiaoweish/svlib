@@ -236,16 +236,6 @@ package svlib_Str_pkg;
     value = value.substr(L, R);
   endfunction
 
-  // Split a string on every occurrence of a given character
-  function qs Str::split(string splitset);
-    return {};
-  endfunction
-
-  // Tokenize a string on whitespace boundaries
-  function qs Str::tokens();
-    return {};
-  endfunction
-
   // Trim a string (remove leading and/or trailing whitespace)
   function void Str::trim(side_e side=BOTH);
     int first = 0;
@@ -278,6 +268,19 @@ package svlib_Str_pkg;
     endcase
   endfunction
     
+  // REVISIT Incomplete implementations:
+  
+  // Split a string on every occurrence of a given character
+  function qs Str::split(string splitset);
+    return {};
+  endfunction
+
+  // Tokenize a string on whitespace boundaries. Commas and
+  // string quotes are respected, CSV-fashion.
+  function qs Str::tokens();
+    return {};
+  endfunction
+
 endpackage
 
 `endif

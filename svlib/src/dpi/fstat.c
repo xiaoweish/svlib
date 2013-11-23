@@ -61,6 +61,70 @@ static int getLibStringBufferSize() {
   }
 }
 
+//--------------------------------------------------------------------------
+// FOR INTERNAL USE BY SVLIB ONLY:
+// Mechanism to retrieve an array of strings from C into SV.
+// A function such as 'glob' whose main result is an array of strings
+// will construct such an array in internal storage here, then return
+// a chandle pointing to the sa_buf_struct that records the array of strings
+// and the SvLib's progress through collecting them.
+// Subsequent calls to SvLib_saBufNext with this chandle will then
+// serve up the strings one by one, finally returning with the chandle set
+// to null to indicate that all the strings have been consumed and the 
+// C-side internal storage has been freed and is no longer accessible.
+
+// Each different data source will require its own free function.
+typedef void (*freeFunc_decl)(saBuf_p);
+
+typedef struct saBuf {
+  char **        scan;         // pointer to the current array element
+  freeFunc_decl  freeFunc;     // function to call on exhaustion
+  void *         data_ptr;     // pointer to app-specific data
+  struct saBuf * sanity_check; // pointer-to-self for checking
+} saBuf_s, *saBuf_p;
+
+static int saBufCreate(int dataBytes, freeFunc_decl ff, saBuf_p *created) {
+  *created = NULL;
+  saBuf_p sa = malloc(sizeof(saBuf_s));
+  if (sa == NULL) {
+    return ENOMEM;
+  }
+  sa->data_ptr = malloc(dataBytes);
+  if (sa->data_ptr == NULL) {
+    free(sa);
+    return ENOMEM;
+  }
+  sa->sanity_check = sa;
+  sa->freeFunc = ff;
+  sa->scan = NULL;
+  *created = sa;
+  return 0;
+}
+
+//-------------------------------------------------------------------------------
+// import "DPI-C" function int SvLib_saBufNext(inout chandle h, output string s);
+//-------------------------------------------------------------------------------
+
+extern int SvLib_saBufNext(void **h, const char **s) {
+  *s = NULL;
+  if (*h == NULL) {
+    return 0;
+  }
+  saBuf_p p = (saBuf_p)(*h);
+  if (p->sanity_check != p) {
+    return ENOMEM;
+  }
+  *s = *(p->scan);
+  p->scan++;
+  if (*s == NULL) {
+    *h = NULL;
+    if (p->freeFunc != NULL) {
+      (*(p->freeFunc))(p);
+    }
+  }
+  return 0;
+}
+
 //-------------------------------------------------------------------
 // import "DPI-C" function string SvLib_getCErrStr(input int errnum);
 //-------------------------------------------------------------------
@@ -99,82 +163,50 @@ extern int SvLib_getcwd(char ** p_result) {
   }
 }
 
-typedef struct stat s_stat, *p_stat;
-
 
 //----------------------------------------------------------------
 //   import "DPI-C" function int SvLib_globStart(
 //                            input  string pattern,
-//                            output chandle hnd,
+//                            output chandle h,
 //                            output int     count );
-//   import "DPI-C" function int SvLib_globNext(
-//                            inout  chandle hnd,
-//                            output string  path );
 //----------------------------------------------------------------
 
-typedef struct gbuf_struct {
-  struct gbuf_struct * sanity_check;
-  char   **scan;
-  glob_t *gb;
-} gbuf_s, *gbuf_p;
-
-static void gbuf_free(gbuf_p p) {
+static void glob_freeFunc(saBuf_p p) {
   if (p==NULL) return;
-  globfree(p->gb);
+  globfree((glob_t*)(p->data_ptr));
   free(p);
 }
 
-extern int SvLib_globStart(const char *pattern, void **hnd, int *number) {
+extern int SvLib_globStart(const char *pattern, void **h, int *number) {
   int result;
+  saBuf_p sa;
   *number = 0;
-  gbuf_p gbuf = malloc(sizeof(gbuf_s));
-  *hnd = NULL;
-  if (gbuf == NULL) {
-    return ENOMEM;
+  *h = NULL;
+  result = saBufCreate(sizeof(glob_t), glob_freeFunc, &sa);
+  if (result) {
+    return result;
   }
-  gbuf->sanity_check = gbuf;
-  gbuf->gb   = malloc(sizeof(glob_t));
-  if (gbuf->gb == NULL) {
-    free(gbuf);
-    return ENOMEM;
-  }
-  result = glob(pattern, GLOB_ERR | GLOB_MARK, NULL, gbuf->gb);
+  result = glob(pattern, GLOB_ERR | GLOB_MARK, NULL, sa->data_ptr);
   switch (result) {
     case GLOB_NOSPACE:
-      gbuf_free(gbuf);
+      glob_freeFunc(sa);
       return ENOMEM;
     case GLOB_ABORTED:
-      gbuf_free(gbuf);
+      glob_freeFunc(sa);
       return EACCES;
     case GLOB_NOMATCH:
     case 0:
-      gbuf->scan = gbuf->gb->gl_pathv;
-      *hnd = (void*) gbuf;
-      *number = gbuf->gb->gl_pathc;
+      sa->scan = ((glob_t*)(sa->data_ptr))->gl_pathv;
+      *number  = ((glob_t*)(sa->data_ptr))->gl_pathc;
+      *h = (void*) sa;
       return 0;
     default:
-      gbuf_free(gbuf);
+      glob_freeFunc(sa);
       return ENOTSUP;
   }
 }
 
-extern int SvLib_globNext(void **hnd, const char **path) {
-  *path = NULL;
-  if (*hnd == NULL) {
-    return 0;
-  }
-  gbuf_p p = (gbuf_p)(*hnd);
-  if (p->sanity_check != p) {
-    return ENOMEM;
-  }
-  *path = *(p->scan);
-  p->scan++;
-  if (*path == NULL) {
-    gbuf_free(p);
-    *hnd = NULL;
-  }
-  return 0;
-}
+typedef struct stat s_stat, *p_stat;
 
 //----------------------------------------------------------------
 //   import "DPI-C" function int SvLib_mtime(
