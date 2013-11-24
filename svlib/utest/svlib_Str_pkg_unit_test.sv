@@ -405,6 +405,18 @@ module Str_unit_test;
   `FAIL_UNLESS_EQUAL(expected, actual);
   
   `SVTEST_END
+
+  `SVTEST(RE_check)
+  
+  Regex re;
+  int sm, result;
+  
+  re = Regex::create("a(b)c");
+  my_Str.set("012abc678");
+  re.run(my_Str, sm, 0);
+  re.run(my_Str, sm, 1);
+  
+  `SVTEST_END
   
   `SVUNIT_TESTS_END
 
