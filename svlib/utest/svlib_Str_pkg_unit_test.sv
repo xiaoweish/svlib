@@ -218,86 +218,40 @@ module Str_unit_test;
     my_Str.set(test_str);
     
     // Calls that should return the whole string
-    my_Str.range(0,10);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
-    my_Str.range(0,-10, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
-    my_Str.range(-1,11);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
-    my_Str.range(-1,12);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
-    my_Str.range(-1,-11, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
-    my_Str.range(-1,-12, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(0,10), test_str);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(0,-10, Str::END), test_str);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(-1,11), test_str);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(-1,12), test_str);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(-1,-11, Str::END), test_str);
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(-1,-12, Str::END), test_str);
     
     // Calls that should return an empty string
-    my_Str.set(test_str);
-    my_Str.range(0,-10);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
-    my_Str.set(test_str);
-    my_Str.range(0,10, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
-    my_Str.set(test_str);
-    my_Str.range(5,0);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
-    my_Str.set(test_str);
-    my_Str.range(5,0, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
-    my_Str.set(test_str);
-    my_Str.range(28,5);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(0,-10), "");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(0,10, Str::END), "");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(5,0), "");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(5,0, Str::END), "");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(28,5), "");
     
     // Slices including the left end
-    my_Str.set(test_str);
-    my_Str.range(0, 5, Str::START);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "01234");
-    my_Str.set(test_str);
-    my_Str.range(-2, 7, Str::START);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "01234");
-    my_Str.set(test_str);
-    my_Str.range(0, 1, Str::START);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0");
-    my_Str.set(test_str);
-    my_Str.range(5, -5, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "01234");
-    my_Str.set(test_str);
-    my_Str.range(5, -6, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "01234");
-    my_Str.set(test_str);
-    my_Str.range(10, 1, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "0");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(0, 5, Str::START), "01234");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(-2, 7, Str::START), "01234");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(0, 1, Str::START), "0");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(5, -5, Str::END), "01234");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(5, -6, Str::END), "01234");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(10, 1, Str::END), "0");
     
     // Slices including the right end
-    my_Str.set(test_str);
-    my_Str.range(0, -5, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56789");
-    my_Str.set(test_str);
-    my_Str.range(-2, -7, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56789");
-    my_Str.set(test_str);
-    my_Str.range(0, -1, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "9");
-    my_Str.set(test_str);
-    my_Str.range(5, 5, Str::START);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56789");
-    my_Str.set(test_str);
-    my_Str.range(5, 6, Str::START);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56789");
-    my_Str.set(test_str);
-    my_Str.range(10, -1, Str::START);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "9");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(0, -5, Str::END), "56789");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(-2, -7, Str::END), "56789");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(0, -1, Str::END), "9");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(5, 5, Str::START), "56789");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(5, 6, Str::START), "56789");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(10, -1, Str::START), "9");
     
     // Slices from the middle
-    my_Str.set(test_str);
-    my_Str.range(1, 5, Str::START);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "12345");
-    my_Str.set(test_str);
-    my_Str.range(5, 2, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "56");
-    my_Str.set(test_str);
-    my_Str.range(5, -2, Str::END);
-    `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "34");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(1, 5, Str::START), "12345");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(5, 2, Str::END), "56");
+    `FAIL_UNLESS_STR_EQUAL(my_Str.range(5, -2, Str::END), "34");
 
   `SVTEST_END
 
@@ -413,8 +367,17 @@ module Str_unit_test;
   
   re = Regex::create("a(b)c");
   my_Str.set("012abc678");
-  re.run(my_Str, sm, 0);
-  re.run(my_Str, sm, 1);
+  result = re.run(my_Str, sm, 0);
+  result = re.run(my_Str, sm, 1);
+  for (int i=0; i<sm; i++) begin
+    int L, R;
+    string match;
+    result = re.getMatchPosition(i, L, R);
+    result = re.getMatchString(i, match);
+    $display("SV match %0d - %0d:%0d \"%s\"", i, L, R, match);
+  end
+  my_Str.set("012345678");
+  result = re.run(my_Str, sm, 0);
   
   `SVTEST_END
   

@@ -275,40 +275,59 @@ extern int SvLib_dayTime() {
 }
 
 //----------------------------------------------------------------
-//   import "DPI-C" function int SvLib_runRegex(
-//                            string re,
-//                            string str,
-//                            int cflags,
-//                            int startPos,
-//                            output int matchlist[]);
+//  import "DPI-C" function string SvLib_regexErrorString(input int err);
 //----------------------------------------------------------------
 
-extern int SvLib_runRegex(const char *re, const char *str, int cflags, int startPos, svOpenArrayHandle matchlist) {
+extern char* SvLib_regexErrorString(int err) {
+  return NULL;
+}
+
+//----------------------------------------------------------------
+//   import "DPI-C" function int SvLib_(
+//                            input  string re,
+//                            input  string str,
+//                            input  int    cflags,
+//                            input  int    startPos,
+//                            output int    matchCount,
+//                            output int    matchList[]);
+//----------------------------------------------------------------
+
+extern int SvLib_regexRun(
+    const char *re,
+    const char *str,
+    int cflags,
+    int startPos,
+    int *matchCount,
+    svOpenArrayHandle matchList
+  ) {
   int result;
   regex_t    compiled;
   regmatch_t * matches;
   int numMatches;
   int i;
   
+  // initialize result
+  *matchCount = 0;
+  
   // result array checks
-  if (svDimensions(matchlist) != 1) {
-    io_printf("svDimensions=%d, should be 1\n", svDimensions(matchlist));
+  if (svDimensions(matchList) != 1) {
+    io_printf("svDimensions=%d, should be 1\n", svDimensions(matchList));
     return -1;
   }
-  numMatches = svSize(matchlist, 1);
+  numMatches = svSize(matchList, 1);
   io_printf("array size=%d\n", numMatches);
   if (numMatches != 0) {
     if ((numMatches % 2) != 0) {
-      io_printf("Odd number of elements in matchlist\n");
+      io_printf("Odd number of elements in matchList\n");
       return -1;
     }
     numMatches /= 2;
-    if (svIncrement(matchlist,1)>0) {
+    if (svIncrement(matchList,1)>0) {
       io_printf("Descending subscripts in array!\n");
       return -1;
     }
-    if (svLeft(matchlist, 1) != 0) {
-      io_printf("svLeft=%d, should be 0\n", svLeft(matchlist,1));
+    if (svLeft(matchList, 1) != 0) {
+      io_printf("svLeft=%d, should be 0\n", svLeft(matchList,1));
       return -1;
     }
     io_printf("checks OK, numMatches=%d\n", numMatches);
@@ -329,20 +348,20 @@ extern int SvLib_runRegex(const char *re, const char *str, int cflags, int start
   
   io_printf("regexec returned %d\n", result);
   
-  if (result) {
-    regfree(&compiled);
-    if (numMatches) free(matches);
-    return -1;  // no-match
-  }
-  
-  // copy matches into SV from struct[]
-  for (i=0; i<numMatches; i++) {
-    *(regoff_t*)(svGetArrElemPtr1(matchlist, 2*i  )) = matches[i].rm_so;
-    *(regoff_t*)(svGetArrElemPtr1(matchlist, 2*i+1)) = matches[i].rm_eo;
+  if (result == 0) {
+    // successful match: copy matches into SV from struct[]
+    for (i=0; (i<numMatches) && (matches[i].rm_so>=0); i++) {
+      (*matchCount)++;
+      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i  )) = matches[i].rm_so + startPos;
+      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i+1)) = matches[i].rm_eo + startPos;
+    }
+  } else if (result == REG_NOMATCH) {
+    // no match, that's OK, we return matchCount==0
+    result = 0;
   }
   regfree(&compiled);
   if (numMatches) free(matches);
-  return 0;
+  return result;
 }
 
 #ifdef _CPLUSPLUS

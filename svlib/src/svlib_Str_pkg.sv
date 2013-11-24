@@ -7,12 +7,14 @@
 
 package svlib_Str_pkg;
 
-  import "DPI-C" function int SvLib_runRegex(
-                           string re,
-                           string str,
-                           int cflags,
-                           int startPos,
-                           output int matchlist[]);
+  import "DPI-C" function int SvLib_regexRun(
+                           input  string re,
+                           input  string str,
+                           input  int    cflags,
+                           input  int    startPos,
+                           output int    matchCount,
+                           output int    matchList[]);
+  import "DPI-C" function string SvLib_regexErrorString(input int err);
 
   typedef string qs[$];
   
@@ -127,7 +129,7 @@ package svlib_Str_pkg;
     // beyond the end (or start) of the string.
     // Clip result to smaller than n if necessary so that the result remains
     // entirely within the bounds of the original string.
-    extern virtual function void   range(int p, int n, origin_e origin=START);
+    extern virtual function string range(int p, int n, origin_e origin=START);
     
     // Replace the range p/n with some other string, not necessarily same length.
     // If n==0 this is an insert operation.
@@ -155,32 +157,30 @@ package svlib_Str_pkg;
   typedef class Regex;
   class Regex extends svlib_base;//#(Regex);
   
-    localparam int maxSubMatches = 9;
-  
     extern static  function Regex  create(string s = "", bit nocase=0, bit noline=0);
-    extern virtual function void   set(string s, bit nocase=0, bit noline=0);
+    extern virtual function void   setRE(string s);
     extern virtual function void   setOpts(bit nocase, bit noline);
-    extern virtual function string get();
+//    extern virtual function void   setMaxMatches(int maxMatches);
+    
+    extern virtual function string getRE();
     extern virtual function void   getOpts(output bit nocase, output bit noline);
+//    extern virtual function int    getMaxMatches();
     extern virtual function Regex  copy();
     
     extern virtual function void   purge();
     
-    extern virtual function int    run(Str s, output int nSubMatches, input int startPos=0);
-    extern virtual function int    rerun(output int nSubMatches, input int startPos=0);
-    
+    extern virtual function int    run(Str s, output int nMatches, input int startPos=0);
     extern virtual function int    getMatchPosition(int match, output int L, output int R);
     extern virtual function int    getMatchString(int match, output string s);
-    extern virtual function int    getError();
     extern virtual function string getErrorString();
     
-    protected Str last_run;
+    protected int lastMatchCount;
+    protected int lastError;
+    protected int matchList[20];
+    protected Str runStr;
     
     protected int     compiledRegexKey;    // for lookup on C side
     protected chandle compiledRegexHandle; // check on C-side pointer
-    protected struct {
-      int rm_so; int rm_eo;
-    }                 rm[0:maxSubMatches];
     
     protected bit    nocase;
     protected bit    noline;
@@ -285,14 +285,14 @@ package svlib_Str_pkg;
     Obstack#(Str)::put(obj);
   endfunction
 
-  function void Str::range(int p, int n, origin_e origin=START);
+  function string Str::range(int p, int n, origin_e origin=START);
     int L, R;
     get_range_positions(p, n, origin, L, R);
     clip_to_bounds(L);
     clip_to_bounds(R);
     // adjust for substr conventions
     R--;
-    value = value.substr(L, R);
+    return value.substr(L, R);
   endfunction
 
   // Trim a string (remove leading and/or trailing whitespace)
@@ -360,17 +360,18 @@ package svlib_Str_pkg;
 
   function Regex  Regex::create(string s = "", bit nocase=0, bit noline=0);
     Regex r = new(); //randstable_new();
-    r.set(s, nocase, noline);
+    r.setRE(s);
+    r.setOpts(nocase, noline);
+//    r.setMaxMatches(10);  // sensible default
     return r;
   endfunction
   
-  function void   Regex::set(string s, bit nocase=0, bit noline=0);
+  function void   Regex::setRE(string s);
     if (s!=text) begin
       // RE text has changed, so we must reset the object
       this.text = s;
       purge();
     end
-    setOpts(nocase, noline);
   endfunction
   
   function void   Regex::setOpts(bit nocase, bit noline);
@@ -382,11 +383,19 @@ package svlib_Str_pkg;
     end
   endfunction
   
+//   function void   Regex::setMaxMatches(int maxMatches);
+//     if (maxMatches*2 != matchList.size()) begin
+//       matchList = new[maxMatches*2];
+//     end
+//   endfunction
+  
   function void   Regex::purge();
     compiledRegexHandle = null;
+    lastMatchCount = -1; // Not matched at all
+    lastError = -1;  // No match attempt
   endfunction
   
-  function string Regex::get();
+  function string Regex::getRE();
     return text;
   endfunction
   
@@ -395,8 +404,13 @@ package svlib_Str_pkg;
     noline = this.noline;
   endfunction
   
+//   function int    Regex::getMaxMatches();
+//     return matchList.size()/2;
+//   endfunction
+  
   function Regex  Regex::copy();
-    return create(text, nocase, noline);
+    Regex it = create(text, nocase, noline);
+//    it.setMaxMatches(getMaxMatches());
   endfunction
   
   // REVISIT Incomplete implementations:
@@ -407,37 +421,57 @@ package svlib_Str_pkg;
     return {};
   endfunction
   
-  // import "DPI-C" function int SvLib_runRegex(
-  //                          string re,
-  //                          string str,
-  //                          int cflags,
-  //                          int startPos,
-  //                          output int matchlist[]);
-  function int    Regex::run(Str s, output int nSubMatches, input int startPos=0);
-    int matchlist[20];  // space for $0..$9
+  function int    Regex::run(Str s, output int nMatches, input int startPos=0);
     int result;
-    result = SvLib_runRegex(.re(text), .str(s.get()), .cflags(0), .startPos(startPos), .matchlist(matchlist));
-    $display("result from Regex::run = %0d", result);
-    if (result) return result;
-    for (int i=0; i<$size(matchlist,1); i+=2) begin
-      $display("match %0d - %0d:%0d", i/2, matchlist[i], matchlist[i+1]);
+    runStr = s;
+    nMatches = 0;
+    lastMatchCount = -1;  // pessimistic
+    
+    lastError = SvLib_regexRun(
+      .re(text), .str(s.get()), .cflags(0), .startPos(startPos), 
+      .matchCount(nMatches), .matchList(matchList));
+    for (int i=2*nMatches; i<$size(matchList,1); i++) matchList[i] = -1;
+    
+    $display("result from Regex::run = %0d, nMatches=%0d", lastError, nMatches);
+    if (lastError) return lastError;
+    
+    for (int i=0; i<$size(matchList,1); i+=2) begin
+      $display("match %0d - %0d:%0d", i/2, matchList[i], matchList[i+1]);
     end
+    lastMatchCount = nMatches;
     return 0;
   endfunction
   
-  function int    Regex::rerun(output int nSubMatches, input int startPos=0);
-  endfunction
-  
   function int    Regex::getMatchPosition(int match, output int L, output int R);
+    if (match>lastMatchCount || match<0) begin
+      L = -1;
+      R = -1;
+      return 1;
+    end
+    else begin
+      L = matchList[match*2];
+      R = matchList[match*2+1] - 1;
+      return 0;
+    end
   endfunction
   
   function int    Regex::getMatchString(int match, output string s);
-  endfunction
-  
-  function int    Regex::getError();
+    int L, R, result;
+    s = "";
+    result = getMatchPosition(match, L, R);
+    if (result) return result;
+    if (runStr == null) return 1;
+    s = runStr.range(L, R+1-L);
+    return 0;
   endfunction
   
   function string Regex::getErrorString();
+    case (lastError)
+      0  : return "";
+      -1 : return "SvLib_regex not yet run";
+      default :
+        return SvLib_regexErrorString(lastError);
+    endcase
   endfunction
     
 endpackage
