@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <glob.h>
 #include <time.h>
+#include <regex.h>
 
 #include <veriuser.h>
 #include <svdpi.h>

@@ -69,8 +69,6 @@ package svlib_Str_pkg;
   //
   class Str extends svlib_base;
   
-    protected static Str obstack;
-  
     typedef enum {NONE, LEFT, RIGHT, BOTH} side_e;
     typedef enum {START, END} origin_e;
   
@@ -78,8 +76,8 @@ package svlib_Str_pkg;
     // be performed on it.  Get and set the object's string value.
     extern static  function Str    create(string s = "");
     extern virtual function string get();
-    extern virtual function int    len();
     extern virtual function Str    copy();
+    extern virtual function int    len();
     
     extern virtual function void   set(string s);
     
@@ -123,38 +121,70 @@ package svlib_Str_pkg;
     
     protected string value;
     
-    protected function void get_range_positions(
+    extern protected function void get_range_positions(
       int p, int n, origin_e origin=START,
       output int L, output int R
     );
-      int len = value.len;
-      // establish start position "just to the left of"
-      if (origin==END) begin
-        L = len - p;
-      end
-      else begin
-        L = p;
-      end
-      // establish L/R boundaries
-      R = L;
-      if (n<0) begin
-        // 'p' is right end, push L leftwards appropriately
-        L += n;
-      end
-      else begin
-        // 'p' is left end, push R rightwards appropriately
-        R += n;
-      end
-    endfunction
-    
-    protected function void clip_to_bounds(inout int n);
-      if (n<0) n=0; else if (n>value.len) n=value.len;
-    endfunction
-
+    extern protected function void clip_to_bounds(inout int n);
     
   endclass
   
+  class Regex extends svlib_base;
   
+    localparam int maxSubMatches = 9;
+  
+    extern static  function Regex  create(string s = "", bit nocase=0, bit linestop=0);
+    extern virtual function void   set(string s, bit nocase=0, bit linestop=0);
+    extern virtual function void   setOpts(bit nocase, bit linestop);
+    extern virtual function string get();
+    extern virtual function void   getOpts(output bit nocase, output bit linestop);
+    extern virtual function Regex  copy();
+    
+    extern virtual function int    run(Str s, output int nSubMatches, input int startPos=0);
+    extern virtual function int    rerun(output int nSubMatches, input int startPos=0);
+    
+    extern virtual function int    getMatchPosition(int match, output int L, output int R);
+    extern virtual function int    getMatchString(int match, output string s);
+    extern virtual function int    getError();
+    extern virtual function string getErrorString();
+    
+    protected Str last_run;
+    
+    protected int compiledRegexKey;        // for lookup on C side
+    protected chandle compiledRegexHandle; // check on C-side pointer
+    protected struct {int rm_so; int rm_eo;} rm[0:maxSubMatches];
+  
+  endclass
+  
+  
+  function void Str::get_range_positions(
+    int p, int n, origin_e origin=START,
+    output int L, output int R
+  );
+    int len = value.len;
+    // establish start position "just to the left of"
+    if (origin==END) begin
+      L = len - p;
+    end
+    else begin
+      L = p;
+    end
+    // establish L/R boundaries
+    R = L;
+    if (n<0) begin
+      // 'p' is right end, push L leftwards appropriately
+      L += n;
+    end
+    else begin
+      // 'p' is left end, push R rightwards appropriately
+      R += n;
+    end
+  endfunction
+
+  function void Str::clip_to_bounds(inout int n);
+    if (n<0) n=0; else if (n>value.len) n=value.len;
+  endfunction
+
   // Save a string as an object so that further manipulations can
   // be performed on it.
   function Str Str::create(string s = "");
@@ -238,8 +268,11 @@ package svlib_Str_pkg;
 
   // Trim a string (remove leading and/or trailing whitespace)
   function void Str::trim(side_e side=BOTH);
-    int first = 0;
-    int last  = value.len-1;
+    int first;
+    int last;
+    if (side == NONE) return;
+    first = 0;
+    last  = value.len-1;
     if (side inside {LEFT, BOTH}) begin
       while ((first <= last) && isspace(value[first])) first++;
     end
@@ -268,19 +301,73 @@ package svlib_Str_pkg;
     endcase
   endfunction
     
-  // REVISIT Incomplete implementations:
-  
   // Split a string on every occurrence of a given character
   function qs Str::split(string splitset);
-    return {};
+    split = {};
+    if (splitset == "") begin
+      foreach (value[i]) split.push_back(value[i]);
+    end
+    else begin
+      byte unsigned splitchars[$];
+      int anchor = 0;
+      foreach (splitset[i]) begin
+        splitchars.push_back(splitset[i]);
+      end
+      foreach (value[i]) begin
+        if (value[i] inside {splitchars}) begin
+          split.push_back(value.substr(anchor, i-1));
+          anchor = i+1;
+        end
+      end
+      split.push_back(value.substr(anchor, value.len()-1));
+    end
   endfunction
 
+  // REVISIT Incomplete implementations:
+  
   // Tokenize a string on whitespace boundaries. Commas and
   // string quotes are respected, CSV-fashion.
   function qs Str::tokens();
     return {};
   endfunction
 
+  function Regex  Regex::create(string s = "", bit nocase=0, bit linestop=0);
+  endfunction
+  
+  function void   Regex::set(string s, bit nocase=0, bit linestop=0);
+  endfunction
+  
+  function void   Regex::setOpts(bit nocase, bit linestop);
+  endfunction
+  
+  function string Regex::get();
+  endfunction
+  
+  function void   Regex::getOpts(output bit nocase, output bit linestop);
+  endfunction
+  
+  function Regex  Regex::copy();
+  endfunction
+  
+  function int    Regex::run(Str s, output int nSubMatches, input int startPos=0);
+  endfunction
+  
+  function int    Regex::rerun(output int nSubMatches, input int startPos=0);
+  endfunction
+  
+  function int    Regex::getMatchPosition(int match, output int L, output int R);
+  endfunction
+  
+  function int    Regex::getMatchString(int match, output string s);
+  endfunction
+  
+  function int    Regex::getError();
+  endfunction
+  
+  function string Regex::getErrorString();
+  endfunction
+  
+    
 endpackage
 
 `endif

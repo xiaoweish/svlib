@@ -60,6 +60,13 @@ module Str_unit_test;
   //     <test code>
   //   `SVTEST_END
   //===================================
+  
+  function automatic string displayable(string q[$]);
+    string result;
+    foreach (q[i]) result = {result, " \"", q[i], "\""};
+    return result;
+  endfunction
+  
   `SVUNIT_TESTS_BEGIN
   
   `SVTEST(Str_create_check)
@@ -336,6 +343,67 @@ module Str_unit_test;
   `FAIL_UNLESS_EQUAL(my_Str.first(sought),     -1);
   `FAIL_UNLESS_EQUAL(my_Str.last (sought),     -1);
 
+  `SVTEST_END
+
+  `SVTEST(Str_split_check)
+  
+  string test_str = "aabcdefff";
+  string expected[$] = {};
+  string actual[$];
+  my_Str.set(test_str);
+  
+  actual = my_Str.split("");
+  expected.delete();
+  for (int i=0; i<test_str.len(); i++)
+    expected.push_back(test_str.substr(i,i));
+  `FAIL_UNLESS_EQUAL(expected, actual);
+
+  actual = my_Str.split("b");
+  expected = {"aa", "cdefff"};
+  `FAIL_UNLESS_EQUAL(expected, actual);
+
+  actual = my_Str.split("bf");
+  expected = {"aa", "cde", "", "", ""};
+  `FAIL_UNLESS_EQUAL(expected, actual);
+
+  actual = my_Str.split("abc");
+  expected = {"", "", "", "", "defff"};
+  `FAIL_UNLESS_EQUAL(expected, actual);
+  
+  actual = my_Str.split("pqr");
+  expected = {"aabcdefff"};
+  `FAIL_UNLESS_EQUAL(expected, actual);
+  
+  actual = my_Str.split("p");
+  `FAIL_UNLESS_EQUAL(expected, actual);
+  
+  my_Str.set("a");
+  
+  actual = my_Str.split("cde");
+  expected = {"a"};
+  `FAIL_UNLESS_EQUAL(expected, actual);
+  
+  actual = my_Str.split("");
+  expected = {"a"};
+  `FAIL_UNLESS_EQUAL(expected, actual);
+  
+  actual = my_Str.split("a");
+  expected = {"", ""};
+  `FAIL_UNLESS_EQUAL(expected, actual);
+  
+  my_Str.set("");
+  
+  actual = my_Str.split("");
+  expected = {};
+  `FAIL_UNLESS_EQUAL(expected, actual);
+  
+  actual = my_Str.split("a");
+  expected = {""};
+  `FAIL_UNLESS_EQUAL(expected, actual);
+  
+  actual = my_Str.split("ab");
+  `FAIL_UNLESS_EQUAL(expected, actual);
+  
   `SVTEST_END
   
   `SVUNIT_TESTS_END
