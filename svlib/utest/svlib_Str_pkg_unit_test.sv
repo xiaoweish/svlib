@@ -150,10 +150,12 @@ module Str_unit_test;
     string S;
     int D, C, G, P;
     
+    /*
     Obstack#(Str)::stats(D, C, G, P);
     //`INFO($sformatf("depth=%0d, constructed=%0d, get_calls=%0d, put_calls=%0d", D, C, G, P));
     `FAIL_UNLESS(G>=P)
     `FAIL_UNLESS(D+G-P==C)
+    */
     
     S = "abcdef";
     S = str_replace(S, "123", 0);
@@ -175,11 +177,13 @@ module Str_unit_test;
     S = str_replace(S, "=", 100, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(S, "=0EXTRA123abcdefEXTRAz-")
     
+    /*
     Obstack#(Str)::stats(D, C, G, P);
     //`INFO($sformatf("depth=%0d, constructed=%0d, get_calls=%0d, put_calls=%0d", D, C, G, P));
     `FAIL_UNLESS(G>=P)
     `FAIL_UNLESS(C>0)
     `FAIL_UNLESS(D+G-P==C)
+    */
     
   `SVTEST_END
   
@@ -360,24 +364,112 @@ module Str_unit_test;
   
   `SVTEST_END
 
+  `SVTEST(Str_join_check)
+
+  my_Str.set("ABC");
+  `FAIL_UNLESS_STR_EQUAL("", my_Str.sjoin({}) )
+  `FAIL_UNLESS_STR_EQUAL("Single", my_Str.sjoin({"Single"}))
+  `FAIL_UNLESS_STR_EQUAL("oneABCtwo", my_Str.sjoin({"one", "two"}))
+  `FAIL_UNLESS_STR_EQUAL("ABCtwo", my_Str.sjoin({"", "two"}))
+  `FAIL_UNLESS_STR_EQUAL("oneABCtwoABCthree", my_Str.sjoin({"one", "two", "three"}))
+  
+  my_Str.set("");
+  `FAIL_UNLESS_STR_EQUAL("", my_Str.sjoin({}))
+  `FAIL_UNLESS_STR_EQUAL("Single", my_Str.sjoin({"Single"}))
+  `FAIL_UNLESS_STR_EQUAL("onetwo", my_Str.sjoin({"one", "two"}))
+  `FAIL_UNLESS_STR_EQUAL("two", my_Str.sjoin({"", "two"}))
+  `FAIL_UNLESS_STR_EQUAL("onetwothree", my_Str.sjoin({"one", "two", "three"}))
+  
+  `SVTEST_END
+
   `SVTEST(RE_check)
   
   Regex re;
-  int sm, result;
+  int result;
   
   re = Regex::create("a(b)c");
   my_Str.set("012abc678");
-  result = re.run(my_Str, sm, 0);
-  result = re.run(my_Str, sm, 1);
-  for (int i=0; i<sm; i++) begin
+  result = re.test(my_Str, 0);
+  $display("\n\"%s\" =~ \"%s\"", my_Str.get(), re.getRE());
+  for (int i=0; i<re.getMatchCount(); i++) begin
     int L, R;
     string match;
     result = re.getMatchPosition(i, L, R);
     result = re.getMatchString(i, match);
-    $display("SV match %0d - %0d:%0d \"%s\"", i, L, R, match);
+    $display("match[%0d] = [%0d:%0d] \"%s\"", i, L, R, match);
+  end
+  result = re.test(my_Str, 1);
+  $display("\n\"%s\" =~ \"%s\"", my_Str.get(), re.getRE());
+  for (int i=0; i<re.getMatchCount(); i++) begin
+    int L, R;
+    string match;
+    result = re.getMatchPosition(i, L, R);
+    result = re.getMatchString(i, match);
+    $display("match[%0d] = [%0d:%0d] \"%s\"", i, L, R, match);
   end
   my_Str.set("012345678");
-  result = re.run(my_Str, sm, 0);
+  result = re.test(my_Str, 0);
+  $display("\n\"%s\" =~ \"%s\"", my_Str.get(), re.getRE());
+  for (int i=0; i<re.getMatchCount(); i++) begin
+    int L, R;
+    string match;
+    result = re.getMatchPosition(i, L, R);
+    result = re.getMatchString(i, match);
+    $display("match[%0d] = [%0d:%0d] \"%s\"", i, L, R, match);
+  end
+  
+  re.setRE("a(bc");
+  `FAIL_UNLESS(re.getError()==-1)
+  result = re.test(my_Str, 0);
+  `FAIL_UNLESS(result!=0)
+    
+    
+  re = regexMatch(.haystack("yes, we have no bananas"), .needle("A"), .options(0));
+  `FAIL_UNLESS(re==null)
+  re = regexMatch(.haystack("yes, we have no bananas"), .needle("A"), .options(Regex::NOCASE));
+  `FAIL_UNLESS(re!=null)
+  begin
+    int L, R;
+    string match;
+    result = re.getMatchPosition(0, L, R);
+    result = re.getMatchString(0, match);
+    `FAIL_UNLESS_EQUAL(L,9)
+    `FAIL_UNLESS_EQUAL(R,9)
+    `FAIL_UNLESS_STR_EQUAL(match, "a")
+  end
+  `FAIL_UNLESS(re.retest(.startPos(10))==0)
+  begin
+    int L, R;
+    string match;
+    result = re.getMatchPosition(0, L, R);
+    `FAIL_UNLESS_EQUAL(L,17)
+    `FAIL_UNLESS_EQUAL(R,17)
+  end
+  
+  re.setRE("(na)+");
+  re.setOpts(0);
+  result = re.test(.s(Str::create("yes, we have no bananas")),.startPos(17));
+  `FAIL_UNLESS(result==0)
+  begin
+    int L, R;
+    string match;
+    result = re.getMatchPosition(0, L, R);
+    result = re.getMatchString(0, match);
+    `FAIL_UNLESS_EQUAL(L,18)
+    `FAIL_UNLESS_EQUAL(R,21)
+    `FAIL_UNLESS_STR_EQUAL(match, "nana")
+    result = re.getMatchPosition(1, L, R);
+    result = re.getMatchString(1, match);
+    `FAIL_UNLESS_EQUAL(L,20)
+    `FAIL_UNLESS_EQUAL(R,21)
+    `FAIL_UNLESS_STR_EQUAL(match, "na")
+  end
+  
+  re = regexMatch("yes, we have no bananas", "z");
+  `FAIL_UNLESS(re == null)
+  
+  re = regexMatch("yes, we have no bananas", "x(z");
+  `FAIL_UNLESS(re == null)
   
   `SVTEST_END
   

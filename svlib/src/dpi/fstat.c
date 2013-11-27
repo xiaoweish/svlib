@@ -22,8 +22,8 @@
 extern "C" {
 #endif
 
-static char* libStringBuffer = NULL;
-static int   libStringBufferSize = 0;
+static char*  libStringBuffer = NULL;
+static size_t libStringBufferSize = 0;
 
 // Get a new string buffer of given size.
 // If size<=0 and there is currently no buffer,
@@ -32,7 +32,7 @@ static int   libStringBufferSize = 0;
 // and there is already a buffer, double its existing
 // size and then return it.
 //
-static char* getLibStringBuffer(int size) {
+static char* getLibStringBuffer(size_t size) {
   if (size<=0) {
     if (libStringBuffer==NULL) {
       return getLibStringBuffer(SVLIB_STRING_BUFFER_START_SIZE);
@@ -55,7 +55,7 @@ static char* getLibStringBuffer(int size) {
   return libStringBuffer;
 }
 
-static int getLibStringBufferSize() {
+static size_t getLibStringBufferSize() {
   if (libStringBuffer==NULL) {
     return 0;
   } else {
@@ -75,17 +75,17 @@ static int getLibStringBufferSize() {
 // to null to indicate that all the strings have been consumed and the 
 // C-side internal storage has been freed and is no longer accessible.
 
-// Each different data source will require its own free function.
+// Each different data source will require its own mem-free callback.
 typedef void (*freeFunc_decl)(saBuf_p);
 
 typedef struct saBuf {
-  char **        scan;         // pointer to the current array element
+  char        ** scan;         // pointer to the current array element
   freeFunc_decl  freeFunc;     // function to call on exhaustion
-  void *         data_ptr;     // pointer to app-specific data
+  void         * data_ptr;     // pointer to app-specific data
   struct saBuf * sanity_check; // pointer-to-self for checking
 } saBuf_s, *saBuf_p;
 
-static int saBufCreate(int dataBytes, freeFunc_decl ff, saBuf_p *created) {
+static int32_t saBufCreate(size_t dataBytes, freeFunc_decl ff, saBuf_p *created) {
   *created = NULL;
   saBuf_p sa = malloc(sizeof(saBuf_s));
   if (sa == NULL) {
@@ -107,7 +107,7 @@ static int saBufCreate(int dataBytes, freeFunc_decl ff, saBuf_p *created) {
 // import "DPI-C" function int SvLib_saBufNext(inout chandle h, output string s);
 //-------------------------------------------------------------------------------
 
-extern int SvLib_saBufNext(void **h, const char **s) {
+extern int32_t SvLib_saBufNext(void **h, const char **s) {
   *s = NULL;
   if (*h == NULL) {
     return 0;
@@ -131,7 +131,7 @@ extern int SvLib_saBufNext(void **h, const char **s) {
 // import "DPI-C" function string SvLib_getCErrStr(input int errnum);
 //-------------------------------------------------------------------
 
-extern const char* SvLib_getCErrStr(int errnum) {
+extern const char* SvLib_getCErrStr(int32_t errnum) {
   return strerror(errnum);
 }
 
@@ -139,10 +139,10 @@ extern const char* SvLib_getCErrStr(int errnum) {
 // import "DPI-C" function int SvLib_getcwd(output string result);
 //----------------------------------------------------------------
 
-extern int SvLib_getcwd(char ** p_result) {
+extern int32_t SvLib_getcwd(char ** p_result) {
 
-  int  bSize = SVLIB_STRING_BUFFER_START_SIZE;
-  char *buf;
+  size_t  bSize = SVLIB_STRING_BUFFER_START_SIZE;
+  char  * buf;
 
   while (1) {
     buf   = getLibStringBuffer(bSize);
@@ -167,15 +167,15 @@ extern int SvLib_getcwd(char ** p_result) {
 
 //----------------------------------------------------------------
 // import "DPI-C" function int SvLib_timeFormat(
-//                                       input  string format, 
 //                                       input  int    time, 
+//                                       input  string format, 
 //                                       output string formatted);
 //----------------------------------------------------------------
 
-extern int SvLib_timeFormat(int t, const char *fs, const char ** p_result) {
+extern int32_t SvLib_timeFormat(int32_t t, const char *fs, const char ** p_result) {
   
-  int  bSize = SVLIB_STRING_BUFFER_START_SIZE;
-  char *buf;
+  size_t  bSize = SVLIB_STRING_BUFFER_START_SIZE;
+  char  * buf;
   
   // There is no way to determine overflow error unless we can 
   // guarantee the result string is non-empty. So we prefix the
@@ -215,8 +215,8 @@ static void glob_freeFunc(saBuf_p p) {
   free(p);
 }
 
-extern int SvLib_globStart(const char *pattern, void **h, int *number) {
-  int result;
+extern int32_t SvLib_globStart(const char *pattern, void **h, uint32_t *number) {
+  int32_t result;
   saBuf_p sa;
   *number = 0;
   *h = NULL;
@@ -252,9 +252,9 @@ typedef struct stat s_stat, *p_stat;
 //                            output int    mtime);
 //----------------------------------------------------------------
 
-extern int SvLib_mtime(const char *path, int *mtime) {
+extern int32_t SvLib_mtime(const char *path, uint32_t *mtime) {
   s_stat s;
-  int e = stat(path, &s);
+  uint32_t e = stat(path, &s);
   if (e) {
     *mtime = 0;
     return e;
@@ -268,9 +268,9 @@ extern int SvLib_mtime(const char *path, int *mtime) {
 //   import "DPI-C" function int SvLib_dayTime();
 //----------------------------------------------------------------
 
-extern int SvLib_dayTime() {
+extern int32_t SvLib_dayTime() {
   time_t t = time(NULL);
-  int ti = t;
+  int32_t ti = t;
   return ti;
 }
 
@@ -278,33 +278,63 @@ extern int SvLib_dayTime() {
 //  import "DPI-C" function string SvLib_regexErrorString(input int err);
 //----------------------------------------------------------------
 
-extern char* SvLib_regexErrorString(int err) {
-  return NULL;
+extern const char* SvLib_regexErrorString(uint32_t err) {
+  switch (err) {
+    case REG_BADBR : return
+              "Invalid use of back reference operator";
+    case REG_BADPAT : return
+              "Invalid use of pattern operators such as group or list";
+    case REG_BADRPT : return
+              "Invalid use of repetition operators";
+    case REG_EBRACE : return
+              "Un-matched brace interval operators";
+    case REG_EBRACK : return
+              "Un-matched bracket list operators";
+    case REG_ECOLLATE : return
+              "Invalid collating element";
+    case REG_ECTYPE : return
+              "Unknown character class name";
+    case REG_EEND : return
+              "Non-specific error, not defined by POSIX.2";
+    case REG_EESCAPE : return
+              "Trailing backslash";
+    case REG_EPAREN : return
+              "Un-matched parenthesis group operators";
+    case REG_ERANGE : return
+              "Invalid use of the range operator";
+    case REG_ESIZE : return
+              "Compiled RE requires a pattern buffer larger than 64Kb";
+    case REG_ESPACE : return
+              "The regex routines ran out of memory";
+    case REG_ESUBREG : return
+              "Invalid back reference to a subexpression";
+  }
+  return "Unknown regular expression error";
 }
-
 //----------------------------------------------------------------
-//   import "DPI-C" function int SvLib_(
+//   import "DPI-C" function int SvLib_regexRun(
 //                            input  string re,
 //                            input  string str,
-//                            input  int    cflags,
+//                            input  int    options,
 //                            input  int    startPos,
 //                            output int    matchCount,
 //                            output int    matchList[]);
 //----------------------------------------------------------------
 
-extern int SvLib_regexRun(
+extern uint32_t SvLib_regexRun(
     const char *re,
     const char *str,
-    int cflags,
-    int startPos,
-    int *matchCount,
+    int32_t     options,
+    int32_t     startPos,
+    int32_t    *matchCount,
     svOpenArrayHandle matchList
   ) {
-  int result;
+  uint32_t result;
   regex_t    compiled;
   regmatch_t * matches;
-  int numMatches;
-  int i;
+  uint32_t numMatches;
+  uint32_t i;
+  uint32_t cflags;
   
   // initialize result
   *matchCount = 0;
@@ -314,39 +344,38 @@ extern int SvLib_regexRun(
     io_printf("svDimensions=%d, should be 1\n", svDimensions(matchList));
     return -1;
   }
-  numMatches = svSize(matchList, 1);
-  io_printf("array size=%d\n", numMatches);
+  numMatches = svSizeOfArray(matchList) / sizeof(uint32_t);
   if (numMatches != 0) {
     if ((numMatches % 2) != 0) {
       io_printf("Odd number of elements in matchList\n");
       return -1;
     }
     numMatches /= 2;
-    if (svIncrement(matchList,1)>0) {
-      io_printf("Descending subscripts in array!\n");
-      return -1;
-    }
+    // We are obliged to assume that the array has ascending range
+    // because IUS doesn't yet support svIncrement. In practice this
+    // is not a problem because the open array is always supplied
+    // by a calling routine that is fully under the library's control.
+    //if (svIncrement(matchList,1)>0) {
+    //  io_printf("Descending subscripts in array!\n");
+    //  return -1;
+    //}
     if (svLeft(matchList, 1) != 0) {
       io_printf("svLeft=%d, should be 0\n", svLeft(matchList,1));
       return -1;
     }
-    io_printf("checks OK, numMatches=%d\n", numMatches);
     matches = malloc(numMatches * sizeof(regmatch_t));
   }
   
-  io_printf("matches allocated\n");
-  
-  result = regcomp(&compiled, re, cflags|REG_EXTENDED);
+  cflags = REG_EXTENDED;
+  if (options & 1) cflags |= REG_ICASE;
+  if (options & 2) cflags |= REG_NEWLINE;
+  result = regcomp(&compiled, re, cflags);
   if (result) {
     regfree(&compiled);
     return result;
   }
   
-  io_printf("regex compiled OK\n");
-
   result = regexec(&compiled, &(str[startPos]), numMatches, matches, 0);
-  
-  io_printf("regexec returned %d\n", result);
   
   if (result == 0) {
     // successful match: copy matches into SV from struct[]
