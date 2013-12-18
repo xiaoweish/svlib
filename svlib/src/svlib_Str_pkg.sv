@@ -5,8 +5,8 @@
 
 `include "svlib_macros.sv"
 
-`define SVLIB_CLASS(T)                            \
-  class T extends svlib_base;                     \
+`define SVLIB_CLASS(T, B)                         \
+  class T extends B;                              \
     protected static function T randstable_new(); \
       `ifdef SVLIB_NO_RANDSTABLE_NEW              \
       T result = new();                           \
@@ -96,7 +96,7 @@ package svlib_Str_pkg;
   //   modifying the stored object.
   //
   //class Str extends svlib_base;//#(Str);
-  `SVLIB_CLASS(Str)
+  `SVLIB_CLASS(Str, svlib_base)
   
     typedef enum {NONE, LEFT, RIGHT, BOTH} side_e;
     typedef enum {START, END} origin_e;
@@ -163,7 +163,7 @@ package svlib_Str_pkg;
   endclass
   
   //class Regex extends svlib_base;//#(Regex);
-  `SVLIB_CLASS(Regex)
+  `SVLIB_CLASS(Regex, svlib_base)
   
     typedef enum {NOCASE=1, NOLINE=2} regexOptions;
     
@@ -199,6 +199,21 @@ package svlib_Str_pkg;
     protected string text;
   
   endclass
+  /*
+  `SVLIB_CLASS(Pathname, Str)
+    extern virtual function bit      setPathname(Str s);
+    extern virtual function bit      isAbsolute();
+    extern virtual function Pathname parent(int backsteps=1);
+    extern virtual function Str      extension();
+    extern virtual function Str      tail();
+    extern virtual function Pathname commonAncestor(Pathname other);
+    extern virtual function Pathname relativePathTo(Pathname other);
+    extern virtual function Pathname normalize();
+    extern virtual function qs       pathComponents();
+    extern virtual function string   volume();  // always '/' on *nix
+    extern virtual function void     appendPath(Str s);
+  endclass
+  */
   
   function automatic Regex regexMatch(string haystack, string needle, int options=0);
     Regex re;

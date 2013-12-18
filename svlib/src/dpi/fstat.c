@@ -25,13 +25,16 @@ extern "C" {
 static char*  libStringBuffer = NULL;
 static size_t libStringBufferSize = 0;
 
-// Get a new string buffer of given size.
-// If size<=0 and there is currently no buffer,
-// create one with the default size. If size=0 and
-// there is already a buffer, return it. If size<0
-// and there is already a buffer, double its existing
-// size and then return it.
-//
+/*--------------------------------------------------------------------------
+ * FOR INTERNAL USE BY SVLIB ONLY:
+ *--------------------------------------------------------------------------
+ * Get a new string buffer of given size.
+ * If size<=0 and there is currently no buffer,
+ * create one with the default size. If size=0 and
+ * there is already a buffer, return it. If size<0
+ * and there is already a buffer, double its existing
+ * size and then return it.
+ */ 
 static char* getLibStringBuffer(size_t size) {
   if (size<=0) {
     if (libStringBuffer==NULL) {
@@ -63,26 +66,28 @@ static size_t getLibStringBufferSize() {
   }
 }
 
-//--------------------------------------------------------------------------
-// FOR INTERNAL USE BY SVLIB ONLY:
-// Mechanism to retrieve an array of strings from C into SV.
-// A function such as 'glob' whose main result is an array of strings
-// will construct such an array in internal storage here, then return
-// a chandle pointing to the sa_buf_struct that records the array of strings
-// and the SvLib's progress through collecting them.
-// Subsequent calls to SvLib_saBufNext with this chandle will then
-// serve up the strings one by one, finally returning with the chandle set
-// to null to indicate that all the strings have been consumed and the 
-// C-side internal storage has been freed and is no longer accessible.
+/*--------------------------------------------------------------------------
+ * FOR INTERNAL USE BY SVLIB ONLY:
+ *--------------------------------------------------------------------------
+ * Mechanism to retrieve an array of strings from C into SV.
+ * A function such as 'glob' whose main result is an array of strings
+ * will construct such an array in internal storage here, then return
+ * a chandle pointing to the sa_buf_struct that records the array of strings
+ * and the SvLib's progress through collecting them.
+ * Subsequent calls to SvLib_saBufNext with this chandle will then
+ * serve up the strings one by one, finally returning with the chandle set
+ * to null to indicate that all the strings have been consumed and the 
+ * C-side internal storage has been freed and is no longer accessible.
+ */
 
-// Each different data source will require its own mem-free callback.
+/* Each different data source will require its own mem-free callback. */
 typedef void (*freeFunc_decl)(saBuf_p);
 
 typedef struct saBuf {
-  char        ** scan;         // pointer to the current array element
-  freeFunc_decl  freeFunc;     // function to call on exhaustion
-  void         * data_ptr;     // pointer to app-specific data
-  struct saBuf * sanity_check; // pointer-to-self for checking
+  char        ** scan;         /* pointer to the current array element */
+  freeFunc_decl  freeFunc;     /* function to call on exhaustion       */
+  void         * data_ptr;     /* pointer to app-specific data         */
+  struct saBuf * sanity_check; /* pointer-to-self for checking         */
 } saBuf_s, *saBuf_p;
 
 static int32_t saBufCreate(size_t dataBytes, freeFunc_decl ff, saBuf_p *created) {
@@ -103,10 +108,10 @@ static int32_t saBufCreate(size_t dataBytes, freeFunc_decl ff, saBuf_p *created)
   return 0;
 }
 
-//-------------------------------------------------------------------------------
-// import "DPI-C" function int SvLib_saBufNext(inout chandle h, output string s);
-//-------------------------------------------------------------------------------
-
+/*-------------------------------------------------------------------------------
+ * import "DPI-C" function int SvLib_saBufNext(inout chandle h, output string s);
+ *-------------------------------------------------------------------------------
+ */
 extern int32_t SvLib_saBufNext(void **h, const char **s) {
   *s = NULL;
   if (*h == NULL) {
@@ -127,18 +132,18 @@ extern int32_t SvLib_saBufNext(void **h, const char **s) {
   return 0;
 }
 
-//-------------------------------------------------------------------
-// import "DPI-C" function string SvLib_getCErrStr(input int errnum);
-//-------------------------------------------------------------------
-
+/*-------------------------------------------------------------------
+ * import "DPI-C" function string SvLib_getCErrStr(input int errnum);
+ *-------------------------------------------------------------------
+ */
 extern const char* SvLib_getCErrStr(int32_t errnum) {
   return strerror(errnum);
 }
 
-//----------------------------------------------------------------
-// import "DPI-C" function int SvLib_getcwd(output string result);
-//----------------------------------------------------------------
-
+/*----------------------------------------------------------------
+ * import "DPI-C" function int SvLib_getcwd(output string result);
+ *----------------------------------------------------------------
+ */
 extern int32_t SvLib_getcwd(char ** p_result) {
 
   size_t  bSize = SVLIB_STRING_BUFFER_START_SIZE;
@@ -165,21 +170,23 @@ extern int32_t SvLib_getcwd(char ** p_result) {
   }
 }
 
-//----------------------------------------------------------------
-// import "DPI-C" function int SvLib_timeFormat(
-//                                       input  int    time, 
-//                                       input  string format, 
-//                                       output string formatted);
-//----------------------------------------------------------------
-
-extern int32_t SvLib_timeFormat(int32_t t, const char *fs, const char ** p_result) {
+/*----------------------------------------------------------------
+ * import "DPI-C" function int SvLib_timeFormat(
+ *                                       input  longint epochTime, 
+ *                                       input  string  format, 
+ *                                       output string  formatted);
+ *----------------------------------------------------------------
+ */
+extern int32_t SvLib_timeFormat(int64_t epochTime, const char *fs, const char ** p_result) {
   
   size_t  bSize = SVLIB_STRING_BUFFER_START_SIZE;
   char  * buf;
+  time_t t = epochTime;  /* to keep C library time functions happy */
   
-  // There is no way to determine overflow error unless we can 
-  // guarantee the result string is non-empty. So we prefix the
-  // result string with a space to ensure non-emptiness. Ugh.
+  /* There is no way to determine string overfill error unless we 
+   * can guarantee the result string is non-empty. So we prefix
+   * the result string with a space to ensure non-emptiness. Ugh.
+   */
   char * fss = malloc(strlen(fs)+2);
   *fss = ' ';
   strcpy(&(fss[1]), fs);  
@@ -188,7 +195,7 @@ extern int32_t SvLib_timeFormat(int32_t t, const char *fs, const char ** p_resul
     buf   = getLibStringBuffer(bSize);
     bSize = getLibStringBufferSize();
     if (0 != strftime(buf, bSize, fss, localtime(&t))) {
-      *p_result = &(buf[1]); // skip added space
+      *p_result = &(buf[1]); /* skip added space */
       free(fss);
       return 0;
     } else if (bSize >= SVLIB_STRING_BUFFER_LONGEST_PATHNAME) {
@@ -202,13 +209,13 @@ extern int32_t SvLib_timeFormat(int32_t t, const char *fs, const char ** p_resul
   }
 }
 
-//----------------------------------------------------------------
-//   import "DPI-C" function int SvLib_globStart(
-//                            input  string pattern,
-//                            output chandle h,
-//                            output int     count );
-//----------------------------------------------------------------
-
+/*----------------------------------------------------------------
+ *   import "DPI-C" function int SvLib_globStart(
+ *                            input  string pattern,
+ *                            output chandle h,
+ *                            output int     count );
+ *----------------------------------------------------------------
+ */
 static void glob_freeFunc(saBuf_p p) {
   if (p==NULL) return;
   globfree((glob_t*)(p->data_ptr));
@@ -246,39 +253,64 @@ extern int32_t SvLib_globStart(const char *pattern, void **h, uint32_t *number) 
 
 typedef struct stat s_stat, *p_stat;
 
-//----------------------------------------------------------------
-//   import "DPI-C" function int SvLib_mtime(
-//                            input  string path,
-//                            output int    mtime);
-//----------------------------------------------------------------
-
-extern int32_t SvLib_mtime(const char *path, uint32_t *mtime) {
+/*----------------------------------------------------------------
+ *   import "DPI-C" function int SvLib_stat(
+ *                            input  string  path,
+ *                            input  int     what,
+ *                            output longint value);
+ *----------------------------------------------------------------
+ */
+extern int32_t SvLib_stat(const char *path, int what, int64_t *value) {
   s_stat s;
-  uint32_t e = stat(path, &s);
-  if (e) {
-    *mtime = 0;
-    return e;
+  uint32_t e;
+  if (what < 0) {
+    /* if *path is a symlink, don't follow the link but stat it */
+    what = -what;
+    e = lstat(path, &s);
   } else {
-    *mtime = s.st_mtime;
-    return 0;
+    /* normal stat, follow symlinks */
+    e = stat(path, &s);
+ }
+  if (e) {
+    *value = 0;
+    return errno;
+  } else {
+    switch (what) {
+      case 1: /* Modification time */
+        *value = s.st_mtime;
+        return 0;
+      case 2: /* Access time */
+        *value = s.st_atime;
+        return 0;
+      case 3: /* Status change time */
+        *value = s.st_ctime;
+        return 0;
+      case 4: /* Size in bytes */
+        *value = s.st_size;
+        return 0;
+      case 5: /* Attributes, see 'man 2 stat' for details */
+        *value = s.st_mode;
+        return 0;
+      default: /* huh? should never happen, SV should get it right */
+        *value = 1; /* to distinguish from stat() errors */
+        return 1;
+    }
   }
 }
 
-//----------------------------------------------------------------
-//   import "DPI-C" function int SvLib_dayTime();
-//----------------------------------------------------------------
-
-extern int32_t SvLib_dayTime() {
-  time_t t = time(NULL);
-  int32_t ti = t;
-  return ti;
+/*----------------------------------------------------------------
+ *   import "DPI-C" function int SvLib_dayTime();
+ *----------------------------------------------------------------
+ */
+extern int64_t SvLib_dayTime() {
+  return time(NULL);
 }
 
-//----------------------------------------------------------------
-//  import "DPI-C" function string SvLib_regexErrorString(input int err);
-//----------------------------------------------------------------
-
-extern const char* SvLib_regexErrorString(uint32_t err) {
+/*----------------------------------------------------------------
+ *  import "DPI-C" function string SvLib_regexErrorString(input int err);
+ *----------------------------------------------------------------
+ */
+extern const char* SvLib_regexErrorString(int32_t err) {
   switch (err) {
     case REG_BADBR : return
               "Invalid use of back reference operator";
@@ -311,16 +343,17 @@ extern const char* SvLib_regexErrorString(uint32_t err) {
   }
   return "Unknown regular expression error";
 }
-//----------------------------------------------------------------
-//   import "DPI-C" function int SvLib_regexRun(
-//                            input  string re,
-//                            input  string str,
-//                            input  int    options,
-//                            input  int    startPos,
-//                            output int    matchCount,
-//                            output int    matchList[]);
-//----------------------------------------------------------------
 
+/*----------------------------------------------------------------
+ *   import "DPI-C" function int SvLib_regexRun(
+ *                            input  string re,
+ *                            input  string str,
+ *                            input  int    options,
+ *                            input  int    startPos,
+ *                            output int    matchCount,
+ *                            output int    matchList[]);
+ *----------------------------------------------------------------
+*/
 extern uint32_t SvLib_regexRun(
     const char *re,
     const char *str,
@@ -336,10 +369,10 @@ extern uint32_t SvLib_regexRun(
   uint32_t i;
   uint32_t cflags;
   
-  // initialize result
+  /* initialize result */
   *matchCount = 0;
   
-  // result array checks
+  /* result array checks */
   if (svDimensions(matchList) != 1) {
     io_printf("svDimensions=%d, should be 1\n", svDimensions(matchList));
     return -1;
@@ -351,14 +384,15 @@ extern uint32_t SvLib_regexRun(
       return -1;
     }
     numMatches /= 2;
-    // We are obliged to assume that the array has ascending range
-    // because IUS doesn't yet support svIncrement. In practice this
-    // is not a problem because the open array is always supplied
-    // by a calling routine that is fully under the library's control.
-    //if (svIncrement(matchList,1)>0) {
-    //  io_printf("Descending subscripts in array!\n");
-    //  return -1;
-    //}
+    /* We are obliged to assume that the array has ascending range
+     * because IUS doesn't yet support svIncrement. In practice this
+     * is not a problem because the open array is always supplied
+     * by a calling routine that is fully under the library's control.
+     * if (svIncrement(matchList,1)>0) {
+     *   io_printf("Descending subscripts in array!\n");
+     *   return -1;
+     * }
+     */
     if (svLeft(matchList, 1) != 0) {
       io_printf("svLeft=%d, should be 0\n", svLeft(matchList,1));
       return -1;
@@ -378,14 +412,14 @@ extern uint32_t SvLib_regexRun(
   result = regexec(&compiled, &(str[startPos]), numMatches, matches, 0);
   
   if (result == 0) {
-    // successful match: copy matches into SV from struct[]
+    /* successful match: copy matches into SV from struct[] */
     for (i=0; (i<numMatches) && (matches[i].rm_so>=0); i++) {
       (*matchCount)++;
       *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i  )) = matches[i].rm_so + startPos;
       *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i+1)) = matches[i].rm_eo + startPos;
     }
   } else if (result == REG_NOMATCH) {
-    // no match, that's OK, we return matchCount==0
+    /* no match, that's OK, we return matchCount==0 */
     result = 0;
   }
   regfree(&compiled);
