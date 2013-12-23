@@ -5,20 +5,6 @@
 
 `include "svlib_macros.sv"
 
-`define SVLIB_CLASS(T, B)                         \
-  class T extends B;                              \
-    protected static function T randstable_new(); \
-      `ifdef SVLIB_NO_RANDSTABLE_NEW              \
-      T result = new();                           \
-      `else                                       \
-      std::process p = std::process::self();      \
-      string randstate = p.get_randstate();       \
-      T result = new();                           \
-      p.set_randstate(randstate);                 \
-      `endif                                      \
-      return result;                              \
-    endfunction                                   \
-
 
 package svlib_Str_pkg;
 
@@ -210,6 +196,7 @@ package svlib_Str_pkg;
     extern virtual function Pathname relativePathTo(Pathname other);
     extern virtual function Pathname normalize();
     extern virtual function qs       pathComponents();
+    extern virtual function string   setFromComponents(qs components);
     extern virtual function string   volume();  // always '/' on *nix
     extern virtual function void     appendPath(Str s);
   endclass
