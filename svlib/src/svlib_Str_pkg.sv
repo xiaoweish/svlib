@@ -602,8 +602,11 @@ package svlib_Str_pkg;
   function string Path::extension     (string path);
   endfunction
   function string Path::tail          (string path, int backsteps=1);
+    qs comps = decompose(path);
   endfunction
   function string Path::commonAncestor(string path, string other);
+    qs compsP = decompose(path);
+    qs compsO = decompose(other);
   endfunction
   function string Path::relPathTo     (string path, string other);
   endfunction
