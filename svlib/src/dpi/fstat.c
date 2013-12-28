@@ -307,10 +307,29 @@ extern int64_t SvLib_dayTime() {
 }
 
 /*----------------------------------------------------------------
- *  import "DPI-C" function string SvLib_regexErrorString(input int err);
+ *  import "DPI-C" function string SvLib_regexErrorString(input int err, input string re);
  *----------------------------------------------------------------
  */
-extern const char* SvLib_regexErrorString(int32_t err) {
+extern const char* SvLib_regexErrorString(int32_t err, const char* re) {
+  uint32_t actSize, bSize;
+  regex_t  compiled;
+  char* buf;
+  err = regcomp(&compiled, re, REG_EXTENDED);
+  if (!err) {
+    buf = NULL;
+  } else {
+    /* First, try to get result into existing buffer first. */
+    actSize = 0;
+    do {
+      buf = getLibStringBuffer(actSize);
+      bSize = getLibStringBufferSize();
+      actSize = regerror(err, &compiled, buf, bSize);
+      /* But resize buffer to fit if required. */
+    } while (actSize > bSize);
+  }
+  regfree(&compiled);
+  return buf;
+/*
   switch (err) {
     case REG_BADBR : return
               "Invalid use of back reference operator";
@@ -342,6 +361,7 @@ extern const char* SvLib_regexErrorString(int32_t err) {
               "Invalid back reference to a subexpression";
   }
   return "Unknown regular expression error";
+*/
 }
 
 /*----------------------------------------------------------------

@@ -15,7 +15,7 @@ package svlib_Str_pkg;
                            input  int    startPos,
                            output int    matchCount,
                            output int    matchList[]);
-  import "DPI-C" function string SvLib_regexErrorString(input int err);
+  import "DPI-C" function string SvLib_regexErrorString(input int err, input string re);
 
   typedef string qs[$];
   
@@ -90,29 +90,30 @@ package svlib_Str_pkg;
     // Save a string as an object so that further manipulations can
     // be performed on it.  Get and set the object's string value.
     extern static  function Str    create(string s = "");
-    extern virtual function string get();
-    extern virtual function Str    copy();
-    extern virtual function int    len();
+    extern virtual function string get   ();
+    extern virtual function Str    copy  ();
+    extern virtual function int    len   ();
     
-    extern virtual function void   set(string s);
-    
+    extern virtual function void   set   (string s);
     extern virtual function void   append(string s);
 
-    // Find the first occurrence of substr in s, starting from the "start"
-    // position. If a match is found, return the index of the first character
-    // of the match.  If no match is found, return -1.
-    extern virtual function int    first(string substr, int ignore=0);
-    extern virtual function int    last (string substr, int ignore=0);
+    // Find the first occurrence of substr in s, ignoring the specified
+    // number of characters from the starting point.
+    // If a match is found, return the index of the leftmost
+    // character of the match.
+    // If no match is found, return -1.
+    extern virtual function int    first (string substr, int ignore=0);
+    extern virtual function int    last  (string substr, int ignore=0);
     
     // Split a string on every occurrence of a given character
-    extern virtual function qs     split(string splitset="", bit keepSplitters=0);
+    extern virtual function qs     split (string splitset="", bit keepSplitters=0);
     
     // Use the Str object's contents to join adjacent elements of the 
     // queue of strings into a single larger string. For example, if the
     // Str object 's' contains "XX" then
     //    s.sjoin({"a", "b", "c"})
     // would yield the string "a, b, c"
-    extern virtual function string sjoin(qs strings);
+    extern virtual function string sjoin (qs strings);
     
     // Get a range (substring). The starting position 'p' is an anchor point,
     // like an I-beam cursor, just to the left of the specified character.
@@ -126,17 +127,17 @@ package svlib_Str_pkg;
     // beyond the end (or start) of the string.
     // Clip result to smaller than n if necessary so that the result remains
     // entirely within the bounds of the original string.
-    extern virtual function string range(int p, int n, origin_e origin=START);
+    extern virtual function string range (int p, int n, origin_e origin=START);
     
     // Replace the range p/n with some other string, not necessarily same length.
     // If n==0 this is an insert operation.
     extern virtual function void   replace(string rs, int p, int n, origin_e origin=START);
     
     // Trim a string (remove leading and/or trailing whitespace)
-    extern virtual function void   trim(side_e side=BOTH);
+    extern virtual function void   trim  (side_e side=BOTH);
     
     // Justify a string (pad to width with spaces on left/right/both)
-    extern virtual function void   just(int width, side_e side=BOTH);
+    extern virtual function void   just  (int width, side_e side=BOTH);
     
     protected string value;
     
@@ -153,68 +154,87 @@ package svlib_Str_pkg;
   
     typedef enum {NOCASE=1, NOLINE=2} regexOptions;
     
-    extern static  function Regex  create(string s = "", int options=0);
-    extern virtual function void   setRE(string s);
+    extern static  function Regex  create (string s = "", int options=0);
+    // Set the regular expression string
+    extern virtual function void   setRE  (string s);
+    // Set the options (as a bitmap)
     extern virtual function void   setOpts(int options);
     
-    extern virtual function string getRE();
+    // Retrieve the regex string
+    extern virtual function string getRE  ();
+    // Retrieve the option bitmap
     extern virtual function int    getOpts();
-    extern virtual function string getStr();
+    // Retrieve the test string
+    extern virtual function string getStr ();
 
-    extern virtual function Regex  copy();
-    
-    extern virtual function int    test(Str s, int startPos=0);
-    extern virtual function int    retest(int startPos);
-    extern virtual function int    getMatchCount();
-    extern virtual function int    getMatchPosition(int match, output int L, output int R);
-    extern virtual function int    getMatchString(int match, output string s);
-    extern virtual function string getErrorString();
+    // Clone this regex into another, preserving all values
+    extern virtual function Regex  copy   ();
+
+    // Get the error code for the most recent error. 
+    // Checks the RE for validity, if not done already.    
     extern virtual function int    getError();
+    // Get a string representation of the error
+    extern virtual function string getErrorString();
+    
+    // Run the RE on a sample string, skipping over the first startPos characters
+    extern virtual function int    test   (Str s, int startPos=0);
+    // Run the RE again on the same sample string, with different start position
+    extern virtual function int    retest (int startPos);
+    
+    // From the most recent test, find how many matches there were (0=no match).
+    // The whole match counts as 1; each submatch/group adds one.
+    extern virtual function int    getMatchCount ();
+    // For a given match (0=full) get the start position of that match
+    extern virtual function int    getMatchStart (int match);
+    // For a given match (0=full) get the length of that match
+    extern virtual function int    getMatchLength(int match);
+    // Extract a given match from the sample string, returns "" if no match
+    extern virtual function string getMatchString(int match);
+    
+    extern virtual function int    subst(Str s, string substStr, int startPos = 0);
+    extern virtual function int    substAll(Str s, string substStr, int startPos = 0);
     
     extern protected virtual function void   purge();
+    extern protected virtual function int    match_subst(string substStr);
     
     protected int nMatches;
     protected int lastError;
     protected int matchList[20];
     protected Str runStr;
     
-    protected int     compiledRegexKey;    // for lookup on C side
-    protected chandle compiledRegexHandle; // check on C-side pointer
+    //protected int     compiledRegexKey;    // for lookup on C side
+    //protected chandle compiledRegexHandle; // check on C-side pointer
     
     protected int    options;
     protected string text;
   
   endclass
-  /*
-  `SVLIB_CLASS(Pathname, Str)
-    extern virtual function bit      setPathname(Str s);
-    extern virtual function bit      isAbsolute();
-    extern virtual function Pathname parent(int backsteps=1);
-    extern virtual function Str      extension();
-    extern virtual function Str      tail();
-    extern virtual function Pathname commonAncestor(Pathname other);
-    extern virtual function Pathname relativePathTo(Pathname other);
-    extern virtual function Pathname normalize();
-    extern virtual function qs       pathComponents();
-    extern virtual function string   setFromComponents(qs components);
-    extern virtual function string   volume();  // always '/' on *nix
-    extern virtual function void     appendPath(Str s);
+  `SVLIB_CLASS(Path, Str)
+    extern static function bit    isAbsolute    (string path);
+    extern static function string dirname       (string path, int backsteps=1);
+    extern static function string extension     (string path);
+    extern static function string tail          (string path, int backsteps=1);
+    extern static function string commonAncestor(string path, string other);
+    extern static function string relPathTo     (string path, string other);
+    extern static function string normalize     (string path);
+    extern static function qs     decompose     (string path);
+    extern static function string compose       (qs subpaths);
+    extern static function string volume        (string path);  // always '/' on *nix
   endclass
-  */
   
   function automatic Regex regexMatch(string haystack, string needle, int options=0);
     Regex re;
     Str   s;
-    int   err;
+    bit   found;
     re  = Obstack#(Regex)::get();
     re.setRE(needle);
     re.setOpts(options);
-    s   = Str::create(haystack);
-    err = re.test(s);
     regexMatch_check_RE_valid: 
-      assert (err==0) else
+      assert (re.getError()==0) else
         $error("Bad RE \"%s\": %s", needle, re.getErrorString());
-    if (err == 0 && re.getMatchCount() > 0)
+    s   = Str::create(haystack);
+    found = re.test(s);
+    if (found)
       return re;
     // Return the unwanted Regex object to the obstack
     Obstack#(Regex)::put(re);
@@ -427,7 +447,7 @@ package svlib_Str_pkg;
   endfunction
   
   function void   Regex::purge();
-    compiledRegexHandle = null;
+    //compiledRegexHandle = null;
     nMatches  = -1; // Not matched at all
     lastError = -1; // No match attempt
   endfunction
@@ -464,37 +484,47 @@ package svlib_Str_pkg;
       .re(text), .str(runStr.get()), .options(options), .startPos(startPos), 
       .matchCount(nMatches), .matchList(matchList));
     for (int i=2*nMatches; i<$size(matchList,1); i++) matchList[i] = -1;
-    return lastError;
+    return (lastError==0 && nMatches>0);
   endfunction
   
   function int    Regex::getMatchCount();
     return nMatches;
   endfunction
   
-  function int    Regex::getMatchPosition(int match, output int L, output int R);
+  function int    Regex::getMatchStart(int match);
     if (match>nMatches || match<0) begin
-      L = -1;
-      R = -1;
-      return 1;
+      return -1;
     end
     else begin
-      L = matchList[match*2];
-      R = matchList[match*2+1] - 1;
-      return 0;
+      return matchList[match*2];
     end
   endfunction
   
-  function int    Regex::getMatchString(int match, output string s);
-    int L, R, result;
-    s = "";
-    result = getMatchPosition(match, L, R);
-    if (result) return result;
-    if (runStr == null) return 1;
-    s = runStr.range(L, R+1-L);
-    return 0;
+  function int    Regex::getMatchLength(int match);
+    if (match>nMatches || match<0) begin
+      return 0;
+    end
+    else begin
+      return matchList[match*2+1] - matchList[match*2];
+    end
+  endfunction
+  
+  function string    Regex::getMatchString(int match);
+    int L, len;
+    L = getMatchStart(match);
+    if (L<0) return "";
+    if (runStr == null) return "";
+    len = getMatchLength(match);
+    if (len<=0) return "";
+    return runStr.range(L, len);
   endfunction
   
   function int Regex::getError();
+    if (lastError < 0) begin
+      lastError = SvLib_regexRun(
+        .re(text), .str(""), .options(options), .startPos(0), 
+        .matchCount(nMatches), .matchList(matchList));
+    end
     return lastError;
   endfunction
   
@@ -503,10 +533,127 @@ package svlib_Str_pkg;
       0  : return "";
       -1 : return "SvLib_regex not yet run";
       default :
-        return SvLib_regexErrorString(lastError);
+        return SvLib_regexErrorString(lastError, text);
     endcase
   endfunction
+  
+  function int Regex::subst(Str s, string substStr, int startPos = 0);
+    if (test(s, startPos)) begin 
+      startPos = match_subst(substStr);
+      return 1;
+    end
+    else begin
+      return 0;
+    end
+  endfunction
+
+  function int Regex::substAll(Str s, string substStr, int startPos = 0);
+    int n = 0;
+    while (test(s, startPos)) begin
+      startPos = match_subst(substStr);
+      n++;
+    end
+    return n;
+  endfunction
+  
+  // Internal "works" of subst for a single match, assumed already matched
+  function int Regex::match_subst(string substStr);
+    qs  parts;
+    Str realSubst = Obstack#(Str)::get();
+    int i, result;
+    realSubst.set(substStr);
+    parts = realSubst.split("");
+    realSubst.set("");
+    i = 0;
+    while (i<parts.size()) begin
+      if ((i == parts.size()-1) || (parts[i] != "$")) begin
+        realSubst.append(parts[i]);
+      end
+      else begin
+        i++;
+        if (parts[i] inside {["0":"9"]}) begin
+          int m;
+          void'($sscanf(parts[i], "%d", m));
+          realSubst.append(runStr.range(getMatchStart(m), getMatchLength(m)));
+        end
+        else begin
+          realSubst.append(parts[i]);
+        end
+      end
+      i++;
+    end
+    runStr.replace(realSubst.get(), getMatchStart(0), getMatchLength(0));
+    result = getMatchStart(0) + realSubst.len();
+
+    Obstack#(Str)::put(realSubst);
+    return result;
+  endfunction
+
+  /////////////////////////////////////////////////////////////////////////////
     
+  function bit    Path::isAbsolute    (string path);
+    return (path[0] == "/");
+  endfunction
+  
+  function string Path::dirname       (string path, int backsteps=1);
+    qs comps = decompose(path);
+    
+  endfunction
+  function string Path::extension     (string path);
+  endfunction
+  function string Path::tail          (string path, int backsteps=1);
+  endfunction
+  function string Path::commonAncestor(string path, string other);
+  endfunction
+  function string Path::relPathTo     (string path, string other);
+  endfunction
+  function string Path::normalize     (string path);
+  endfunction
+
+  function qs     Path::decompose     (string path);
+    qs components, result;
+    Str pstr = Obstack#(Str)::get();
+    pstr.set(path);
+    components = pstr.split("/", 0);
+    Obstack#(Str)::put(pstr);
+    if (isAbsolute(path))
+      result.push_back("/");
+    foreach (components[i])
+      if (components[i] != "")
+        result.push_back(components[i]);
+    return result;
+  endfunction
+
+  function string Path::compose (qs subpaths);
+    string result;
+    qs  pathComps;
+    int firstUseful = 0;
+    Str path = Obstack#(Str)::get();
+    bit notFirst = 0;
+    path.set("");
+    for (int i=subpaths.size()-1; i>=0; i--) if (isAbsolute(subpaths[i])) begin
+      firstUseful=i;
+      break;
+    end
+    for (int i=firstUseful; i<subpaths.size(); i++) begin
+      pathComps = decompose(subpaths[i]);
+      foreach (pathComps[j]) begin
+        if (notFirst) begin
+          path.append("/");
+        end
+        notFirst = 1;
+        path.append(pathComps[j]);
+      end
+    end
+    result = path.get();
+    Obstack#(Str)::put(path);
+    return result;
+  endfunction
+  
+  function string Path::volume        (string path);  // always '/' on *nix
+    return "/";
+  endfunction
+  
 endpackage
 
 `endif
