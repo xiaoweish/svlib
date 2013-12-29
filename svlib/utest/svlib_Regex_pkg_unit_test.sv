@@ -1,9 +1,12 @@
 `include "svunit_defines.svh"
+
+`include "svlib_Base_pkg.sv"
 `include "svlib_Str_pkg.sv"
 
 module Regex_unit_test;
 
   import svunit_pkg::*;
+  import svlib_Base_pkg::qs;
   import svlib_Str_pkg::*;
 
   string name = "Regex_ut";

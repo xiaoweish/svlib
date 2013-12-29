@@ -1,12 +1,12 @@
 `ifndef SVLIB_STR_PKG__DEFINED
 `define SVLIB_STR_PKG__DEFINED
 
-`define SVLIB_NO_RANDSTABLE_NEW
-
 `include "svlib_macros.sv"
 
 
 package svlib_Str_pkg;
+
+  import svlib_Base_pkg::*;
 
   import "DPI-C" function int SvLib_regexRun(
                            input  string re,
@@ -17,62 +17,10 @@ package svlib_Str_pkg;
                            output int    matchList[]);
   import "DPI-C" function string SvLib_regexErrorString(input int err, input string re);
 
-  typedef string qs[$];
-  
   function automatic bit isspace(byte unsigned ch);
     return (ch inside {"\t", "\n", "\r", " ", 160});  // nbsp
   endfunction
   
-  class svlib_base;// #(parameter type T = int);
-  
-    svlib_base obstack_link;
-
-  endclass
-
-  virtual class Obstack #(parameter type T=int) extends svlib_base;
-    local static svlib_base head;
-    local static int constructed_ = 0;
-    local static int get_calls_ = 0;
-    local static int put_calls_ = 0;
-    
-    static function T get();
-      T result;
-      if (head == null) begin
-        result = T::create();
-        constructed_++;
-      end
-      else begin
-        $cast(result, head);//result = head;
-        head = head.obstack_link;
-      end
-      get_calls_++;
-      return result;
-    endfunction
-    static function void put(svlib_base t);
-      put_calls_++;
-      if (t == null) return;
-      t.obstack_link = head;
-      head = t;
-    endfunction
-    // debug/test only - DO NOT USE normally
-    static function void stats(
-        output int depth,
-        output int constructed,
-        output int get_calls,
-        output int put_calls
-      );
-      svlib_base p = head;
-      depth = 0;
-      while (p != null) begin
-        depth++;
-        p = p.obstack_link;
-      end
-      constructed = constructed_;
-      get_calls = get_calls_;
-      put_calls = put_calls_;
-    endfunction
-  endclass
-
   // Str: various string manipulations.
   // Most functions come in two flavors:
   // - a package version named str_XXX that takes a string value,
@@ -82,7 +30,9 @@ package svlib_Str_pkg;
   //   modifying the stored object.
   //
   //class Str extends svlib_base;//#(Str);
-  `SVLIB_CLASS(Str, svlib_base)
+  class Str extends svlib_base;
+  
+    `SVLIB_CLASS_UTILS(Str)
   
     typedef enum {NONE, LEFT, RIGHT, BOTH} side_e;
     typedef enum {START, END} origin_e;
@@ -150,7 +100,9 @@ package svlib_Str_pkg;
   endclass
   
   //class Regex extends svlib_base;//#(Regex);
-  `SVLIB_CLASS(Regex, svlib_base)
+  class Regex extends svlib_base;
+  
+    `SVLIB_CLASS_UTILS(Regex)
   
     typedef enum {NOCASE=1, NOLINE=2} regexOptions;
     
@@ -209,7 +161,10 @@ package svlib_Str_pkg;
     protected string text;
   
   endclass
-  `SVLIB_CLASS(Path, Str)
+  class Path extends Str;
+  
+    `SVLIB_CLASS_UTILS(Path)
+
     extern static function bit    isAbsolute    (string path);
     extern static function string dirname       (string path, int backsteps=1);
     extern static function string extension     (string path);
@@ -556,7 +511,12 @@ package svlib_Str_pkg;
     return n;
   endfunction
   
-  // Internal "works" of subst for a single match, assumed already matched
+  // Internal "works" of subst for a single match, assumed already matched.
+  // Replaces $0..$9 with the corresponding submatches; $ followed by any 
+  // other character is replaced with the second character literally. $ at
+  // the very end of the replacement string acts as a literal $, as if it
+  // were doubled.
+  //
   function int Regex::match_subst(string substStr);
     qs  parts;
     Str realSubst = Obstack#(Str)::get();
@@ -572,8 +532,7 @@ package svlib_Str_pkg;
       else begin
         i++;
         if (parts[i] inside {["0":"9"]}) begin
-          int m;
-          void'($sscanf(parts[i], "%d", m));
+          int m = parts[i].atoi();
           realSubst.append(runStr.range(getMatchStart(m), getMatchLength(m)));
         end
         else begin
@@ -584,36 +543,64 @@ package svlib_Str_pkg;
     end
     runStr.replace(realSubst.get(), getMatchStart(0), getMatchLength(0));
     result = getMatchStart(0) + realSubst.len();
-
     Obstack#(Str)::put(realSubst);
     return result;
   endfunction
 
   /////////////////////////////////////////////////////////////////////////////
     
-  function bit    Path::isAbsolute    (string path);
+  function bit Path::isAbsolute(string path);
     return (path[0] == "/");
   endfunction
   
-  function string Path::dirname       (string path, int backsteps=1);
+  function string Path::dirname(string path, int backsteps=1);
     qs comps = decompose(path);
-    
-  endfunction
-  function string Path::extension     (string path);
-  endfunction
-  function string Path::tail          (string path, int backsteps=1);
-    qs comps = decompose(path);
-  endfunction
-  function string Path::commonAncestor(string path, string other);
-    qs compsP = decompose(path);
-    qs compsO = decompose(other);
-  endfunction
-  function string Path::relPathTo     (string path, string other);
-  endfunction
-  function string Path::normalize     (string path);
+    if (backsteps >= comps.size()) begin
+      return path;
+    end
+    else begin
+      return compose(comps[0:(comps.size()-1)-backsteps]);
+    end
   endfunction
 
-  function qs     Path::decompose     (string path);
+  function string Path::extension(string path);
+    string result = tail(path);
+    Str str = Obstack#(Str)::get();
+    int dotpos;
+    str.set(result);
+    dotpos = str.last(".");
+    if (dotpos < 0) begin
+      return "";
+    end
+    else begin
+      Obstack#(Str)::put(str);
+      return result.substr(dotpos, result.len()-1);
+    end
+  endfunction
+
+  function string Path::tail(string path, int backsteps=1);
+    qs comps = decompose(path);
+    if (backsteps >= comps.size()) begin
+      return path;
+    end
+    else begin
+      return compose(comps[comps.size()-backsteps:comps.size()-1]);
+    end
+  endfunction
+
+  function string Path::commonAncestor(string path, string other);
+    qs compsP = decompose(normalize(path));
+    qs compsO = decompose(normalize(other));
+  endfunction
+
+  function string Path::relPathTo(string path, string other);
+  endfunction
+
+  function string Path::normalize(string path);
+    qs comps = decompose(path);
+  endfunction
+
+  function qs Path::decompose(string path);
     qs components, result;
     Str pstr = Obstack#(Str)::get();
     pstr.set(path);
@@ -627,7 +614,7 @@ package svlib_Str_pkg;
     return result;
   endfunction
 
-  function string Path::compose (qs subpaths);
+  function string Path::compose(qs subpaths);
     string result;
     qs  pathComps;
     int firstUseful = 0;
@@ -653,7 +640,7 @@ package svlib_Str_pkg;
     return result;
   endfunction
   
-  function string Path::volume        (string path);  // always '/' on *nix
+  function string Path::volume(string path);  // always '/' on *nix
     return "/";
   endfunction
   

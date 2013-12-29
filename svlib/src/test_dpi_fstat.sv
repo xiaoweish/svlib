@@ -1,31 +1,7 @@
 module test_dpi_fstat;
 
-  import "DPI-C" function string SvLib_getCErrStr(input int errnum);
-  import "DPI-C" function int SvLib_saBufNext(
-                            inout  chandle hnd,
-                            output string  path );
-  import "DPI-C" function int SvLib_getcwd(output string result);
-  import "DPI-C" function int SvLib_globStart(
-                            input  string pattern,
-                            output chandle hnd,
-                            output int     count);
-  import "DPI-C" function int SvLib_stat(input string path, input int what, output longint value);
-  import "DPI-C" function longint SvLib_dayTime();
-  import "DPI-C" function int SvLib_timeFormat(input longint tm, input string format, output string formatted);
-  
-  typedef string qS[$];
-  function int SvLib_getQS(input chandle hnd, output qS ss);
-    int result;
-    string s;
-    ss.delete();
-    if (hnd == null) return -1;
-    forever begin
-      result = SvLib_saBufNext(hnd, s);
-      if (result != 0) return result;
-      if (hnd == null) return 0;
-      ss.push_back(s);
-    end
-  endfunction
+  import svlib_Base_pkg::*;
+  import svlib_Sys_pkg::*;
 
   initial begin
     string s;
@@ -33,7 +9,7 @@ module test_dpi_fstat;
     longint ftime, fval;
     chandle hnd;
     int count;
-    qS paths;
+    qs paths;
     
     result = SvLib_getcwd(s);
 
