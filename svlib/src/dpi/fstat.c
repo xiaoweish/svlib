@@ -12,6 +12,8 @@
 #include <veriuser.h>
 #include <svdpi.h>
 
+#include "../svlib_shared_c_sv.h"
+
 #define STRINGIFY(x) MACROHASH(x)
 #define MACROHASH(x) #x
 
@@ -47,8 +49,8 @@ static char* getLibStringBuffer(size_t size) {
   } else if (libStringBufferSize < size) {
     char* buf = malloc(size);
     if (buf == NULL) {
+      /* Report the error and return the existing buffer, whatever it is */
       perror("PROBLEM in SvLib::getLibStringBuffer: cannot malloc");
-      // and return the existing buffer, whatever it is
     } else {
       free(libStringBuffer);
       libStringBuffer = buf;
@@ -276,19 +278,19 @@ extern int32_t SvLib_stat(const char *path, int what, int64_t *value) {
     return errno;
   } else {
     switch (what) {
-      case 1: /* Modification time */
+      case statMTIME: /* Modification time */
         *value = s.st_mtime;
         return 0;
-      case 2: /* Access time */
+      case statATIME: /* Access time */
         *value = s.st_atime;
         return 0;
-      case 3: /* Status change time */
+      case statCTIME: /* Status change time */
         *value = s.st_ctime;
         return 0;
-      case 4: /* Size in bytes */
+      case statSIZE: /* Size in bytes */
         *value = s.st_size;
         return 0;
-      case 5: /* Attributes, see 'man 2 stat' for details */
+      case statMODE: /* Attributes, see 'man 2 stat' for details */
         *value = s.st_mode;
         return 0;
       default: /* huh? should never happen, SV should get it right */

@@ -7,6 +7,8 @@
 package svlib_Sys_pkg;
 
   import svlib_Base_pkg::*;
+  
+  `include "svlib_shared_c_sv.h"
 
   import "DPI-C" function string  SvLib_getCErrStr (input int errnum);
   import "DPI-C" function int     SvLib_getcwd     (output string result);

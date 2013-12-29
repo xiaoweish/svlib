@@ -62,6 +62,12 @@ package svlib_Base_pkg;
     endfunction
     
   endclass
+  
+  typedef PerProcess#(int) ppInt;
+  
+  // ppLastError can be created using plain old new(), because
+  // only this package's RNG is affected and that doesn't matter.
+  ppInt ppLastError = new();
 
   virtual class Obstack #(parameter type T=int) extends svlib_base;
     local static svlib_base head;
