@@ -242,6 +242,10 @@ extern int32_t SvLib_globStart(const char *pattern, void **h, uint32_t *number) 
       glob_freeFunc(sa);
       return EACCES;
     case GLOB_NOMATCH:
+      *number  = 0;
+      *h       = NULL;
+      glob_freeFunc(sa);
+      return 0;
     case 0:
       sa->scan = ((glob_t*)(sa->data_ptr))->gl_pathv;
       *number  = ((glob_t*)(sa->data_ptr))->gl_pathc;
@@ -256,47 +260,31 @@ extern int32_t SvLib_globStart(const char *pattern, void **h, uint32_t *number) 
 typedef struct stat s_stat, *p_stat;
 
 /*----------------------------------------------------------------
- *   import "DPI-C" function int SvLib_stat(
+ *   import "DPI-C" function int SvLib_fileStat(
  *                            input  string  path,
- *                            input  int     what,
- *                            output longint value);
+ *                            input  int     asLink,
+ *                            output longint stats[statARRAYSIZE]);
  *----------------------------------------------------------------
  */
-extern int32_t SvLib_stat(const char *path, int what, int64_t *value) {
+extern int32_t SvLib_fileStat(const char *path, int asLink, int64_t *stats) {
   s_stat s;
   uint32_t e;
-  if (what < 0) {
+  if (asLink) {
     /* if *path is a symlink, don't follow the link but stat it */
-    what = -what;
     e = lstat(path, &s);
   } else {
-    /* normal stat, follow symlinks */
+    /* normal stat, follow symlink */
     e = stat(path, &s);
  }
   if (e) {
-    *value = 0;
     return errno;
   } else {
-    switch (what) {
-      case statMTIME: /* Modification time */
-        *value = s.st_mtime;
-        return 0;
-      case statATIME: /* Access time */
-        *value = s.st_atime;
-        return 0;
-      case statCTIME: /* Status change time */
-        *value = s.st_ctime;
-        return 0;
-      case statSIZE: /* Size in bytes */
-        *value = s.st_size;
-        return 0;
-      case statMODE: /* Attributes, see 'man 2 stat' for details */
-        *value = s.st_mode;
-        return 0;
-      default: /* huh? should never happen, SV should get it right */
-        *value = 1; /* to distinguish from stat() errors */
-        return 1;
-    }
+    stats[statMTIME] = s.st_mtime;
+    stats[statATIME] = s.st_atime;
+    stats[statCTIME] = s.st_ctime;
+    stats[statSIZE]  = s.st_size;
+    stats[statMODE]  = s.st_mode;
+    return 0;
   }
 }
 

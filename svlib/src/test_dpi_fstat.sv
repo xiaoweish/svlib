@@ -7,12 +7,11 @@ module test_dpi_fstat;
     string s;
     int result;
     longint ftime, fval;
-    chandle hnd;
-    int count;
     qs paths;
+    longint stats[statARRAYSIZE];
+    sysFileStat_s stat;
     
     result = SvLib_getcwd(s);
-
     if (result) begin
       $display("failed, result=%0d \"%s\"", result, s);
     end
@@ -21,113 +20,56 @@ module test_dpi_fstat;
       $display("         s=\"%s\"", s);
     end
     
-    result = SvLib_globStart("../*", hnd, count);
-    if (result) begin
-      $display("globStart failed, result=%0d", result);
+    svlibSys_errorHandling(1);
+    
+    paths = fileGlob("../foo/*");
+    if (svlibLastError()) begin
+      $display("Glob call yielded %s", svlibErrorDetails());
     end
     else begin
-      $display("globStart: number=%0d", count);
-      result = SvLib_getQS(hnd, paths);
-      if (result) begin
-        $display("SvLib_getQS failed, result=%0d", result);
-      end
-      else begin
-        foreach (paths[i]) begin
-          $display("  path[%0d]=\"%s\"", i, paths[i]);
-        end
+      $display("Directory listing of ../* :");
+      foreach (paths[i]) begin
+        $display("  path[%0d]=\"%s\"", i, paths[i]);
       end
     end
 
-    result = SvLib_stat("README", statMTIME, ftime);
-    if (result) begin
-      $display("mtime failed, result=%0d", result);
+    stat = fileStat("README");
+   if (svlibLastError()) begin
+      $display("Stat call yielded %s", svlibErrorDetails());
     end
     else begin
-      $display("mtime success, mtime=%0d", ftime);
+      $display("Stat call worked");
     end
-    result = SvLib_timeFormat(ftime, "%c", s);
+   
+    $display("mtime = %0d", stat.mtime);
+    result = SvLib_timeFormat(stat.mtime, "%c", s);
     if (result != 0)
-      $display("  Oops, timeFormat result = %0d (%s)", result, SvLib_getCErrStr(result));
+      $display("  Oops, timeFormat result = %0d (%s)", result, svlibErrorString(result));
     else
       $display("  That's \"%s\"", s);
+      
+    $display("atime = %0d",  stat.atime);
+    $display("ctime = %0d",  stat.ctime);
+    $display("size  = %0d",  stat.size);
+    $display("type  = %s" ,  stat.mode.fType.name);
+    $display("perms = %04o", stat.mode.fPermissions);
     
-    result = SvLib_stat("README", statATIME, ftime);
-    if (result) begin
-      $display("atime failed, result=%0d", result);
+    svlibSys_errorHandling(1);
+    
+    stat = fileStat("crapola");
+    stat = fileStat("crapola");
+    if (svlibLastError()) begin
+      $display("That call yielded an error (%s)", svlibErrorString());
     end
     else begin
-      $display("atime success, atime=%0d", ftime);
-    end
-    
-    result = SvLib_stat("README", statCTIME, ftime);
-    if (result) begin
-      $display("ctime failed, result=%0d", result);
-    end
-    else begin
-      $display("ctime success, ctime=%0d", ftime);
-    end
-    
-    result = SvLib_stat("README", statSIZE, ftime);
-    if (result) begin
-      $display("fsize failed, result=%0d", result);
-    end
-    else begin
-      $display("fsize success, size=%0d bytes", ftime);
-    end
-    
-    result = SvLib_stat("README", statMODE, ftime);
-    if (result) begin
-      $display("fmode failed, result=%0d", result);
-    end
-    else begin
-      $display("fmode success, mode=%07o", ftime);
-    end
-    
-    result = SvLib_stat("README", -statMTIME, ftime);
-    if (result) begin
-      $display("mtime failed, result=%0d", result);
-    end
-    else begin
-      $display("mtime success, mtime=%0d", ftime);
-    end
-    
-    result = SvLib_stat("README", -statATIME, ftime);
-    if (result) begin
-      $display("atime failed, result=%0d", result);
-    end
-    else begin
-      $display("atime success, atime=%0d", ftime);
-    end
-    
-    result = SvLib_stat("README", -statCTIME, ftime);
-    if (result) begin
-      $display("ctime failed, result=%0d", result);
-    end
-    else begin
-      $display("ctime success, ctime=%0d", ftime);
-    end
-    
-    result = SvLib_stat("README", -statSIZE, ftime);
-    if (result) begin
-      $display("fsize failed, result=%0d", result);
-    end
-    else begin
-      $display("fsize success, size=%0d bytes", ftime);
-    end
-    
-    result = SvLib_stat("crapola", -statMODE, ftime);
-    if (result) begin
-      $display("fmode failed, result=%0d \"%s\"", result, SvLib_getCErrStr(result));
-    end
-    else begin
-      $display("fmode success, mode=%07o", ftime);
+      $display("That stat call worked");
     end
     
     ftime = SvLib_dayTime();
     $display("unix time now = %0d", ftime);
     result = SvLib_timeFormat(ftime, "%c", s);
     if (result != 0)
-      $display("  Oops, timeFormat result = %0d (%s)", result, SvLib_getCErrStr(result));
+      $display("  Oops, timeFormat result = %0d (%s)", result, svlibErrorString(result));
     else
       $display("  That's \"%s\"", s);
     
