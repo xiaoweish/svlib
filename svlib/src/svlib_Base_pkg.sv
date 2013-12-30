@@ -58,11 +58,13 @@ package svlib_Base_pkg;
     
     virtual function void set(T value);
       INDEX_T idx = getIndex();
+      //$display("----set(%0d), n=%0d", value, valuePerProcess.num);
       if (pendingPerProcess.exists(idx) && pendingPerProcess[idx]) begin
         handlePendingOverwrite(idx);
       end
       valuePerProcess  [idx] = value;
       pendingPerProcess[idx] = pendingIfValue(value);
+      //$display("    pending=%b", pendingPerProcess[idx]);
     endfunction
 
     protected function bit is_set();
@@ -76,6 +78,7 @@ package svlib_Base_pkg;
         value = valuePerProcess[idx];
         pendingPerProcess[idx] = 0;
       end
+      //$display("----get()=%0d, num=%0d", value, valuePerProcess.num);
       return value;
     endfunction
     

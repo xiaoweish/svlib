@@ -22,7 +22,32 @@ module test_dpi_fstat;
     
     svlibSys_errorHandling(1);
     
+    $display("Illegal glob attempt");
     paths = fileGlob("../foo/*");
+    /*if (svlibLastError()) begin
+      $display("Glob call yielded %s", svlibErrorDetails());
+    end
+    else*/ begin
+      $display("Directory listing of ../foo/* :");
+      foreach (paths[i]) begin
+        $display("  path[%0d]=\"%s\"", i, paths[i]);
+      end
+    end
+    
+    $display("Empty glob attempt");
+    paths = fileGlob("../foo");
+    if (svlibLastError()) begin
+      $display("Glob call yielded %s", svlibErrorDetails());
+    end
+    else begin
+      $display("Directory listing of ../foo :");
+      foreach (paths[i]) begin
+        $display("  path[%0d]=\"%s\"", i, paths[i]);
+      end
+    end
+    
+    $display("Non-empty glob attempt");
+    paths = fileGlob("../*");
     if (svlibLastError()) begin
       $display("Glob call yielded %s", svlibErrorDetails());
     end
@@ -32,6 +57,7 @@ module test_dpi_fstat;
         $display("  path[%0d]=\"%s\"", i, paths[i]);
       end
     end
+    
 
     stat = fileStat("README");
    if (svlibLastError()) begin
