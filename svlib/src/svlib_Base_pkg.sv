@@ -125,18 +125,18 @@ package svlib_Base_pkg;
       end
     endfunction
     
-    virtual function void report();
-      $display("---\\/--- Error Manager ---\\/---");
-      $display("  Default user-mode = %b", defaultUserBit);
+    virtual function qs report();
+      report.push_back($sformatf("----\\/---- Per-Process Error Manager ----\\/----"));
+      report.push_back($sformatf("  Default user-mode = %b", defaultUserBit));
       if (userPerProcess.num) begin
-        $display("  user pend errno err");
+        report.push_back($sformatf("  user pend errno err"));
         foreach (userPerProcess[idx]) begin
-          $display("    %b    %b %3d  %s",
+          report.push_back($sformatf("    %b    %b   %3d  %s",
                         userPerProcess[idx], pendingPerProcess[idx],
-                           valuePerProcess[idx], svlibErrorString(valuePerProcess[idx]));
+                           valuePerProcess[idx], svlibErrorString(valuePerProcess[idx])));
         end
       end
-      $display("---/\\--- Error Manager ---/\\---");
+      report.push_back($sformatf("----/\\---- Per-Process Error Manager ----/\\----"));
     endfunction
     
   endclass

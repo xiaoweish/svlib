@@ -2,6 +2,7 @@ module test_dpi_fstat;
 
   import svlib_Base_pkg::*;
   import svlib_Sys_pkg::*;
+  import svlib_Str_pkg::*;
 
   initial begin
     string s;
@@ -105,10 +106,12 @@ module test_dpi_fstat;
       $display("  That's \"%s\"", s);
     
 
-    #1
     $display("Finishing");
-    errorManager.report();
-    #1;
+    begin
+      Str joiner;
+      joiner = Str::create("\n");
+      $display(joiner.sjoin(errorManager.report()));
+    end
     
   end
 
