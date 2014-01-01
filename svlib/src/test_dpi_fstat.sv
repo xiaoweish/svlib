@@ -81,18 +81,18 @@ module test_dpi_fstat;
     $display("ctime = %0d",  stat.ctime);
     $display("size  = %0d",  stat.size);
     $display("type  = %s" ,  stat.mode.fType.name);
-    $display("perms = %04o", stat.mode.fPermissions);
+    $display("perms = 0%04o", stat.mode.fPermissions);
     
     fork
-      stat = fileStat("crapola");
+      stat = fileStat("nonexistentFile");
     join_none
     fork begin
-      stat = fileStat("crapola");
+      stat = fileStat("nonexistentFile");
       if (svlibLastError()) begin
-        $display("fileStat(\"crapola\") yielded an error (%s)", svlibErrorString());
+        $display("fileStat(\"nonexistentFile\") yielded an error (%s)", svlibErrorString());
       end
       else begin
-        $display("fileStat(\"crapola\") worked");
+        $display("fileStat(\"nonexistentFile\") worked");
       end
     end join_none
     wait fork;
@@ -107,11 +107,7 @@ module test_dpi_fstat;
     
 
     $display("Finishing");
-    begin
-      Str joiner;
-      joiner = Str::create("\n");
-      $display(joiner.sjoin(errorManager.report()));
-    end
+    $display(str_sjoin(errorManager.report(), "\n"));
     
   end
 

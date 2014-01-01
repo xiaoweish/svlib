@@ -131,7 +131,7 @@ package svlib_Base_pkg;
       if (userPerProcess.num) begin
         report.push_back($sformatf("  user pend errno err"));
         foreach (userPerProcess[idx]) begin
-          report.push_back($sformatf("    %b    %b   %3d  %s",
+          report.push_back($sformatf("    %b    %b  %4d  %s",
                         userPerProcess[idx], pendingPerProcess[idx],
                            valuePerProcess[idx], svlibErrorString(valuePerProcess[idx])));
         end
@@ -144,7 +144,7 @@ package svlib_Base_pkg;
   svlibErrorManager errorManager = svlibErrorManager::getInstance();
   
   function automatic void svlibUserHandlesErrors(bit user, bit setDefault=0);
-    errorManager.setUserHandling(user);
+    errorManager.setUserHandling(user, setDefault);
   endfunction
 
   function automatic int svlibLastError();

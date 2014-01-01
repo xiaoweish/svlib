@@ -17,10 +17,6 @@ package svlib_Str_pkg;
                            output int    matchList[]);
   import "DPI-C" function string SvLib_regexErrorString(input int err, input string re);
 
-  function automatic bit isspace(byte unsigned ch);
-    return (ch inside {"\t", "\n", "\r", " ", 160});  // nbsp
-  endfunction
-  
   // Str: various string manipulations.
   // Most functions come in two flavors:
   // - a package version named str_XXX that takes a string value,
@@ -161,6 +157,7 @@ package svlib_Str_pkg;
     protected string text;
   
   endclass
+  
   class Path extends Str;
   
     `SVLIB_CLASS_UTILS(Path)
@@ -176,6 +173,17 @@ package svlib_Str_pkg;
     extern static function string compose       (qs subpaths);
     extern static function string volume        (string path);  // always '/' on *nix
   endclass
+  
+  function automatic bit isspace(byte unsigned ch);
+    return (ch inside {"\t", "\n", "\r", " ", 160});  // nbsp
+  endfunction
+  
+  function automatic string str_sjoin(qs elements, string joiner);
+    Str str = Obstack#(Str)::get();
+    str.set(joiner);
+    str_sjoin = str.sjoin(elements);
+    Obstack#(Str)::put(str);
+  endfunction
   
   function automatic Regex regexMatch(string haystack, string needle, int options=0);
     Regex re;
