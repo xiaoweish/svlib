@@ -64,13 +64,14 @@ package svlib_Sys_pkg;
     longint stats[statARRAYSIZE];
     int err;
     err = SvLib_fileStat(path, asLink, stats);
-    ppLastError.set(err);
-    fileStat_check_syscall_ok:
-      assert (err == 0) else 
-        $error("Failed to stat \"%s\": %s", 
-                                path, svlibErrorDetails(err)
-        );
-    if (err==0) begin
+    if (errorManager.check(err)) begin
+      fileStat_check_syscall_ok:
+        assert (!err) else 
+          $error("Failed to stat \"%s\": %s", 
+                                  path, svlibErrorDetails()
+          );
+    end
+    if (!err) begin
       fileStat.mtime = stats[statMTIME];
       fileStat.atime = stats[statATIME];
       fileStat.ctime = stats[statCTIME];
@@ -81,31 +82,29 @@ package svlib_Sys_pkg;
   
   function automatic qs fileGlob(string wildPath);
     qs      paths;
-    int     err;
     chandle hnd;
     int     count;
+    int     err;
     
     err = SvLib_globStart(wildPath, hnd, count);
-    ppLastError.set(err);
-    fileGlob_check_globStart_ok:
-      assert (err == 0) else
-        $error("Failed to glob \"%s\": %s", wildPath, svlibErrorDetails(err));
-
-    if (err == 0) begin
+    if (errorManager.check(err)) begin
+      fileGlob_check_globStart_ok:
+        assert (!err) else
+          $error("Failed to glob \"%s\": %s", wildPath, svlibErrorDetails());
+    end
+    
+    if (!err) begin
       err = SvLib_getQS(hnd, paths);
-      ppLastError.set(err);
-      fileGlob_check_getQS_ok:
-        assert (err == 0) else
-         $error("Failed to get glob strings: %s", svlibErrorDetails(err));
+      if (errorManager.check(err)) begin
+        fileGlob_check_getQS_ok:
+          assert (!err) else
+           $error("Failed to get glob strings: %s", svlibErrorDetails());
+      end
     end
     
     return paths;
   endfunction
 
-  function void svlibSys_errorHandling(bit user = 0);
-    $assertoff(1);
-  endfunction
-  
 endpackage
 
 `endif

@@ -29,84 +29,126 @@ package svlib_Base_pkg;
     svlib_base obstack_link;
   endclass
   
-  class PerProcess#(parameter type T=int) extends svlib_base;
+  class svlibErrorManager extends svlib_base;
   
-    `SVLIB_CLASS_UTILS(PerProcess#(T))
+    `SVLIB_CLASS_UTILS(svlibErrorManager)
 
     `ifdef INCA
       typedef string INDEX_T;
-      protected function INDEX_T getIndex();
-        return $sformatf("%p", std::process::self());
+      protected function INDEX_T indexFromProcess(process p);
+        return $sformatf("%p", p);
       endfunction
     `else
-      typedef std::process INDEX_T;
-      protected function INDEX_T getIndex();
-        return std::process::self();
+      typedef process INDEX_T;
+      protected function INDEX_T indexFromProcess(process p);
+        return p;
       endfunction
     `endif
     
-    T   valuePerProcess   [INDEX_T];
-    bit pendingPerProcess [INDEX_T];
+    protected int valuePerProcess   [INDEX_T];
+    protected bit pendingPerProcess [INDEX_T];
+    protected bit userPerProcess    [INDEX_T];
+    protected bit defaultUserBit;
     
-    virtual function bit pendingIfValue(T value);
-      return 1;  // default implementation
+    protected function INDEX_T getIndex();
+      return indexFromProcess(process::self());
     endfunction
     
-    virtual function void handlePendingOverwrite(INDEX_T idx);
-      // default: do nothing
+    static svlibErrorManager singleton = null;
+    static function svlibErrorManager getInstance();
+      if (singleton == null)
+        singleton = randstable_new();
+      return singleton;
     endfunction
     
-    virtual function void set(T value);
+    protected virtual function bit has(INDEX_T idx);
+      return valuePerProcess.exists(idx);
+    endfunction
+    
+    protected virtual function void newIndex(INDEX_T idx, int value=0);
+      pendingPerProcess [idx] = (value != 0);
+      valuePerProcess   [idx] = value;
+      userPerProcess    [idx] = defaultUserBit;
+    endfunction
+    
+    virtual function bit check(int value);
       INDEX_T idx = getIndex();
-      //$display("----set(%0d), n=%0d", value, valuePerProcess.num);
-      if (pendingPerProcess.exists(idx) && pendingPerProcess[idx]) begin
-        handlePendingOverwrite(idx);
+      if (!has(idx)) begin
+        newIndex(idx, value);
       end
-      valuePerProcess  [idx] = value;
-      pendingPerProcess[idx] = pendingIfValue(value);
-      //$display("    pending=%b", pendingPerProcess[idx]);
+      else begin
+        if (pendingPerProcess[idx]) begin
+          svlibBase_check_unhandledError: assert (0) else
+            $error("Not yet handled before next errorable call: %s",
+                              svlibErrorDetails(valuePerProcess[idx])
+            );
+        end
+        valuePerProcess[idx] = value;
+        pendingPerProcess[idx] = (value != 0);
+      end
+      return !userPerProcess[idx];
     endfunction
 
-    protected function bit is_set();
-      return valuePerProcess.exists(getIndex());
-    endfunction
-
-    virtual function T get();
-      T value;
+    virtual function int get();
       INDEX_T idx = getIndex();
-      if (valuePerProcess.exists(idx)) begin
-        value = valuePerProcess[idx];
+      if (has(idx)) begin
         pendingPerProcess[idx] = 0;
+        return valuePerProcess[idx];
       end
-      //$display("----get()=%0d, num=%0d", value, valuePerProcess.num);
-      return value;
+      else begin
+        return 0;
+      end
+    endfunction
+    
+    virtual function bit getUserHandling(bit getDefault=0);
+      if (getDefault) begin
+        return defaultUserBit;
+      end else begin
+        INDEX_T idx = getIndex();
+        if (!has(idx))
+          return defaultUserBit;
+        else
+          return userPerProcess[idx];
+      end
+    endfunction
+    
+    virtual function void setUserHandling(bit user, bit setDefault=0);
+      if (setDefault) begin
+        defaultUserBit = user;
+      end
+      else begin
+        INDEX_T idx = getIndex();
+        if (!has(idx)) begin
+          newIndex(idx, 0);
+        end
+        userPerProcess[idx] = user;
+      end
+    endfunction
+    
+    virtual function void report();
+      $display("---\\/--- Error Manager ---\\/---");
+      $display("  Default user-mode = %b", defaultUserBit);
+      if (userPerProcess.num) begin
+        $display("  user pend errno err");
+        foreach (userPerProcess[idx]) begin
+          $display("    %b    %b %3d  %s",
+                        userPerProcess[idx], pendingPerProcess[idx],
+                           valuePerProcess[idx], svlibErrorString(valuePerProcess[idx]));
+        end
+      end
+      $display("---/\\--- Error Manager ---/\\---");
     endfunction
     
   endclass
   
-  class ppError extends PerProcess#(int);
+  svlibErrorManager errorManager = svlibErrorManager::getInstance();
   
-    `SVLIB_CLASS_UTILS(ppError)
-    
-    virtual function bit pendingIfValue(T value);
-      return (value != 0);
-    endfunction
-    
-    virtual function void handlePendingOverwrite(INDEX_T idx);
-      svlibBase_check_userHandledError: assert (0) else
-        $error("Not yet handled before next errorable call: %s",
-                          svlibErrorDetails(valuePerProcess[idx])
-        );
-    endfunction
-    
-  endclass
-  
-  // ppLastError can be created using plain old new(), because
-  // only this package's RNG is affected and that doesn't matter.
-  ppError ppLastError = new();
-  
+  function automatic void svlibUserHandlesErrors(bit user, bit setDefault=0);
+    errorManager.setUserHandling(user);
+  endfunction
+
   function automatic int svlibLastError();
-    return ppLastError.get(); 
+    return errorManager.get(); 
   endfunction
   
   // Get the string corresponding to a specific C error number.
@@ -114,7 +156,7 @@ package svlib_Base_pkg;
   function automatic string svlibErrorString(int err=0);
     if (err == 0)
       err = svlibLastError();
-    return SvLib_getCErrStr(err);    
+    return SvLib_getCErrStr(err);
   endfunction
   
   function automatic string svlibErrorDetails(int err=0);
@@ -136,7 +178,7 @@ package svlib_Base_pkg;
         constructed_++;
       end
       else begin
-        $cast(result, head);//result = head;
+        $cast(result, head);
         head = head.obstack_link;
       end
       get_calls_++;
@@ -165,6 +207,7 @@ package svlib_Base_pkg;
       get_calls = get_calls_;
       put_calls = put_calls_;
     endfunction
+    
   endclass
 
 endpackage

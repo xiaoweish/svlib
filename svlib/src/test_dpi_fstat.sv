@@ -20,7 +20,7 @@ module test_dpi_fstat;
       $display("         s=\"%s\"", s);
     end
     
-    svlibSys_errorHandling(1);
+    svlibUserHandlesErrors(0);
     
     $display("Illegal glob attempt");
     paths = fileGlob("../foo/*");
@@ -59,12 +59,14 @@ module test_dpi_fstat;
     end
     
 
+    svlibUserHandlesErrors(1);
+    
     stat = fileStat("README");
-   if (svlibLastError()) begin
-      $display("Stat call yielded %s", svlibErrorDetails());
+    if (svlibLastError()) begin
+      $display("fileStat(\"README\") yielded %s", svlibErrorDetails());
     end
     else begin
-      $display("Stat call worked");
+      $display("fileStat(\"README\") worked");
     end
    
     $display("mtime = %0d", stat.mtime);
@@ -80,16 +82,19 @@ module test_dpi_fstat;
     $display("type  = %s" ,  stat.mode.fType.name);
     $display("perms = %04o", stat.mode.fPermissions);
     
-    svlibSys_errorHandling(1);
-    
-    stat = fileStat("crapola");
-    stat = fileStat("crapola");
-    if (svlibLastError()) begin
-      $display("That call yielded an error (%s)", svlibErrorString());
-    end
-    else begin
-      $display("That stat call worked");
-    end
+    fork
+      stat = fileStat("crapola");
+    join_none
+    fork begin
+      stat = fileStat("crapola");
+      if (svlibLastError()) begin
+        $display("fileStat(\"crapola\") yielded an error (%s)", svlibErrorString());
+      end
+      else begin
+        $display("fileStat(\"crapola\") worked");
+      end
+    end join_none
+    wait fork;
     
     ftime = SvLib_dayTime();
     $display("unix time now = %0d", ftime);
@@ -100,7 +105,10 @@ module test_dpi_fstat;
       $display("  That's \"%s\"", s);
     
 
+    #1
     $display("Finishing");
+    errorManager.report();
+    #1;
     
   end
 
