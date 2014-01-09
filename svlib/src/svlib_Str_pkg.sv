@@ -514,6 +514,7 @@ package svlib_Str_pkg;
     lastError = SvLib_regexRun(
       .re(text), .str(runStr.get()), .options(options), .startPos(startPos), 
       .matchCount(nMatches), .matchList(matchList));
+    if (nMatches<0 || nMatches>20) return 0;
     for (int i=2*nMatches; i<$size(matchList,1); i++) matchList[i] = -1;
     return (lastError==0 && nMatches>0);
   endfunction

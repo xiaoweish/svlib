@@ -419,17 +419,18 @@ extern uint32_t SvLib_regexRun(
     return result;
   }
   
+  *matchCount = compiled.re_nsub+1;
   result = regexec(&compiled, &(str[startPos]), numMatches, matches, 0);
   if (result == 0) {
     /* successful match: copy matches into SV from struct[] */
-    for (i=0; i<numMatches; i++) {
-      (*matchCount)++;
-      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i  )) = (matches[i].rm_so < 0) ? -1 : matches[i].rm_so + startPos;
-      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i+1)) = (matches[i].rm_so < 0) ? -1 : matches[i].rm_eo + startPos;
+    for (i=0; i<numMatches && i<*matchCount; i++) {
+      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i  )) = matches[i].rm_so + startPos;
+      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i+1)) = matches[i].rm_eo + startPos;
     }
   } else if (result == REG_NOMATCH) {
     /* no match, that's OK, we return matchCount==0 */
     result = 0;
+    *matchCount = 0;
   }
   regfree(&compiled);
   if (numMatches) free(matches);
