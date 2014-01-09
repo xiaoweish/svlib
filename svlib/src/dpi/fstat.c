@@ -420,13 +420,12 @@ extern uint32_t SvLib_regexRun(
   }
   
   result = regexec(&compiled, &(str[startPos]), numMatches, matches, 0);
-  
   if (result == 0) {
     /* successful match: copy matches into SV from struct[] */
-    for (i=0; (i<numMatches) && (matches[i].rm_so>=0); i++) {
+    for (i=0; i<numMatches; i++) {
       (*matchCount)++;
-      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i  )) = matches[i].rm_so + startPos;
-      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i+1)) = matches[i].rm_eo + startPos;
+      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i  )) = (matches[i].rm_so < 0) ? -1 : matches[i].rm_so + startPos;
+      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i+1)) = (matches[i].rm_so < 0) ? -1 : matches[i].rm_eo + startPos;
     }
   } else if (result == REG_NOMATCH) {
     /* no match, that's OK, we return matchCount==0 */

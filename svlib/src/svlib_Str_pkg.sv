@@ -95,7 +95,6 @@ package svlib_Str_pkg;
     
   endclass
   
-  //class Regex extends svlib_base;//#(Regex);
   class Regex extends svlib_base;
   
     `SVLIB_CLASS_UTILS(Regex)
@@ -158,6 +157,7 @@ package svlib_Str_pkg;
   
   endclass
   
+  
   class Path extends Str;
   
     `SVLIB_CLASS_UTILS(Path)
@@ -185,6 +185,14 @@ package svlib_Str_pkg;
     Obstack#(Str)::put(str);
   endfunction
   
+  function automatic string str_trim(string s, Str::side_e side=Str::BOTH);
+    Str str = Obstack#(Str)::get();
+    str.set(s);
+    str.trim(side);
+    str_trim = str.get();
+    Obstack#(Str)::put(str);
+  endfunction
+  
   function automatic Regex regexMatch(string haystack, string needle, int options=0);
     Regex re;
     Str   s;
@@ -204,6 +212,66 @@ package svlib_Str_pkg;
     return null;
   endfunction
 
+  // REVISIT: negative numbers must be accepted
+  function bit scanVerilogInt(string s, output integer result);
+    Regex re;
+    Str str;
+    re = Obstack#(Regex)::get();
+    str = Obstack#(Str)::get();
+    str.set(s);
+    // First sieve: is it syntactically anything like an integer?
+    re.setRE("^[[:space:]]*(([[:digit:]]+)?'([hHxXdDoObB]))?([[:xdigit:]_]+)[[:space:]]*$");
+    if (!re.test(str)) begin
+      Obstack#(Str)::put(str);
+      Obstack#(Regex)::put(re);
+      return 0;
+    end
+    else begin
+      string nBitsStr, radixLetter, valueStr;
+      bit ok;
+      int nBits;
+      nBitsStr    = re.getMatchString(2);
+      radixLetter = re.getMatchString(3);
+      valueStr    = re.getMatchString(4);
+      if (nBitsStr == "")
+        nBits = 32;
+      else
+        nBits = nBitsStr.atoi;
+      ok = scanInt(radixLetter, valueStr, result);
+      Obstack#(Regex)::put(re);
+      Obstack#(Str)::put(str);
+      return ok;
+    end
+  endfunction
+  
+  function bit scanInt(string radixLetter, string v, output integer result);
+    int radix;
+    case (radixLetter)
+      "h", "H", "x", "X" :
+        radix= 16;
+      "o", "O" :
+        radix = 8;
+      "d", "D" , "" :
+        radix = 10;
+      "b", "B" :
+        radix = 2;
+      default :
+        return 0;
+    endcase
+    if (radix == 16) begin
+      result = v.atohex();
+      return 1;
+    end
+    ///////////////////// REVISIT error checking for illegal digits
+    case (radix)
+      10: result = v.atoi();
+       8: result = v.atooct();
+       2: result = v.atobin();
+     endcase
+     return 1;
+  endfunction
+
+  /////////////////////// IMPLEMENTATIONS OF EXTERN METHODS ///////////////////
   
   function void Str::get_range_positions(
     int p, int n, origin_e origin=START,

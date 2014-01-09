@@ -15,6 +15,12 @@
     p.set_randstate(randstate);                 \
     `endif                                      \
     return result;                              \
-  endfunction                                   \
+  endfunction
+  
+`define foreach_line(fid,line,linenum,start=1) \
+  for ( int linenum=start, string line="";     \
+        $fgets(line, fid) > 0;                 \
+        linenum++                              \
+      )
 
 `endif
