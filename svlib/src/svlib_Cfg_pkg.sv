@@ -18,6 +18,7 @@ package svlib_Cfg_pkg;
     CFG_MISSING_DOT,
     CFG_NOT_SEQUENCE,
     CFG_NOT_MAP,
+    CFG_NOT_SCALAR,
     CFG_NULL_NODE,
     CFG_NOT_FOUND
   } cfgError_e;
@@ -201,48 +202,46 @@ package svlib_Cfg_pkg;
   class cfgFileINI extends cfgFile;
     `SVLIB_CLASS_UTILS(cfgFileINI)
     static function cfgFileINI create(); return randstable_new(); endfunction
+    protected virtual function void streamComments(cfgNode node);
+      if (node.comments.size() > 0) $fdisplay(fd);
+      foreach (node.comments[i]) $fdisplay(fd, "# %s", node.comments[i]);
+    endfunction
     function cfgError_e serialize  (cfgNode node, int options=0);
       cfgNodeMap root;
       if (mode != "w")        return CFG_NO_FILE;
       if (node == null)       return CFG_NULL_NODE;
       if (node.kind() != MAP) return CFG_NOT_MAP;
       // It's a map. Traverse it...
-      foreach (node.comments[i]) begin
-        $fdisplay(fd, "# %s", node.comments[i]);
-      end
+      streamComments(node);
       $cast(root, node);
       foreach (root.value[key]) begin
         cfgNode nd = root.value[key];
-        $fdisplay(fd);
-        foreach (nd.comments[i]) begin
-          $fdisplay(fd, "# %s", nd.comments[i]);
-        end
+        streamComments(nd);
         if (nd.kind() == SCALAR) begin
           cfgNodeScalar ns;
           $cast(ns, nd);
           $fdisplay(fd, "%s=%s", key, ns.sformat());
         end
-        else if (nd.kind() == MAP) begin
+        else if (nd.kind() != MAP) begin
+          return CFG_NOT_MAP;
+        end
+        else begin
           cfgNodeMap nm;
           $cast(nm, nd);
           $fdisplay(fd, "[%s]", key);
           foreach (nm.value[k2]) begin
             cfgNode n2 = nm.value[k2];
-            foreach (n2.comments[i]) begin
-              $fdisplay(fd, "# %s", n2.comments[i]);
-            end
-            if (n2.kind() == SCALAR) begin
-              cfgNodeScalar ns;
-              $cast(ns, n2);
-              $fdisplay(fd, "%s=%s", k2, ns.sformat());
+            if (n2.kind() != SCALAR) begin
+              return CFG_NOT_SCALAR;
             end
             else begin
-              return CFG_NOT_MAP;
+              cfgNodeScalar ns;
+              $cast(ns, n2);
+              streamComments(ns);
+              $fdisplay(fd, "%s=%s", k2, ns.sformat());
             end
           end
-        end
-        else begin
-          return CFG_NOT_MAP;
+          $fdisplay(fd);
         end
       end
       $fdisplay(fd);

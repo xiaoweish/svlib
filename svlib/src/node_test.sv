@@ -29,12 +29,17 @@ module node_test;
     ns.addNode(cfgScalarInt::createNode("", 14));
     ns.addNode(cfgScalarInt::createNode("", 15));
     $cast(nm, nm.value["second_value"]);
+    nm.comments.push_back("second_value comment 1");
     nm.addNode(cfgScalarString::createNode("entryA", "valueA"));
     nm.addNode(cfgScalarString::createNode("entryB", "valueB"));
     nm.addNode(cfgNodeMap::create("sectionC"));
     $cast(nm, nm.value["sectionC"]);
+    nm.comments.push_back("comment on section C: 1");
+    nm.comments.push_back("comment on section C: 2");
     nm.addNode(cfgScalarInt::createNode("C_A", 500));
     nm.addNode(cfgScalarString::createNode("C_B", "hello"));
+    $cast(nv, nm.lookup("C_A"));
+    nv.comments.push_back("comment on C_A");
     
     $display("root : ");
     $display(root.sformat(1));
@@ -122,12 +127,11 @@ module node_test;
       cfgError_e err;
       fi = cfgFileINI::create();
       err = fi.openW("my.ini");
-      $display();
-      $display("openW: %s", err.name);
+      $display("\nopenW: %s", err.name);
       err = fi.serialize(root.lookup("second_value"));
       $display("serialize: %s", err.name);
       err = fi.close();
-      $display("close: %s", err.name);
+      $display("close: %s\n", err.name);
     end
     
   end
