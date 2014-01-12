@@ -1,3 +1,14 @@
 16'h47
 12_34_5
 'b1__0_1_1_
+  a[ 7]   .   a b c def   [ 8 ]  s0a  . [8] a.b
+foo.bar[6]   
+foo.bar    
+ . foo.goobar    
+ . foo.goobar
+first
+fourth
+fourth[2]
+fourth[7]
+fourth.fred
+[1]

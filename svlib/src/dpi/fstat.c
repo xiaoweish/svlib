@@ -424,8 +424,13 @@ extern uint32_t SvLib_regexRun(
   if (result == 0) {
     /* successful match: copy matches into SV from struct[] */
     for (i=0; i<numMatches && i<*matchCount; i++) {
-      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i  )) = matches[i].rm_so + startPos;
-      *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i+1)) = matches[i].rm_eo + startPos;
+      if (matches[i].rm_so < 0) {
+        *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i  )) = -1;
+        *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i+1)) = -1;
+      } else {
+        *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i  )) = matches[i].rm_so + startPos;
+        *(regoff_t*)(svGetArrElemPtr1(matchList, 2*i+1)) = matches[i].rm_eo + startPos;
+      }
     }
   } else if (result == REG_NOMATCH) {
     /* no match, that's OK, we return matchCount==0 */

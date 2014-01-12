@@ -25,8 +25,7 @@ package svlib_Str_pkg;
   //   Str object, possibly returning a result and possibly
   //   modifying the stored object.
   //
-  //class Str extends svlib_base;//#(Str);
-  class Str extends svlib_base;
+  class Str extends svlibBase;
   
     `SVLIB_CLASS_UTILS(Str)
   
@@ -95,7 +94,7 @@ package svlib_Str_pkg;
     
   endclass
   
-  class Regex extends svlib_base;
+  class Regex extends svlibBase;
   
     `SVLIB_CLASS_UTILS(Regex)
   
@@ -106,6 +105,9 @@ package svlib_Str_pkg;
     extern virtual function void   setRE  (string s);
     // Set the options (as a bitmap)
     extern virtual function void   setOpts(int options);
+    // Set the test string
+    extern virtual function void   setStr (Str s);
+    extern virtual function void   setStrContents (string s);
     
     // Retrieve the regex string
     extern virtual function string getRE  ();
@@ -175,7 +177,7 @@ package svlib_Str_pkg;
   endclass
   
   function automatic bit isspace(byte unsigned ch);
-    return (ch inside {"\t", "\n", "\r", " ", 160});  // nbsp
+    return (ch inside {"\t", "\n", " ", 13, 160});  // CR, nbsp
   endfunction
   
   function automatic string str_sjoin(qs elements, string joiner);
@@ -492,6 +494,16 @@ package svlib_Str_pkg;
       return "";
     else
       return runStr.get();
+  endfunction
+  
+  function void Regex::setStr(Str s);
+    runStr = s;
+  endfunction
+  
+  function void Regex::setStrContents(string s);
+    if (runStr == null)
+      runStr = Obstack#(Str)::get();
+    runStr.set(s);
   endfunction
   
   function int    Regex::getOpts();

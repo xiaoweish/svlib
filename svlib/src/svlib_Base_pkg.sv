@@ -25,11 +25,11 @@ package svlib_Base_pkg;
     end
   endfunction
 
-  class svlib_base;// #(parameter type T = int);
-    svlib_base obstack_link;
+  class svlibBase;// #(parameter type T = int);
+    svlibBase obstack_link;
   endclass
   
-  class svlibErrorManager extends svlib_base;
+  class svlibErrorManager extends svlibBase;
   
     `SVLIB_CLASS_UTILS(svlibErrorManager)
 
@@ -165,8 +165,8 @@ package svlib_Base_pkg;
     return $sformatf("errno=%0d (%s)", err, SvLib_getCErrStr(err));
   endfunction
   
-  virtual class Obstack #(parameter type T=int) extends svlib_base;
-    local static svlib_base head;
+  virtual class Obstack #(parameter type T=int) extends svlibBase;
+    local static svlibBase head;
     local static int constructed_ = 0;
     local static int get_calls_ = 0;
     local static int put_calls_ = 0;
@@ -184,7 +184,7 @@ package svlib_Base_pkg;
       get_calls_++;
       return result;
     endfunction
-    static function void put(svlib_base t);
+    static function void put(svlibBase t);
       put_calls_++;
       if (t == null) return;
       t.obstack_link = head;
@@ -197,7 +197,7 @@ package svlib_Base_pkg;
         output int get_calls,
         output int put_calls
       );
-      svlib_base p = head;
+      svlibBase p = head;
       depth = 0;
       while (p != null) begin
         depth++;
