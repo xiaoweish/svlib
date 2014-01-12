@@ -18,15 +18,23 @@ module node_test;
     string path, re;
     
     // build top-down
-    nm = cfgNodeMap::create("root"); root = nm;
-    nm.value["first"]  = cfgScalarInt::createNode(1001);
-    nm.value["second"] = cfgScalarString::createNode("second_value");
-    nm.value["third"]  = cfgScalarInt::createNode(1003);
-    ns = cfgNodeSequence::create();
-    nm.value["fourth"] = ns;
-    ns.value.push_back(cfgScalarInt::createNode(13));
-    ns.value.push_back(cfgScalarInt::createNode(14));
-    ns.value.push_back(cfgScalarInt::createNode(15));
+    nm = cfgNodeMap::create("root");
+    root = nm;
+    nm.addNode(cfgScalarInt::createNode("first", 1001));
+    nm.addNode(cfgNodeMap::create("second_value"));
+    nm.addNode(cfgScalarInt::createNode("third", 1003));
+    ns = cfgNodeSequence::create("fourth");
+    nm.addNode(ns);
+    ns.addNode(cfgScalarInt::createNode("", 13));
+    ns.addNode(cfgScalarInt::createNode("", 14));
+    ns.addNode(cfgScalarInt::createNode("", 15));
+    $cast(nm, nm.value["second_value"]);
+    nm.addNode(cfgScalarString::createNode("entryA", "valueA"));
+    nm.addNode(cfgScalarString::createNode("entryB", "valueB"));
+    nm.addNode(cfgNodeMap::create("sectionC"));
+    $cast(nm, nm.value["sectionC"]);
+    nm.addNode(cfgScalarInt::createNode("C_A", 500));
+    nm.addNode(cfgScalarString::createNode("C_B", "hello"));
     
     $display("root : ");
     $display(root.sformat(1));
@@ -108,6 +116,19 @@ module node_test;
       end
     end
     $fclose(f);
+    
+    begin
+      cfgFileINI fi;
+      cfgError_e err;
+      fi = cfgFileINI::create();
+      err = fi.openW("my.ini");
+      $display();
+      $display("openW: %s", err.name);
+      err = fi.serialize(root.lookup("second_value"));
+      $display("serialize: %s", err.name);
+      err = fi.close();
+      $display("close: %s", err.name);
+    end
     
   end
 

@@ -4,7 +4,7 @@
   a[ 7]   .   a b c def   [ 8 ]  s0a  . [8] a.b
 foo.bar[6]   
 foo.bar    
- . foo.goobar    
+ [5] ]. foo.goobar    
  . foo.goobar
 first
 fourth

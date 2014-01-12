@@ -187,6 +187,11 @@ package svlib_Str_pkg;
     Obstack#(Str)::put(str);
   endfunction
   
+  function automatic string str_repeat(string s, int n);
+    if (n<=0) return "";
+    return {n{s}};
+  endfunction
+  
   function automatic string str_trim(string s, Str::side_e side=Str::BOTH);
     Str str = Obstack#(Str)::get();
     str.set(s);
@@ -405,13 +410,13 @@ package svlib_Str_pkg;
     if (n <= 0) return;
     case (side)
       RIGHT:
-        value = { {n{" "}}, value };
+        value = { str_repeat(" ", n), value };
       LEFT:
-        value = { value, {n{" "}} };
+        value = { value, str_repeat(" ", n) };
       BOTH:
         begin
           n2 = n/2;
-          value = { {n2{" "}}, value, {n-n/2{" "}} };
+          value = { str_repeat(" ", n2), value, str_repeat(" ", n-n2) };
         end
     endcase
   endfunction
