@@ -23,8 +23,8 @@ module node_test;
     nm.addNode(cfgScalarInt::createNode("first", 1001));
     nm.addNode(cfgNodeMap::create("second_value"));
     nm.addNode(cfgScalarInt::createNode("third", 1003));
-    ns = cfgNodeSequence::create("fourth");
-    nm.addNode(ns);
+    nm.addNode(cfgNodeSequence::create("fourth"));
+    $cast(ns, root.lookup("fourth"));
     ns.addNode(cfgScalarInt::createNode("", 13));
     ns.addNode(cfgScalarInt::createNode("", 14));
     ns.addNode(cfgScalarInt::createNode("", 15));
@@ -32,12 +32,12 @@ module node_test;
     nm.comments.push_back("second_value comment 1");
     nm.addNode(cfgScalarString::createNode("entryA", "valueA"));
     nm.addNode(cfgScalarString::createNode("entryB", "valueB"));
-    nm.addNode(cfgNodeMap::create("sectionC"));
-    $cast(nm, nm.value["sectionC"]);
+    nm.addNode(cfgNodeMap::create("section_C"));
+    $cast(nm, nm.value["section_C"]);
     nm.comments.push_back("comment on section C: 1");
     nm.comments.push_back("comment on section C: 2");
     nm.addNode(cfgScalarInt::createNode("C_A", 500));
-    nm.addNode(cfgScalarString::createNode("C_B", "hello"));
+    nm.addNode(cfgScalarString::createNode("C_B", "' _ hello ** '"));
     $cast(nv, nm.lookup("C_A"));
     nv.comments.push_back("comment on C_A");
     
@@ -112,7 +112,7 @@ module node_test;
         node = root.lookup(path);
         if (node == null) begin
           cfgError_e err;
-          err = root.getLookupError();
+          err = root.getLastError();
           $display("lookup fail, error = %s", err.name);
         end
         else begin
@@ -123,15 +123,39 @@ module node_test;
     $fclose(f);
     
     begin
+    
       cfgFileINI fi;
       cfgError_e err;
-      fi = cfgFileINI::create();
+      
+      fi = cfgFileINI::create("INI file my.ini");
       err = fi.openW("my.ini");
       $display("\nopenW: %s", err.name);
+      
       err = fi.serialize(root.lookup("second_value"));
       $display("serialize: %s", err.name);
+      
       err = fi.close();
       $display("close: %s\n", err.name);
+      
+      err = fi.openR("my.ini");
+      $display("\nopenR: %s", err.name);
+      
+      root = fi.deserialize();
+      void'(fi.close());
+      $display();
+      $display(root.sformat(1));
+      $display();
+      
+      
+      err = fi.openW("clone.ini");
+      $display("\nopenW: %s", err.name);
+      
+      err = fi.serialize(root);
+      $display("serialize: %s", err.name);
+      
+      err = fi.close();
+      $display("close: %s\n", err.name);
+
     end
     
   end
