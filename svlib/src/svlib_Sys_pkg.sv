@@ -60,6 +60,10 @@ package svlib_Sys_pkg;
     sysFileMode_s mode;
   } sysFileStat_s;
   
+  function automatic longint sysDaytime();
+    return SvLib_dayTime();
+  endfunction
+  
   function automatic sysFileStat_s fileStat(string path, bit asLink=0);
     longint stats[statARRAYSIZE];
     int err;

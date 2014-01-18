@@ -4,6 +4,48 @@ module node_test;
 
   import svlib_Str_pkg::*;
   import svlib_Cfg_pkg::*;
+  import svlib_Sys_pkg::*;
+  
+  class TrialSerializableSmall;
+  
+    int x;
+    string s;
+    function void display();
+      $display("TrialSerializableSmall::x=%0d", x);
+      $display("TrialSerializableSmall::s=\"%s\"", s);
+    endfunction
+    
+    `SVLIB_DOM_UTILS_BEGIN(TrialSerializableSmall)
+      `SVLIB_DOM_FIELD_INT(x)
+      `SVLIB_DOM_FIELD_STRING(s)
+    `SVLIB_DOM_UTILS_END
+  
+  endclass
+  
+  class TrialSerializableTop;
+  
+    int x;
+    string s;
+    TrialSerializableSmall baby;
+    
+    function void display();
+      $display("TrialSerializableTop::x=%0d", x);
+      $display("TrialSerializableTop::s=\"%s\"", s);
+      $display("TrialSerializableTop::baby...");
+      if (baby == null) $display("null"); else baby.display();
+    endfunction
+    
+    function new;
+      baby = new;
+    endfunction
+    
+    `SVLIB_DOM_UTILS_BEGIN(TrialSerializableTop)
+      `SVLIB_DOM_FIELD_INT(x)
+      `SVLIB_DOM_FIELD_STRING(s)
+      `SVLIB_DOM_FIELD_OBJECT(baby)
+    `SVLIB_DOM_UTILS_END
+  
+  endclass
 
   initial begin
   
@@ -126,6 +168,9 @@ module node_test;
     
       cfgFileINI fi;
       cfgError_e err;
+      TrialSerializableTop tst;
+      cfgNode nd;
+      cfgNodeMap mp;
       
       fi = cfgFileINI::create("INI file my.ini");
       err = fi.openW("my.ini");
@@ -146,16 +191,75 @@ module node_test;
       $display(root.sformat(1));
       $display();
       
+      tst = new;
+      tst.s = "this is top.s";
+      tst.x = 12345;
+      tst.baby.s = "this is baby.s";
+      tst.baby.x = 54321;
+      $display("here is what I made:");
+      tst.display();
+      $display();
       
+      nd = tst.toDOM("tst");
+      $display("here is the DOM '%s'", nd.getName());
+      $display(nd.sformat());
+      $display();
+
       err = fi.openW("clone.ini");
       $display("\nopenW: %s", err.name);
-      
-      err = fi.serialize(root);
+      err = fi.serialize(nd);
       $display("serialize: %s", err.name);
-      
       err = fi.close();
       $display("close: %s\n", err.name);
 
+      tst = new;
+      $display("here is the empty object:");
+      tst.display();
+      $display();
+      $cast(mp, nd);
+      tst.fromDOM(mp);
+      $display("here is what I got back:");
+      tst.display();
+      $display();
+      $display("here is the DOM '%s' after fromDOM", nd.getName());
+      $display(nd.sformat());
+      $display();
+      
+      tst = new;
+      tst.baby=null;
+      $display("here is the mangled object:");
+      tst.display();
+      $display();
+      $cast(mp, nd);
+      tst.fromDOM(mp);
+      $display("here is what I got back:");
+      tst.display();
+      $display();
+      $display("here is the DOM '%s' after fromDOM", nd.getName());
+      $display(nd.sformat());
+      $display();
+      
+    end
+    
+    begin
+      longint walltime, mtime;
+      Str haystack;
+      Regex re;
+      int n, m;
+      sysFileStat_s fs;
+      m = 100;
+      re = Regex::create("'([a-z]+),([a-z]+)'");
+      haystack = Str::create();
+      walltime = sysDaytime();
+      repeat (m) haystack.append("abc'def,ghi'jkl");
+      repeat (100) begin
+        n = re.substAll(haystack, "'$2,$1'");
+        assert (n==m);
+      end
+      $display("time taken = %0d", sysDaytime() - walltime);
+      walltime = sysDaytime();
+      repeat (1000000) fs = fileStat("my.ini");
+      $display("time taken = %0d", sysDaytime() - walltime);
     end
     
   end

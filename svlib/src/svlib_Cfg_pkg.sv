@@ -240,7 +240,7 @@ package svlib_Cfg_pkg;
     static function cfgScalarInt create(int v = 0);
       create = randstable_new();
       create.name = "";
-      create.set(v);
+      create.value = v;
     endfunction
     static function cfgNodeScalar createNode(string name, int v = 0);
       cfgNodeScalar ns = cfgNodeScalar::create(name);
@@ -260,7 +260,7 @@ package svlib_Cfg_pkg;
     endfunction
     function cfgObjKind_e kind(); return SCALAR_STRING; endfunction
     static function cfgScalarString create(string v = "");
-      create = randstable_new();
+      create = cfgScalarString::randstable_new();
       create.name = "";
       create.value = v;
     endfunction
@@ -278,47 +278,69 @@ package svlib_Cfg_pkg;
       create = randstable_new();
       create.name = name;
     endfunction
-    protected virtual function void streamComments(cfgNode node);
+    protected virtual function void writeComments(cfgNode node);
       if (node.comments.size() > 0) $fdisplay(fd);
       foreach (node.comments[i]) $fdisplay(fd, "# %s", node.comments[i]);
     endfunction
+    
+    protected function cfgError_e writeScalar(string key, cfgNodeScalar ns);
+      writeComments(ns);
+      $fdisplay(fd, "%s=%s", key, ns.sformat());
+      return CFG_OK;
+    endfunction
+    
+    protected function cfgError_e writeMap(string key, cfgNodeMap nm);
+      cfgError_e err;
+      $fdisplay(fd);
+      writeComments(nm);
+      $fdisplay(fd, "[%s]", key);
+      foreach (nm.value[k2]) begin
+        cfgNode nd = nm.value[k2];
+        if (nm.value[k2].kind() != NODE_SCALAR) begin
+          return CFG_INI_SERIALIZE_NOT_SCALAR;
+        end
+        else begin
+          cfgNodeScalar ns;
+          $cast(ns, nm.value[k2]);
+          err = writeScalar(k2, ns);
+          if (err != CFG_OK) return err;
+        end
+      end
+      return CFG_OK;
+    endfunction
+    
     function cfgError_e serialize  (cfgNode node, int options=0);
       cfgNodeMap root;
+      cfgError_e err;
       if (mode != "w")             return CFG_INI_SERIALIZE_NOT_WRITE;
       if (node == null)            return CFG_INI_SERIALIZE_NULL;
       if (node.kind() != NODE_MAP) return CFG_INI_SERIALIZE_TOP_NOT_MAP;
       // It's a map. Traverse it...
-      streamComments(node);
+      writeComments(node);
       $cast(root, node);
+      // For .INI, must write out all the scalars first.
       foreach (root.value[key]) begin
-        cfgNode nd = root.value[key];
-        streamComments(nd);
-        if (nd.kind() == NODE_SCALAR) begin
+        if (root.value[key].kind() == NODE_SCALAR) begin
           cfgNodeScalar ns;
-          $cast(ns, nd);
-          $fdisplay(fd, "%s=%s", key, ns.sformat());
+          $cast(ns, root.value[key]);
+          err = writeScalar(key, ns);
+          if (err != CFG_OK) return err;
         end
-        else if (nd.kind() != NODE_MAP) begin
-          return CFG_INI_SERIALIZE_SECTION_NOT_MAP;
-        end
-        else begin
-          cfgNodeMap nm;
-          $cast(nm, nd);
-          $fdisplay(fd, "[%s]", key);
-          foreach (nm.value[k2]) begin
-            cfgNode n2 = nm.value[k2];
-            if (n2.kind() != NODE_SCALAR) begin
-              return CFG_INI_SERIALIZE_NOT_SCALAR;
+      end
+      // Then write out all the maps - one level deep only!  
+      foreach (root.value[key]) begin
+        case (root.value[key].kind())
+          NODE_SCALAR: ; // we've done those already
+          NODE_MAP:
+            begin
+              cfgNodeMap nm;
+              $cast(nm, root.value[key]);
+              err = writeMap(key, nm);
+              if (err != CFG_OK) return err;
             end
-            else begin
-              cfgNodeScalar ns;
-              $cast(ns, n2);
-              streamComments(ns);
-              $fdisplay(fd, "%s=%s", k2, ns.sformat());
-            end
-          end
-          $fdisplay(fd);
-        end
+          default:
+            return CFG_INI_SERIALIZE_SECTION_NOT_MAP;
+        endcase
       end
       $fdisplay(fd);
       return CFG_OK;
@@ -395,6 +417,7 @@ package svlib_Cfg_pkg;
         end
         else begin
           lastError = CFG_INI_DESERIALIZE_BAD_SYNTAX;
+          $display("bad syntax in line %0d \"%s\"", linenum, strLine.get());
         end
         
       end
@@ -427,6 +450,7 @@ package svlib_Cfg_pkg;
  endclass
   
   function bit cfgScalarInt::scan(string s);
+    $display("scan(\"%s\"", s);
     return scanVerilogInt(s, value);
   endfunction
 
