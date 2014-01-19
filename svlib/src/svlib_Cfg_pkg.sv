@@ -19,19 +19,21 @@ package svlib_Cfg_pkg;
     // No error, must be zero for ease of return value testing
     CFG_OK = 0,
     
+    // Errors caused by generic (de)serialize operations
+    CFG_SERIALIZE_NULL,                // Called serialize(null)
+
     // Errors caused by YAML serialize/deserialize operations
     CFG_YAML_NOT_YET_IMPLEMENTED,
     
-    // Errors caused by INI deserialize operations
-    CFG_INI_DESERIALIZE_NOT_READ,      // SerDes object isn't opened for read
-    CFG_INI_DESERIALIZE_BAD_SYNTAX,    // SerDes object isn't opened for read
+    // Errors caused by file (de)serialize operations
+    CFG_DESERIALIZE_FILE_NOT_READ,     // cfgFile object isn't opened for read
+    CFG_SERIALIZE_FILE_NOT_WRITE,      // cfgFile object isn't opened for write
     
-    // Errors caused by INI serialize operations
-    CFG_INI_SERIALIZE_NOT_WRITE,       // SerDes object isn't opened for write
-    CFG_INI_SERIALIZE_NULL,            // Called serialize(null)
-    CFG_INI_SERIALIZE_TOP_NOT_MAP,     // Root node must be a map
-    CFG_INI_SERIALIZE_SECTION_NOT_MAP, // Each element of root map must be a scalar or map
-    CFG_INI_SERIALIZE_NOT_SCALAR,      // Each element of section map must be a scalar
+    // Errors caused by INI (de)serialize operations
+    CFG_DESERIALIZE_INI_BAD_SYNTAX,    // INI file contents are bad
+    CFG_SERIALIZE_INI_TOP_NOT_MAP,     // Root node must be a map
+    CFG_SERIALIZE_INI_SECTION_NOT_MAP, // Each element of root map must be a scalar or map
+    CFG_SERIALIZE_INI_NOT_SCALAR,      // Each element of section map must be a scalar
     
     // Errors caused by addNode operations
     CFG_ADDNODE_CANNOT_ADD,    // called on an inappropriate node object
@@ -297,7 +299,7 @@ package svlib_Cfg_pkg;
       foreach (nm.value[k2]) begin
         cfgNode nd = nm.value[k2];
         if (nm.value[k2].kind() != NODE_SCALAR) begin
-          return CFG_INI_SERIALIZE_NOT_SCALAR;
+          return CFG_SERIALIZE_INI_NOT_SCALAR;
         end
         else begin
           cfgNodeScalar ns;
@@ -312,9 +314,9 @@ package svlib_Cfg_pkg;
     function cfgError_e serialize  (cfgNode node, int options=0);
       cfgNodeMap root;
       cfgError_e err;
-      if (mode != "w")             return CFG_INI_SERIALIZE_NOT_WRITE;
-      if (node == null)            return CFG_INI_SERIALIZE_NULL;
-      if (node.kind() != NODE_MAP) return CFG_INI_SERIALIZE_TOP_NOT_MAP;
+      if (mode != "w")             return CFG_SERIALIZE_FILE_NOT_WRITE;
+      if (node == null)            return CFG_SERIALIZE_NULL;
+      if (node.kind() != NODE_MAP) return CFG_SERIALIZE_INI_TOP_NOT_MAP;
       // It's a map. Traverse it...
       writeComments(node);
       $cast(root, node);
@@ -339,7 +341,7 @@ package svlib_Cfg_pkg;
               if (err != CFG_OK) return err;
             end
           default:
-            return CFG_INI_SERIALIZE_SECTION_NOT_MAP;
+            return CFG_SERIALIZE_INI_SECTION_NOT_MAP;
         endcase
       end
       $fdisplay(fd);
@@ -364,7 +366,7 @@ package svlib_Cfg_pkg;
       Str             strLine;
       
       if (mode != "r") begin
-        cfgObjError(CFG_INI_DESERIALIZE_NOT_READ);
+        cfgObjError(CFG_DESERIALIZE_FILE_NOT_READ);
         return null;
       end
       
@@ -416,7 +418,7 @@ package svlib_Cfg_pkg;
           end
         end
         else begin
-          lastError = CFG_INI_DESERIALIZE_BAD_SYNTAX;
+          lastError = CFG_DESERIALIZE_INI_BAD_SYNTAX;
           $display("bad syntax in line %0d \"%s\"", linenum, strLine.get());
         end
         
@@ -459,15 +461,15 @@ package svlib_Cfg_pkg;
     Regex re = Obstack#(Regex)::get();
     re.setStrContents(path);
     re.setRE(
-    //     1: first path component, complete with leading/trailing whitespace
-    //          2: first path component, with leading/trailing whitespace trimmed
-    //                  3: digits of index, trimmed, if index exists
-    //                                        4: relative-path '.' if it exists
-    //                                                  5: name key, trimmed, if it exists
-    //                                                                  6: tail of name key (ignore this)
-    //                                                                                                   7: tail
-    //     1----2=======3************3========4***4=====5***************6#######################6*52----17---7
-         "^(\\s*(\\[\\s*([[:digit:]]+)\\s*\\]|(\\.)?\\s*([^].[[:space:]]([^].[]*[^].[[:space:]]+)*))\\s*)(.*$)");
+    //   1: first path component, complete with leading/trailing whitespace
+    //   |    2: first path component, with leading/trailing whitespace trimmed
+    //   |    |       3: digits of index, trimmed, if index exists
+    //   |    |       |                     4: relative-path '.' if it exists
+    //   |    |       |                     |         5: name key, trimmed, if it exists
+    //   |    |       |                     |         |               6: tail of name key (ignore this)
+    //   |    |       |                     |         |               |                                7: tail
+    //   1----2=======3************3========4***4=====5***************6#######################6*52----17--7
+       "^(\\s*(\\[\\s*([[:digit:]]+)\\s*\\]|(\\.)?\\s*([^].[[:space:]]([^].[]*[^].[[:space:]]+)*))\\s*)(.*)$");
 
     nextPos = 0;
     foundNode = this;

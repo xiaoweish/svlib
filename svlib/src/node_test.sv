@@ -247,19 +247,38 @@ module node_test;
       Regex re;
       int n, m;
       sysFileStat_s fs;
+      longint manytime[10];
+      
+      walltime = sys_clockResolution();
+      $display("clock resolution = %0d nanoseconds", walltime);
+      foreach(manytime[i]) begin
+        manytime[i] = sys_nanoseconds();
+      end
+      walltime = manytime[0];
+      foreach(manytime[i]) begin
+        $display("time[%1d] = %0d ns (delta=%5d)", i, manytime[i], manytime[i] - walltime);
+        walltime = manytime[i];
+      end
+      
       m = 100;
       re = Regex::create("'([a-z]+),([a-z]+)'");
       haystack = Str::create();
-      walltime = sysDaytime();
+      walltime = sys_nanoseconds();
+      
       repeat (m) haystack.append("abc'def,ghi'jkl");
       repeat (100) begin
         n = re.substAll(haystack, "'$2,$1'");
         assert (n==m);
       end
-      $display("time taken = %0d", sysDaytime() - walltime);
-      walltime = sysDaytime();
-      repeat (1000000) fs = fileStat("my.ini");
-      $display("time taken = %0d", sysDaytime() - walltime);
+      $display("time taken = %8.6f sec", (sys_nanoseconds() - walltime)/1.0e9);
+    end
+    
+    begin
+      int timeItems[tmARRAYSIZE];
+      $display(sys_formattedTime(1388530000, ""));
+      $display(sys_formattedTime(1388534400, ""));
+      $display(sys_formattedTime(sys_dayTime(), ""));
+      $display("%0d", sys_dayTime());
     end
     
   end

@@ -173,40 +173,100 @@ extern int32_t SvLib_getcwd(char ** p_result) {
 }
 
 /*----------------------------------------------------------------
+ *   import "DPI-C" function int SvLib_fileStat(
+ *                            input  longint epochSeconds,
+ *                            output int     timeItems[tmARRAYSIZE]);
+ *----------------------------------------------------------------
+ */
+ 
+static int isLeapYear(int year) {
+  return ((year%4==0) && (year%100!=0)) || (year%400==0);
+}
+
+extern int32_t SvLib_localTime(int64_t epochSeconds, int *timeItems) {
+  struct tm timeParts;
+  time_t t = epochSeconds;
+  if (NULL == localtime_r(&t, &timeParts))
+    return 1;  /*exceedingly unlikely */
+  timeItems[tmSEC]   = timeParts.tm_sec;
+  timeItems[tmMIN]   = timeParts.tm_min;
+  timeItems[tmHOUR]  = timeParts.tm_hour;
+  timeItems[tmMDAY]  = timeParts.tm_mday;
+  timeItems[tmMON]   = timeParts.tm_mon;
+  timeItems[tmYEAR]  = timeParts.tm_year;
+  timeItems[tmWDAY]  = timeParts.tm_wday;
+  timeItems[tmYDAY]  = timeParts.tm_yday;
+  timeItems[tmISDST] = timeParts.tm_isdst;
+  timeItems[tmISLY]  = isLeapYear(timeParts.tm_year+1900);
+
+  return 0;
+}
+
+/*----------------------------------------------------------------
  * import "DPI-C" function int SvLib_timeFormat(
- *                                       input  longint epochTime, 
+ *                                       input  longint epochSeconds, 
  *                                       input  string  format, 
  *                                       output string  formatted);
  *----------------------------------------------------------------
  */
-extern int32_t SvLib_timeFormat(int64_t epochTime, const char *fs, const char ** p_result) {
+extern int32_t SvLib_timeFormat(int64_t epochSeconds, const char *format, const char **formatted) {
   
-  size_t  bSize = SVLIB_STRING_BUFFER_START_SIZE;
-  char  * buf;
-  time_t t = epochTime;  /* to keep C library time functions happy */
+  size_t bSize = SVLIB_STRING_BUFFER_START_SIZE;
+  char * buf;
+  time_t t = epochSeconds;  /* to keep C library time functions happy */
   
-  /* There is no way to determine string overfill error unless we 
-   * can guarantee the result string is non-empty. So we prefix
-   * the result string with a space to ensure non-emptiness. Ugh.
-   */
-  char * fss = malloc(strlen(fs)+2);
-  *fss = ' ';
-  strcpy(&(fss[1]), fs);  
-
+  struct tm timeParts;        /* broken-down time */
+  
+  /* Make the result an empty string iff user's fmt is an empty string */
+  if (strlen(format)==0) {
+    *formatted = "";
+  }
+  
+  (void) localtime_r(&t, &timeParts);
+  
   while (1) {
     buf   = getLibStringBuffer(bSize);
     bSize = getLibStringBufferSize();
-    if (0 != strftime(buf, bSize, fss, localtime(&t))) {
-      *p_result = &(buf[1]); /* skip added space */
-      free(fss);
+    if (0 != strftime(buf, bSize, format, &timeParts)) {
+      *formatted = buf;
       return 0;
     } else if (bSize >= SVLIB_STRING_BUFFER_LONGEST_PATHNAME) {
-      *p_result = "timeFormat result exceeds maximum buffer length " 
+      *formatted = "timeFormat result exceeds maximum buffer length " 
                   STRINGIFY(SVLIB_STRING_BUFFER_LONGEST_PATHNAME);
-      free(fss);
       return ERANGE;
     } else {
       bSize *= 2;
+    }
+  }
+}
+extern int32_t SvLib_timeFormatST(int64_t epochSeconds, const char **timeST) {
+  
+  size_t bSize = SVLIB_STRING_BUFFER_START_SIZE;
+  char * buf;
+  int    nChars;
+  time_t t = epochSeconds;  /* to keep C library time functions happy */
+  
+  struct tm timeParts;        /* broken-down time */
+
+  (void) localtime_r(&t, &timeParts);
+  
+  while (1) {
+    buf    = getLibStringBuffer(bSize);
+    bSize  = getLibStringBufferSize();
+	  nChars = snprintf(buf, bSize, "Stardate %2d%03d.%01d",
+               (timeParts.tm_year - 46),
+               (((timeParts.tm_yday) * 1000) /
+                (365 + isLeapYear(timeParts.tm_year+1900))),
+                (((timeParts.tm_hour * 60) + timeParts.tm_min)/144));
+    if (nChars<bSize) {
+      *timeST = buf;
+      return 0;
+    } else {
+      bSize = nChars+1;
+      if (bSize >= SVLIB_STRING_BUFFER_LONGEST_PATHNAME) {
+        *timeST = "";
+        return ERANGE;
+      }
     }
   }
 }
@@ -289,11 +349,25 @@ extern int32_t SvLib_fileStat(const char *path, int asLink, int64_t *stats) {
 }
 
 /*----------------------------------------------------------------
- *   import "DPI-C" function int SvLib_dayTime();
+ *   import "DPI-C" function void SvLib_hiResTime(
+ *                                   input  int     getResolution,
+ *                                   output longint seconds,
+ *                                   output longint nanoseconds);
  *----------------------------------------------------------------
  */
-extern int64_t SvLib_dayTime() {
-  return time(NULL);
+extern void SvLib_hiResTime(
+    int getResolution,
+    int64_t *seconds,
+    int64_t *nanoseconds
+  ) {
+  struct timespec t;
+  if (getResolution) {
+    (void) clock_getres(CLOCK_REALTIME, &t);
+  } else {
+    (void) clock_gettime(CLOCK_REALTIME, &t);
+  }
+  *nanoseconds = t.tv_nsec;
+  *seconds     = t.tv_sec;
 }
 
 /*----------------------------------------------------------------

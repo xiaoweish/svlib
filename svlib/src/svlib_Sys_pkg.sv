@@ -7,20 +7,27 @@
 package svlib_Sys_pkg;
 
   import svlib_Base_pkg::*;
+  import svlib_Str_pkg::*;
   
   `include "svlib_shared_c_sv.h"
 
-  import "DPI-C" function int     SvLib_getcwd     (output string result);
-  import "DPI-C" function int     SvLib_globStart  (input  string pattern,
-                                                    output chandle hnd,
-                                                    output int     count);
-  import "DPI-C" function int     SvLib_fileStat   (input  string  path,
-                                                    input  int     asLink,
-                                                    output longint stats[statARRAYSIZE]);
-  import "DPI-C" function longint SvLib_dayTime    ();
-  import "DPI-C" function int     SvLib_timeFormat (input  longint tm,
-                                                    input  string  format,
-                                                    output string formatted);
+  import "DPI-C" function int     SvLib_getcwd      (output string result);
+  import "DPI-C" function int     SvLib_globStart   (input  string pattern,
+                                                     output chandle hnd,
+                                                     output int     count);
+  import "DPI-C" function int     SvLib_fileStat    (input  string  path,
+                                                     input  int     asLink,
+                                                     output longint stats[statARRAYSIZE]);
+  import "DPI-C" function void    SvLib_hiResTime   (input  int     getResolution,
+                                                     output longint seconds,
+                                                     output longint nanoseconds);
+  import "DPI-C" function int     SvLib_timeFormat  (input  longint epochSeconds,
+                                                     input  string  format,
+                                                     output string  formatted);
+  import "DPI-C" function int     SvLib_localTime   (input  longint epochSeconds,
+                                                     output int     timeItems[tmARRAYSIZE]);
+  import "DPI-C" function int     SvLib_timeFormatST(input  longint epochSeconds,
+                                                     output string  formatted);
   
   typedef struct packed {
     bit r;
@@ -60,8 +67,31 @@ package svlib_Sys_pkg;
     sysFileMode_s mode;
   } sysFileStat_s;
   
-  function automatic longint sysDaytime();
-    return SvLib_dayTime();
+  function automatic string sys_formattedTime(
+      input longint epochSeconds,
+      input string  format
+    );
+    string result;
+    void'(SvLib_timeFormatST(epochSeconds, result));
+    return result;
+  endfunction
+
+  function automatic longint sys_dayTime();
+    longint result, junk_ns;
+    SvLib_hiResTime(0, result, junk_ns);
+    return result;
+  endfunction
+  
+  function automatic longint unsigned sys_clockResolution();
+    longint seconds, nanoseconds;
+    SvLib_hiResTime(1, seconds, nanoseconds);
+    return 1e9*seconds + nanoseconds;
+  endfunction
+  
+  function automatic longint unsigned sys_nanoseconds();
+    longint seconds, nanoseconds;
+    SvLib_hiResTime(0, seconds, nanoseconds);
+    return 1e9*seconds + nanoseconds;
   endfunction
   
   function automatic sysFileStat_s fileStat(string path, bit asLink=0);
