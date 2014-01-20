@@ -1,1 +1,1 @@
-../src/dpi/fstat.c
+../src/dpi/svlib_dpi.c

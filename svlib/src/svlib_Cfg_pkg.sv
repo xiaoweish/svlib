@@ -378,7 +378,6 @@ package svlib_Cfg_pkg;
       reComment.setRE("^\\s*[;#]\\s?(.*)$");
       reSection.setRE("^\\s*\\[\\s*(\\w+)\\s*\\]$");
       reKeyVal.setRE("^\\s*(\\w+)\\s*[=:]\\s*((\\w+)|(['\"])(.*)\\4)$");
-      $display("\n== deserialize %s ==", filePath);
       `foreach_line(fd, line, linenum) begin
       
         strLine.set(line);
@@ -387,7 +386,6 @@ package svlib_Cfg_pkg;
         
         if (reComment.test(strLine)) begin
           comments.push_back(reComment.getMatchString(1));
-          $display("comment: %s", comments[$]);
         end
         else if (reSection.test(strLine)) begin
           section = cfgNodeMap::create(reSection.getMatchString(1));
@@ -395,7 +393,6 @@ package svlib_Cfg_pkg;
           comments.delete();
           getRoot(root);
           root.addNode(section);
-          $display("section: \"%s\"", section.getName());
         end
         else if (reKeyVal.test(strLine)) begin
           if (reKeyVal.getMatchStart(3) >=0) begin
@@ -409,17 +406,15 @@ package svlib_Cfg_pkg;
           comments.delete();
           if (section) begin
             section.addNode(keyVal);
-            $display("[%s] keyVal: %s = \"%s\"", section.getName, keyVal.getName(), keyVal.value.str());
           end
           else begin
             getRoot(root);
             root.addNode(keyVal);
-            $display("root keyVal: %s = \"%s\"", keyVal.getName(), keyVal.value.str());
           end
         end
         else begin
           lastError = CFG_DESERIALIZE_INI_BAD_SYNTAX;
-          $display("bad syntax in line %0d \"%s\"", linenum, strLine.get());
+          //$display("bad syntax in line %0d \"%s\"", linenum, strLine.get());
         end
         
       end
@@ -452,7 +447,6 @@ package svlib_Cfg_pkg;
  endclass
   
   function bit cfgScalarInt::scan(string s);
-    $display("scan(\"%s\"", s);
     return scanVerilogInt(s, value);
   endfunction
 
@@ -474,15 +468,15 @@ package svlib_Cfg_pkg;
     nextPos = 0;
     foundNode = this;
     forever begin
-      bit isSeq, isRel;
+      bit isIdx, isRel;
       string idx;
       cfgNode node;
       if (!re.retest(nextPos)) begin
         lastError = CFG_LOOKUP_BAD_SYNTAX;
         break;
       end
-      isSeq = (re.getMatchStart(3) >= 0);
-      isRel = isSeq || (re.getMatchStart(4) >= 0);
+      isIdx = (re.getMatchStart(3) >= 0);
+      isRel = isIdx || (re.getMatchStart(4) >= 0);
       if (!isRel && (nextPos > 0)) begin
         lastError = CFG_LOOKUP_MISSING_DOT;
         break;
@@ -491,7 +485,7 @@ package svlib_Cfg_pkg;
         lastError = CFG_LOOKUP_NULL_NODE;
         break;
       end
-      if (isSeq) begin
+      if (isIdx) begin
         if (foundNode.kind() != NODE_SEQUENCE) begin
           lastError = CFG_LOOKUP_NOT_SEQUENCE;
           break;

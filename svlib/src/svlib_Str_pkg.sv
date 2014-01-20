@@ -8,15 +8,6 @@ package svlib_Str_pkg;
 
   import svlib_Base_pkg::*;
 
-  import "DPI-C" function int SvLib_regexRun(
-                           input  string re,
-                           input  string str,
-                           input  int    options,
-                           input  int    startPos,
-                           output int    matchCount,
-                           output int    matchList[]);
-  import "DPI-C" function string SvLib_regexErrorString(input int err, input string re);
-
   // Str: various string manipulations.
   // Most functions come in two flavors:
   // - a package version named str_XXX that takes a string value,
@@ -227,7 +218,7 @@ package svlib_Str_pkg;
     str = Obstack#(Str)::get();
     str.set(s);
     // First sieve: is it syntactically anything like an integer?
-    re.setRE("^[[:space:]]*(([[:digit:]]+)?'([hHxXdDoObB]))?([[:xdigit:]_]+)[[:space:]]*$");
+    re.setRE("^[[:space:]]*(([[:digit:]]+)?'([hHxXdDoObB]))?([[:xdigit:]xzXZ_]+)[[:space:]]*$");
     if (!re.test(str)) begin
       Obstack#(Str)::put(str);
       Obstack#(Regex)::put(re);
@@ -279,7 +270,7 @@ package svlib_Str_pkg;
   endfunction
 
   /////////////////////// IMPLEMENTATIONS OF EXTERN METHODS ///////////////////
-  
+
   function void Str::get_range_positions(
     int p, int n, origin_e origin=START,
     output int L, output int R
@@ -528,7 +519,7 @@ package svlib_Str_pkg;
     int result;
     nMatches = -1;  // pessimistic, means "nothing done yet"
     
-    lastError = SvLib_regexRun(
+    lastError = svlib_dpi_imported_regexRun(
       .re(text), .str(runStr.get()), .options(options), .startPos(startPos), 
       .matchCount(nMatches), .matchList(matchList));
     if (nMatches<0 || nMatches>20) return 0;
@@ -570,7 +561,7 @@ package svlib_Str_pkg;
   
   function int Regex::getError();
     if (lastError < 0) begin
-      lastError = SvLib_regexRun(
+      lastError = svlib_dpi_imported_regexRun(
         .re(text), .str(""), .options(options), .startPos(0), 
         .matchCount(nMatches), .matchList(matchList));
     end
@@ -580,9 +571,9 @@ package svlib_Str_pkg;
   function string Regex::getErrorString();
     case (lastError)
       0  : return "";
-      -1 : return "SvLib_regex not yet run";
+      -1 : return "svlib_regex not yet run";
       default :
-        return SvLib_regexErrorString(lastError, text);
+        return svlib_dpi_imported_regexErrorString(lastError, text);
     endcase
   endfunction
   

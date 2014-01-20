@@ -76,7 +76,7 @@ static size_t getLibStringBufferSize() {
  * will construct such an array in internal storage here, then return
  * a chandle pointing to the sa_buf_struct that records the array of strings
  * and the SvLib's progress through collecting them.
- * Subsequent calls to SvLib_saBufNext with this chandle will then
+ * Subsequent calls to svlib_dpi_imported_saBufNext with this chandle will then
  * serve up the strings one by one, finally returning with the chandle set
  * to null to indicate that all the strings have been consumed and the 
  * C-side internal storage has been freed and is no longer accessible.
@@ -111,10 +111,10 @@ static int32_t saBufCreate(size_t dataBytes, freeFunc_decl ff, saBuf_p *created)
 }
 
 /*-------------------------------------------------------------------------------
- * import "DPI-C" function int SvLib_saBufNext(inout chandle h, output string s);
+ * import "DPI-C" function int svlib_dpi_imported_saBufNext(inout chandle h, output string s);
  *-------------------------------------------------------------------------------
  */
-extern int32_t SvLib_saBufNext(void **h, const char **s) {
+extern int32_t svlib_dpi_imported_saBufNext(void **h, const char **s) {
   *s = NULL;
   if (*h == NULL) {
     return 0;
@@ -135,18 +135,18 @@ extern int32_t SvLib_saBufNext(void **h, const char **s) {
 }
 
 /*-------------------------------------------------------------------
- * import "DPI-C" function string SvLib_getCErrStr(input int errnum);
+ * import "DPI-C" function string svlib_dpi_imported_getCErrStr(input int errnum);
  *-------------------------------------------------------------------
  */
-extern const char* SvLib_getCErrStr(int32_t errnum) {
+extern const char* svlib_dpi_imported_getCErrStr(int32_t errnum) {
   return strerror(errnum);
 }
 
 /*----------------------------------------------------------------
- * import "DPI-C" function int SvLib_getcwd(output string result);
+ * import "DPI-C" function int svlib_dpi_imported_getcwd(output string result);
  *----------------------------------------------------------------
  */
-extern int32_t SvLib_getcwd(char ** p_result) {
+extern int32_t svlib_dpi_imported_getcwd(char ** p_result) {
 
   size_t  bSize = SVLIB_STRING_BUFFER_START_SIZE;
   char  * buf;
@@ -173,7 +173,7 @@ extern int32_t SvLib_getcwd(char ** p_result) {
 }
 
 /*----------------------------------------------------------------
- *   import "DPI-C" function int SvLib_fileStat(
+ *   import "DPI-C" function int svlib_dpi_imported_fileStat(
  *                            input  longint epochSeconds,
  *                            output int     timeItems[tmARRAYSIZE]);
  *----------------------------------------------------------------
@@ -183,7 +183,7 @@ static int isLeapYear(int year) {
   return ((year%4==0) && (year%100!=0)) || (year%400==0);
 }
 
-extern int32_t SvLib_localTime(int64_t epochSeconds, int *timeItems) {
+extern int32_t svlib_dpi_imported_localTime(int64_t epochSeconds, int *timeItems) {
   struct tm timeParts;
   time_t t = epochSeconds;
   if (NULL == localtime_r(&t, &timeParts))
@@ -203,13 +203,13 @@ extern int32_t SvLib_localTime(int64_t epochSeconds, int *timeItems) {
 }
 
 /*----------------------------------------------------------------
- * import "DPI-C" function int SvLib_timeFormat(
+ * import "DPI-C" function int svlib_dpi_imported_timeFormat(
  *                                       input  longint epochSeconds, 
  *                                       input  string  format, 
  *                                       output string  formatted);
  *----------------------------------------------------------------
  */
-extern int32_t SvLib_timeFormat(int64_t epochSeconds, const char *format, const char **formatted) {
+extern int32_t svlib_dpi_imported_timeFormat(int64_t epochSeconds, const char *format, const char **formatted) {
   
   size_t bSize = SVLIB_STRING_BUFFER_START_SIZE;
   char * buf;
@@ -239,7 +239,7 @@ extern int32_t SvLib_timeFormat(int64_t epochSeconds, const char *format, const 
     }
   }
 }
-extern int32_t SvLib_timeFormatST(int64_t epochSeconds, const char **timeST) {
+extern int32_t svlib_dpi_imported_timeFormatST(int64_t epochSeconds, const char **timeST) {
   
   size_t bSize = SVLIB_STRING_BUFFER_START_SIZE;
   char * buf;
@@ -272,7 +272,7 @@ extern int32_t SvLib_timeFormatST(int64_t epochSeconds, const char **timeST) {
 }
 
 /*----------------------------------------------------------------
- *   import "DPI-C" function int SvLib_globStart(
+ *   import "DPI-C" function int svlib_dpi_imported_globStart(
  *                            input  string pattern,
  *                            output chandle h,
  *                            output int     count );
@@ -284,7 +284,7 @@ static void glob_freeFunc(saBuf_p p) {
   free(p);
 }
 
-extern int32_t SvLib_globStart(const char *pattern, void **h, uint32_t *number) {
+extern int32_t svlib_dpi_imported_globStart(const char *pattern, void **h, uint32_t *number) {
   int32_t result;
   saBuf_p sa;
   *number = 0;
@@ -320,13 +320,13 @@ extern int32_t SvLib_globStart(const char *pattern, void **h, uint32_t *number) 
 typedef struct stat s_stat, *p_stat;
 
 /*----------------------------------------------------------------
- *   import "DPI-C" function int SvLib_fileStat(
+ *   import "DPI-C" function int svlib_dpi_imported_fileStat(
  *                            input  string  path,
  *                            input  int     asLink,
  *                            output longint stats[statARRAYSIZE]);
  *----------------------------------------------------------------
  */
-extern int32_t SvLib_fileStat(const char *path, int asLink, int64_t *stats) {
+extern int32_t svlib_dpi_imported_fileStat(const char *path, int asLink, int64_t *stats) {
   s_stat s;
   uint32_t e;
   if (asLink) {
@@ -349,13 +349,13 @@ extern int32_t SvLib_fileStat(const char *path, int asLink, int64_t *stats) {
 }
 
 /*----------------------------------------------------------------
- *   import "DPI-C" function void SvLib_hiResTime(
+ *   import "DPI-C" function void svlib_dpi_imported_hiResTime(
  *                                   input  int     getResolution,
  *                                   output longint seconds,
  *                                   output longint nanoseconds);
  *----------------------------------------------------------------
  */
-extern void SvLib_hiResTime(
+extern void svlib_dpi_imported_hiResTime(
     int getResolution,
     int64_t *seconds,
     int64_t *nanoseconds
@@ -371,10 +371,10 @@ extern void SvLib_hiResTime(
 }
 
 /*----------------------------------------------------------------
- *  import "DPI-C" function string SvLib_regexErrorString(input int err, input string re);
+ *  import "DPI-C" function string svlib_dpi_imported_regexErrorString(input int err, input string re);
  *----------------------------------------------------------------
  */
-extern const char* SvLib_regexErrorString(int32_t err, const char* re) {
+extern const char* svlib_dpi_imported_regexErrorString(int32_t err, const char* re) {
   uint32_t actSize, bSize;
   regex_t  compiled;
   char* buf;
@@ -429,7 +429,7 @@ extern const char* SvLib_regexErrorString(int32_t err, const char* re) {
 }
 
 /*----------------------------------------------------------------
- *   import "DPI-C" function int SvLib_regexRun(
+ *   import "DPI-C" function int svlib_dpi_imported_regexRun(
  *                            input  string re,
  *                            input  string str,
  *                            input  int    options,
@@ -438,7 +438,7 @@ extern const char* SvLib_regexErrorString(int32_t err, const char* re) {
  *                            output int    matchList[]);
  *----------------------------------------------------------------
 */
-extern uint32_t SvLib_regexRun(
+extern uint32_t svlib_dpi_imported_regexRun(
     const char *re,
     const char *str,
     int32_t     options,

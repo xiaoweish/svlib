@@ -4,4 +4,4 @@
 ../src/svlib_Sys_pkg.sv
 ../src/svlib_Cfg_pkg.sv
 ../src/node_test.sv
-../src/dpi/fstat.c
+../src/dpi/svlib_dpi.c

@@ -1,24 +1,35 @@
 `ifndef SVLIB_BASE_PKG__DEFINED
 `define SVLIB_BASE_PKG__DEFINED
 
+// -------------------------------------------------------------
+// This file defines svlib_Base_pkg, a collection of underlying
+// functionality that is required by other parts of svLib.
+// It also imports all the DPI functions that are required by
+// other parts of the package.
+// User code should *not* import this package. In this way,
+// user code does not have access directly to the DPI functions,
+// allowing svLib to take full control of the SV/C interaction.
+// -------------------------------------------------------------
+
+
 `include "svlib_macros.sv"
 
 package svlib_Base_pkg;
 
+  `include "svlib_dpi_imports.sv"
+
+  // Queue-of-strings is needed very widely in this library, so
+  // we create a convenient typedef for it here.
   typedef string qs[$];
   
-  import "DPI-C" function string  SvLib_getCErrStr (input int errnum);
-  import "DPI-C" function int SvLib_saBufNext(
-                            inout  chandle hnd,
-                            output string  path );
 
-  function int SvLib_getQS(input chandle hnd, output qs ss, input bit keep_ss=0);
+  function int svlib_private_getQS(input chandle hnd, output qs ss, input bit keep_ss=0);
     int result;
     string s;
     if (!keep_ss)    ss.delete();
     if (hnd == null) return 0;
     forever begin
-      result = SvLib_saBufNext(hnd, s);
+      result = svlib_dpi_imported_saBufNext(hnd, s);
       if (result != 0) return result;
       if (hnd == null) return 0;
       ss.push_back(s);
@@ -156,13 +167,13 @@ package svlib_Base_pkg;
   function automatic string svlibErrorString(int err=0);
     if (err == 0)
       err = svlibLastError();
-    return SvLib_getCErrStr(err);
+    return svlib_dpi_imported_getCErrStr(err);
   endfunction
   
   function automatic string svlibErrorDetails(int err=0);
     if (err == 0)
       err = svlibLastError();
-    return $sformatf("errno=%0d (%s)", err, SvLib_getCErrStr(err));
+    return $sformatf("errno=%0d (%s)", err, svlib_dpi_imported_getCErrStr(err));
   endfunction
   
   virtual class Obstack #(parameter type T=int) extends svlibBase;

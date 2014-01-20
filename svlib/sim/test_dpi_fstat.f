@@ -3,4 +3,4 @@
 ../src/svlib_Sys_pkg.sv
 ../src/svlib_Str_pkg.sv
 ../src/test_dpi_fstat.sv
-../src/dpi/fstat.c
+../src/dpi/svlib_dpi.c

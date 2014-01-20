@@ -274,7 +274,6 @@ module node_test;
     end
     
     begin
-      int timeItems[tmARRAYSIZE];
       $display(sys_formattedTime(1388530000, ""));
       $display(sys_formattedTime(1388534400, ""));
       $display(sys_formattedTime(sys_dayTime(), ""));
