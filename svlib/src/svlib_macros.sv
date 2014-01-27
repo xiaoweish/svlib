@@ -76,26 +76,6 @@
 //-------------------------------------------------------------------
 
 
-// SVLIB_CLASS_UTILS
-// -----------------
-// DO NOT USE this macro unless you are writing an extension of an
-// svLib class. See the section "Writing custom extensions of svLib"
-// in the Developer's Guide.
-//-------------------------------------------------------------------
-`define SVLIB_CLASS_UTILS(T)                                        \
-  protected static function T randstable_new();                     \
-    `ifdef SVLIB_NO_RANDSTABLE_NEW                                  \
-    T result = new();                                               \
-    `else                                                           \
-    std::process p = std::process::self();                          \
-    string randstate = p.get_randstate();                           \
-    T result = new();                                               \
-    p.set_randstate(randstate);                                     \
-    `endif                                                          \
-    return result;                                                  \
-  endfunction
-//-------------------------------------------------------------------
-
 // SVLIB_CFG_NODE_UTILS
 // -----------------
 // DO NOT USE this macro unless you are writing an extension of an
@@ -103,9 +83,8 @@
 // of svLib" in the Developer's Guide.
 //-------------------------------------------------------------------
 `define SVLIB_CFG_NODE_UTILS(T)                                     \
-  `SVLIB_CLASS_UTILS(T)                                             \
   static function T create(string name = "");                       \
-    T me = T::randstable_new();                                     \
+    T me = Obstack#(T)::get();                                     \
     me.name = name;                                                 \
     me.parent = null;                                               \
     return me;                                                      \

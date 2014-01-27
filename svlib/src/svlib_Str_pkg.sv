@@ -18,8 +18,6 @@ package svlib_Str_pkg;
   //
   class Str extends svlibBase;
   
-    `SVLIB_CLASS_UTILS(Str)
-  
     typedef enum {NONE, LEFT, RIGHT, BOTH} side_e;
     typedef enum {START, END} origin_e;
   
@@ -76,7 +74,7 @@ package svlib_Str_pkg;
     extern virtual function void   pad   (int width, side_e side=BOTH);
     
     protected string value;
-    protected function setClean(string s);
+    protected function void setClean(string s);
       // Zap all to initial state except for "value"
       value = s;
     endfunction
@@ -90,8 +88,6 @@ package svlib_Str_pkg;
   endclass
   
   class Regex extends svlibBase;
-  
-    `SVLIB_CLASS_UTILS(Regex)
   
     typedef enum {NOCASE=regexNOCASE, NOLINE=regexNOLINE} regexOptions;
     

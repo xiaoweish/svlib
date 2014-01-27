@@ -233,14 +233,13 @@ package svlib_Cfg_pkg;
   endclass
   
   class cfgScalarInt extends cfgTypedScalar#(int);
-    `SVLIB_CLASS_UTILS(cfgScalarInt)
     function string str();
       return $sformatf("%0d", value);
     endfunction
     extern function bit scan(string s);
     function cfgObjKind_e kind(); return SCALAR_INT; endfunction
     static function cfgScalarInt create(int v = 0);
-      create = randstable_new();
+      create = Obstack#(cfgScalarInt)::get();
       create.name = "";
       create.value = v;
     endfunction
@@ -252,7 +251,6 @@ package svlib_Cfg_pkg;
   endclass
   
   class cfgScalarString extends cfgTypedScalar#(string);
-    `SVLIB_CLASS_UTILS(cfgScalarString)
     function string str();
       return get();
     endfunction
@@ -262,7 +260,7 @@ package svlib_Cfg_pkg;
     endfunction
     function cfgObjKind_e kind(); return SCALAR_STRING; endfunction
     static function cfgScalarString create(string v = "");
-      create = cfgScalarString::randstable_new();
+      create = Obstack#(cfgScalarString)::get();
       create.name = "";
       create.value = v;
     endfunction
@@ -274,10 +272,9 @@ package svlib_Cfg_pkg;
   endclass
   
   class cfgFileINI extends cfgFile;
-    `SVLIB_CLASS_UTILS(cfgFileINI)
     function cfgObjKind_e kind(); return FILE_INI; endfunction
     static function cfgFileINI create(string name = "INI_FILE");
-      create = randstable_new();
+      create = Obstack#(cfgFileINI)::get();
       create.name = name;
     endfunction
     protected virtual function void writeComments(cfgNode node);
@@ -431,10 +428,9 @@ package svlib_Cfg_pkg;
  endclass
   
   class cfgFileYAML extends cfgFile;
-    `SVLIB_CLASS_UTILS(cfgFileYAML)
     function cfgObjKind_e kind(); return FILE_YAML; endfunction
     static function cfgFileYAML create(string name = "YAML_FILE");
-      create = randstable_new();
+      create = Obstack#(cfgFileYAML)::get();
       create.name = name;
     endfunction
     function cfgError_e serialize  (cfgNode node, int options=0);
