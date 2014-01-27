@@ -256,7 +256,8 @@ package svlib_Str_pkg;
 
   /////////////////////// IMPLEMENTATIONS OF EXTERN METHODS ///////////////////
   
-  `include "svlib_Str_pkg_impl.sv"
+  `include "svlib_Str_impl.sv"
+  `include "svlib_Regex_impl.sv"
 
 endpackage
 
