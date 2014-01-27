@@ -161,11 +161,11 @@ module Str_unit_test;
     */
     
     S = "abcdef";
-    S = str_replace(S, "123", 0);
+    S = str_replace(S, "123", 0, 0);
     `FAIL_UNLESS_STR_EQUAL(S, "123abcdef")
-    S = str_replace(S, "", -1);
+    S = str_replace(S, "", -1, 0);
     `FAIL_UNLESS_STR_EQUAL(S, "123abcdef")
-    S = str_replace(S, "0", -1);
+    S = str_replace(S, "0", -1, 0);
     `FAIL_UNLESS_STR_EQUAL(S, "0123abcdef")
     S = str_replace(S, "", -1, 0, Str::END);
     `FAIL_UNLESS_STR_EQUAL(S, "0123abcdef")

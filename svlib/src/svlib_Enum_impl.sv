@@ -5,6 +5,17 @@
 // This file is `include-d into svlib_Enum_pkg.sv and
 // should not be used in any other context.
 
+function void EnumUtils::m_build();
+  ENUM e = e.first;
+  for (int pos=0; pos<e.num; pos++) begin
+    m_all_values.push_back(e);
+    m_map[e.name] = e;
+    m_pos[e] = pos;
+    e = e.next;
+  end
+  m_built = 1;
+endfunction
+
 function EnumUtils::qe EnumUtils::all_values();
   if (!m_built) m_build();
   return m_all_values;
@@ -34,3 +45,15 @@ function int EnumUtils::pos(BASE b);
   else
     return -1;
 endfunction
+
+function ENUM EnumUtils::match(BASE b);
+  qe matches;
+  if (!m_built) m_build();
+  matches = all_values.find_first() with(b ==? item);
+  if (matches.size()>0)
+    return matches[0];
+  assert (0) else $error("EnumUtils::match found no match for value 'b%b", b);
+  return ENUM'(b);
+endfunction
+
+

@@ -76,6 +76,10 @@ package svlib_Str_pkg;
     extern virtual function void   pad   (int width, side_e side=BOTH);
     
     protected string value;
+    protected function setClean(string s);
+      // Zap all to initial state except for "value"
+      value = s;
+    endfunction
     
     extern protected function void get_range_positions(
       int p, int n, origin_e origin=START,
@@ -147,7 +151,7 @@ package svlib_Str_pkg;
     
     protected int    options;
     protected string text;
-  
+    
   endclass
   
   
@@ -175,6 +179,27 @@ package svlib_Str_pkg;
     Obstack#(Str)::put(str);
   endfunction
   
+  function automatic string str_pad(string s, int width, Str::side_e side=Str::BOTH);
+    Str str = Obstack#(Str)::get();
+    str.set(s);
+    str.pad(width, side);
+    str_pad = str.get();
+    Obstack#(Str)::put(str);
+  endfunction
+  
+    // Replace the range p/n with some other string, not necessarily same length.
+    // If n==0 this is an insert operation.
+  function automatic string str_replace(string s, string rs, int p, int n,
+                                        Str::origin_e origin=Str::START);
+    Str str = Obstack#(Str)::get();
+    str.set(s);
+    str.replace(rs, p, n, origin);
+    str_replace = str.get();
+    Obstack#(Str)::put(str);
+  endfunction
+
+  //--------------------------------------------------------------
+
   function automatic Regex regexMatch(string haystack, string needle, int options=0);
     Regex re;
     Str   s;

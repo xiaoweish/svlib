@@ -6,9 +6,10 @@
 // should not be used in any other context.
 
 function Regex  Regex::create(string s = "", int options=0);
-  Regex r = Regex::randstable_new();
-  r.setRE(s);
-  r.setOpts(options);
+  Regex r = Obstack#(Regex)::get();
+  r.purge();
+  r.text = s;
+  r.options = options;
   return r;
 endfunction
 

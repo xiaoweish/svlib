@@ -36,8 +36,8 @@ endfunction
 // Save a string as an object so that further manipulations can
 // be performed on it.
 function Str Str::create(string s = "");
-  Str result = Str::randstable_new();
-  result.set(s);
+  Str result = Obstack#(Str)::get();
+  result.setClean(s);
   return result;
 endfunction
 
@@ -89,16 +89,6 @@ function void Str::replace(string rs, int p, int n, origin_e origin=START);
   clip_to_bounds(L);
   clip_to_bounds(R);
   value = {value.substr(0, L-1), rs, value.substr(R, len-1)};
-endfunction
-//
-function automatic string str_replace(
-    string orig, string rs, int p, int n=0, Str::origin_e origin=Str::START
-  );
-  Str obj = Obstack#(Str)::get();
-  obj.set(orig);
-  obj.replace(rs, p, n, origin);
-  str_replace = obj.get();
-  Obstack#(Str)::put(obj);
 endfunction
 
 function string Str::range(int p, int n, origin_e origin=START);

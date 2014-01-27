@@ -203,7 +203,7 @@ package svlib_Base_pkg;
     static function T get();
       T result;
       if (head == null) begin
-        result = T::create();
+        result = T::randstable_new();
         constructed_++;
       end
       else begin

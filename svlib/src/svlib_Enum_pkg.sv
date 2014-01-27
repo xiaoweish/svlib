@@ -25,30 +25,16 @@ package svlib_Enum_pkg;
     extern static function bit  has_name   (string s);
     extern static function bit  has_value  (BASE   b);
     extern static function qe   all_values ();
+    extern static function bit  wild_cast  (output ENUM e, input BASE b);
 
     // List of all values, lazy-evaluated
     protected static qe   m_all_values;
     protected static ENUM m_map[string];
     protected static int  m_pos[BASE];
     protected static bit  m_built;
-
-    protected static function void m_build();
-      ENUM e = e.first;
-      for (int pos=0; pos<e.num; pos++) begin
-        m_all_values.push_back(e);
-        m_map[e.name] = e;
-        m_pos[e] = pos;
-        e = e.next;
-      end
-      m_built = 1;
-    endfunction
-
-    protected ENUM e;
-    protected bit more;
-    function new; start(); endfunction
-    function void start(); e = e.first; more = 1; endfunction
-    function bit  next(output ENUM re); re = e; next = more; e = e.next; more = (e != e.first); endfunction
-    function bit  ready(); return more; endfunction
+    // The lazy-evaluator
+    extern protected static function void m_build();
+    
   endclass
 
   `include "svlib_Enum_impl.sv"

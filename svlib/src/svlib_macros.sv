@@ -12,8 +12,8 @@
 // into a module, interface or package.
 // ------------------------------------------------------------------
 
-// forenum
-// -------
+// foreach_enum
+// ------------
 // A loop construct to iterate over the enumerator values of
 // any enumeration type. It takes two or three arguments.
 // * The first argument is the enumeration type, which should
@@ -33,14 +33,14 @@
 // Typical usage patterns might be:
 //    typedef enum {A, B, C} myEnum_e;
 //    ...
-//    `forenum(myEnum_e, m, i)
+//    `foreach_enum(myEnum_e, m, i)
 //      $display("%0d: %s = %0d", i, m.name, m);
-//    `forenum(myEnum_e, m) begin
+//    `foreach_enum(myEnum_e, m) begin
 //      ... do something with 'm' ...
 //    end
 // Please note that this macro CANNOT be used in randomization constraints.
 //-------------------------------------------------------------------
-`define forenum(E,e,i=__foreach_enum_position_iterator__)           \
+`define foreach_enum(E,e,i=__foreach_enum_position_iterator__)      \
   for (E e = e.first, int i=0; i<e.num; e=e.next, i++)
 //-------------------------------------------------------------------
 
