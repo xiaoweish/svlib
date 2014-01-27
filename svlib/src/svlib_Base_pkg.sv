@@ -23,7 +23,15 @@ package svlib_Base_pkg;
   typedef string qs[$];
   
 
-  function int svlib_private_getQS(input chandle hnd, output qs ss, input bit keep_ss=0);
+  // Consistent mechanism to recover a queue of strings, of unknown length,
+  // from data that's been set up on the DPI-C side. ~hnd~ is the C pointer,
+  // supplied by some earlier DPI call, referencing the C string array data.
+  // This function repeatedly calls svlib_dpi_imported_saBufNext to retrieve
+  // one string from the C array and push the handle variable on to the next.
+  // Flag ~keep_ss~ set: function appends to existing contents of ss.
+  //    ~keep_ss~ clear: function deletes existing contents of ss before starting.
+  //
+  function int svlib_private_getQS(input chandle hnd, ref qs ss, input bit keep_ss=0);
     int result;
     string s;
     if (!keep_ss)    ss.delete();
@@ -35,11 +43,21 @@ package svlib_Base_pkg;
       ss.push_back(s);
     end
   endfunction
+  
 
+  // svlibBase: base class for almost all svlib classes. Provides the "Obstack"
+  // mechanism that allows us to recycle unused objects.
+  //
   class svlibBase;// #(parameter type T = int);
     svlibBase obstack_link;
   endclass
   
+  
+  // svlibErrorManager: singleton class to handle
+  // per-process error management. A single instance
+  // is stored as a static variable and can be returned
+  // by the static getInstance method.
+  //
   class svlibErrorManager extends svlibBase;
   
     `SVLIB_CLASS_UTILS(svlibErrorManager)

@@ -12,8 +12,6 @@
 #include <veriuser.h>
 #include <svdpi.h>
 
-#include "../svlib_shared_c_sv.h"
-
 #define STRINGIFY(x) MACROHASH(x)
 #define MACROHASH(x) #x
 
@@ -23,6 +21,8 @@
 #ifdef _CPLUSPLUS
 extern "C" {
 #endif
+
+#include "../svlib_shared_c_sv.h"
 
 static char*  libStringBuffer = NULL;
 static size_t libStringBufferSize = 0;

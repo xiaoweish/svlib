@@ -274,12 +274,44 @@ module node_test;
     end
     
     begin
-      $display(sys_formattedTime(1388530000, ""));
-      $display(sys_formattedTime(1388534400, ""));
-      $display(sys_formattedTime(sys_dayTime(), ""));
-      $display("%0d", sys_dayTime());
-    end
+      longint t;
+      t = sys_dayTime();
+      $display("Epoch time is %0d seconds", t);
+      $display(sys_formattedTime(t, "Today's time and date is %c"));
+      $display("That's %s", sys_formattedTime(t, "%Q"));
     
+      for (int unsigned x=0; x<45; x++) begin
+        int f;
+        longint t;
+        t = sys_nanoseconds();
+        f = first_factor(x);
+        t = sys_nanoseconds() - t;
+        $display("Computed in %10.6f seconds", t/1.0e9);
+        if (f < 0)
+          $display("%0d is prime", x);
+        else if (f>0)
+          $display("%0d is divisible by %0d", x, f);
+        else
+          $display("WTF, %0d is not prime but cannot be factorized", x);
+      end
+    
+    end
   end
+
+  function automatic int first_factor(int unsigned N);
+    string n_ones = str_repeat("1", N);
+    Regex re = regexMatch(n_ones, "^1?$|^(11+)(\\1+)$");
+    if (re == null || (N>1 && re.getMatchLength(0)==0))
+      return -1; // N is prime
+    else begin
+/*
+      $display("match, $0=\"%s\"(%0d), $1=\"%s\"(%0d), $2=\"%s\"(%0d)",
+                re.getMatchString(0), re.getMatchLength(0),
+                re.getMatchString(1), re.getMatchLength(1),
+                re.getMatchString(2), re.getMatchLength(2));
+*/
+      return re.getMatchLength(1); // return length of \1
+    end
+  endfunction
 
 endmodule

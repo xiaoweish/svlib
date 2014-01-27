@@ -52,7 +52,12 @@ package svlib_Sys_pkg;
       input string  format
     );
     string result;
-    void'(svlib_dpi_imported_timeFormatST(epochSeconds, result));
+    if (format == "%Q") begin
+      void'(svlib_dpi_imported_timeFormatST(epochSeconds, result));
+    end
+    else begin
+      void'(svlib_dpi_imported_timeFormat(epochSeconds, format, result));
+    end
     return result;
   endfunction
 
