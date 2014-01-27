@@ -280,7 +280,7 @@ module node_test;
       $display(sys_formattedTime(t, "Today's time and date is %c"));
       $display("That's %s", sys_formattedTime(t, "%Q"));
     
-      for (int unsigned x=0; x<45; x++) begin
+      for (int unsigned x=0; x<25; x++) begin
         int f;
         longint t;
         t = sys_nanoseconds();

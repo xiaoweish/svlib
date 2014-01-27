@@ -190,29 +190,29 @@ module Str_unit_test;
     
   `SVTEST_END
   
-  `SVTEST(Str_just_check)
+  `SVTEST(Str_pad_check)
   
     test_str = "test";
     my_Str.set(test_str);
     
-    my_Str.just(6,Str::NONE);
+    my_Str.pad(6,Str::NONE);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), test_str)
     `FAIL_UNLESS_EQUAL(my_Str.len(), test_str.len)
     
-    my_Str.just(6,Str::RIGHT);
+    my_Str.pad(6,Str::RIGHT);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "  test")
     `FAIL_UNLESS_EQUAL(my_Str.len(), 6)
     
-    my_Str.just(10,Str::LEFT);
+    my_Str.pad(10,Str::LEFT);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "  test    ")
     `FAIL_UNLESS_EQUAL(my_Str.len(), 10)
 
-    my_Str.just(5,Str::BOTH);
+    my_Str.pad(5,Str::BOTH);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "  test    ")
     `FAIL_UNLESS_EQUAL(my_Str.len(), 10)
 
     my_Str.trim();
-    my_Str.just(12,Str::BOTH);
+    my_Str.pad(12,Str::BOTH);
     `FAIL_UNLESS_STR_EQUAL(my_Str.get(), "    test    ")
     `FAIL_UNLESS_EQUAL(my_Str.len(), 12)
 

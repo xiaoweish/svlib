@@ -170,6 +170,12 @@ module Regex_unit_test;
   `FAIL_UNLESS_EQUAL(count,4)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you have no bananas")
   
+  re.setRE("A.");
+  re.setOpts(Regex::NOCASE);
+  count = re.substAll(str, "$[$2$_$0$&$1$]");
+  `FAIL_UNLESS_EQUAL(count,4)
+  `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you h[avavav]e no b[ananan][ananan][asasas]")
+  
   `SVTEST_END
   
   `SVUNIT_TESTS_END

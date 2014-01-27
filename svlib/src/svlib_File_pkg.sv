@@ -6,6 +6,7 @@
 package svlib_File_pkg;
 
   import svlib_Base_pkg::*;
+  import svlib_Str_pkg::*;
 
   class Path extends Str;
   

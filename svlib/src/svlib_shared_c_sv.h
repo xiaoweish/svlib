@@ -32,3 +32,13 @@ typedef enum {
   tmISLY,     /* is it a leap year    */
   tmARRAYSIZE /* must always be the last one */
 } TM_INDEX_E;
+
+/*  REGEX_OPTIONS_E
+ *  Represents the various options that can be set on a regex.
+ *  The values of this enum are a bitmap, so that multiple
+ *  options can be encoded by ORing together the values.
+ */
+typedef enum {
+  regexNOCASE  = 1,
+  regexNOLINE  = 2
+} REGEX_OPTIONS_E;

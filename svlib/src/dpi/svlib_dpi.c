@@ -485,8 +485,8 @@ extern uint32_t svlib_dpi_imported_regexRun(
   }
   
   cflags = REG_EXTENDED;
-  if (options & 1) cflags |= REG_ICASE;
-  if (options & 2) cflags |= REG_NEWLINE;
+  if (options & regexNOCASE) cflags |= REG_ICASE;
+  if (options & regexNOLINE) cflags |= REG_NEWLINE;
   result = regcomp(&compiled, re, cflags);
   if (result) {
     regfree(&compiled);

@@ -31,7 +31,7 @@ package svlib_Base_pkg;
   // Flag ~keep_ss~ set: function appends to existing contents of ss.
   //    ~keep_ss~ clear: function deletes existing contents of ss before starting.
   //
-  function int svlib_private_getQS(input chandle hnd, ref qs ss, input bit keep_ss=0);
+  function automatic int svlib_private_getQS(input chandle hnd, ref qs ss, input bit keep_ss=0);
     int result;
     string s;
     if (!keep_ss)    ss.delete();
