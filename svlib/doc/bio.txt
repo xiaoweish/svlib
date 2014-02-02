@@ -1,0 +1,22 @@
+Jonathan Bromley graduated in Physics from Oxford 
+University, England, around the time vacuum tubes 
+were starting to go out of fashion.  He taught 
+physics, electronics and computing to high school 
+and undergraduate students, and worked on image 
+processing and industrial control systems in both 
+academic and commercial environments.  
+
+From 2001 to 2009 Jonathan developed and delivered
+training in HDL design and verification, with
+special focus on SystemVerilog.
+
+In 2009 Jonathan joined international verification 
+consultancy Verilab, where he helps clients to use
+up-to-date verification methodologies including
+UVM, eRM and formal methods on ASIC projects.
+
+Jonathan remains active in IEEE SystemVerilog
+standards development, and has presented papers
+at various industry conferences.
+
+Jonathan Bromley, February 2014
