@@ -1,7 +1,7 @@
 `ifndef SVLIB_ENUM_PKG__DEFINED
 `define SVLIB_ENUM_PKG__DEFINED
 
-`include "svlib_macros.sv"
+`include "svlib_macros.svh"
 
 package svlib_Enum_pkg;
   
@@ -25,7 +25,7 @@ package svlib_Enum_pkg;
     extern static function bit  has_name   (string s);
     extern static function bit  has_value  (BASE   b);
     extern static function qe   all_values ();
-    extern static function bit  wild_cast  (output ENUM e, input BASE b);
+    extern static function ENUM match      (BASE   b, bit requireUnique = 0);
 
     // List of all values, lazy-evaluated
     protected static qe   m_all_values;

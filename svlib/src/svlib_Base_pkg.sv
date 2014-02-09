@@ -6,13 +6,18 @@
 // functionality that is required by other parts of svLib.
 // It also imports all the DPI functions that are required by
 // other parts of the package.
-// User code should *not* import this package. In this way,
+// -------------------------------------------------------------
+
+// -------------------------------------------------------------
+//                       IMPORTANT NOTE
+// -------------------------------------------------------------
+// USER CODE SHOULD *NOT* IMPORT THIS PACKAGE. In this way,
 // user code does not have access directly to the DPI functions,
 // allowing svLib to take full control of the SV/C interaction.
 // -------------------------------------------------------------
 
 
-`include "svlib_macros.sv"
+`include "svlib_macros.svh"
 
 package svlib_Base_pkg;
 

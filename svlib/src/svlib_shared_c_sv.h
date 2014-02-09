@@ -1,5 +1,6 @@
-/*  These enum typedefs are valid syntax in both C and SV.
- *  They are used to share constants specifying mapping between
+/*  These enum typedefs are valid syntax in both C and SV,
+ *  so this file can be #included into C code or `included into SV.
+ *  The types are used to share constants specifying mapping between
  *  fields of some C struct and elements of an SV array.
  */
 

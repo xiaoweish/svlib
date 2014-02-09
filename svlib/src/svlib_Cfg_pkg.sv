@@ -1,7 +1,7 @@
 `ifndef SVLIB_CFG_PKG__DEFINED
 `define SVLIB_CFG_PKG__DEFINED
 
-`include "svlib_macros.sv"
+`include "svlib_macros.svh"
 
 package svlib_Cfg_pkg;
 
@@ -375,6 +375,7 @@ package svlib_Cfg_pkg;
       reComment.setRE("^\\s*[;#]\\s?(.*)$");
       reSection.setRE("^\\s*\\[\\s*(\\w+)\\s*\\]$");
       reKeyVal.setRE("^\\s*(\\w+)\\s*[=:]\\s*((\\w+)|(['\"])(.*)\\4)$");
+      
       `foreach_line(fd, line, linenum) begin
       
         strLine.set(line);

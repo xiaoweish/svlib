@@ -1,7 +1,7 @@
 `ifndef SVLIB_SYS_PKG__DEFINED
 `define SVLIB_SYS_PKG__DEFINED
 
-`include "svlib_macros.sv"
+`include "svlib_macros.svh"
 
 
 package svlib_Sys_pkg;

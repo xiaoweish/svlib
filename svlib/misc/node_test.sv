@@ -1,4 +1,4 @@
-`include "svlib_macros.sv"
+`include "svlib_macros.svh"
 
 module node_test;
 
@@ -295,6 +295,11 @@ module node_test;
           $display("WTF, %0d is not prime but cannot be factorized", x);
       end
     
+    end
+    
+    begin
+      sysFileStat_s f;
+      f = fileStat("bad file");
     end
   end
 

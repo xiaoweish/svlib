@@ -76,23 +76,6 @@
 //-------------------------------------------------------------------
 
 
-// SVLIB_CFG_NODE_UTILS
-// -----------------
-// DO NOT USE this macro unless you are writing an extension of an
-// svLib DOM node class. See the section "Writing custom extensions
-// of svLib" in the Developer's Guide.
-//-------------------------------------------------------------------
-`define SVLIB_CFG_NODE_UTILS(T)                                     \
-  static function T create(string name = "");                       \
-    T me = Obstack#(T)::get();                                     \
-    me.name = name;                                                 \
-    me.parent = null;                                               \
-    return me;                                                      \
-  endfunction
-//-------------------------------------------------------------------
-
-
-
 // SVLIB_DOM_UTILS_BEGIN
 // SVLIB_DOM_FIELD_OBJECT
 // SVLIB_DOM_FIELD_STRING
@@ -181,6 +164,22 @@
   endcase
 //-------------------------------------------------------------------
 `define SVLIB_DOM_UTILS_END                                         \
+  endfunction
+//-------------------------------------------------------------------
+
+
+// SVLIB_CFG_NODE_UTILS
+// -----------------
+// DO NOT USE this macro unless you are writing an extension of an
+// svLib DOM node class. See the section "Writing custom extensions
+// of svLib" in the Developer's Guide.
+//-------------------------------------------------------------------
+`define SVLIB_CFG_NODE_UTILS(T)                                     \
+  static function T create(string name = "");                       \
+    T me = Obstack#(T)::get();                                      \
+    me.name = name;                                                 \
+    me.parent = null;                                               \
+    return me;                                                      \
   endfunction
 //-------------------------------------------------------------------
 
