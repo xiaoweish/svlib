@@ -1,13 +1,11 @@
 `include "svunit_defines.svh"
 
-`include "svlib_Base_pkg.sv"
-`include "svlib_Str_pkg.sv"
+`include "svlib_pkg.sv"
 
 module Str_unit_test;
 
   import svunit_pkg::*;
-  import svlib_Base_pkg::qs;
-  import svlib_Str_pkg::*;
+  import svlib_pkg::*;
 
   string name = "Str_ut";
   svunit_testcase svunit_ut;

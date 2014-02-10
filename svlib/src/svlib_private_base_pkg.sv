@@ -15,10 +15,10 @@
 
 package svlib_private_base_pkg;
 
-  `import "svlib_dpi_imports.sv"
+  `include "svlib_dpi_imports.sv"
 
-  // Queue-of-strings is needed very widely in this library, so
-  // we create a convenient typedef for it here.
+  // Queue-of-strings is needed very widely in the library code,
+  // so we create a convenient typedef for it here.
   typedef string qs[$];
 
 

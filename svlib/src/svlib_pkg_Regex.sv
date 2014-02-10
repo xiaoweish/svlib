@@ -61,3 +61,57 @@ class Regex extends svlibBase;
 
 endclass
 
+function automatic Regex regexMatch(string haystack, string needle, int options=0);
+  Regex re;
+  Str   s;
+  bit   found;
+  re  = Obstack#(Regex)::get();
+  re.setRE(needle);
+  re.setOpts(options);
+  regexMatch_check_RE_valid: 
+    assert (re.getError()==0) else
+      $error("Bad RE \"%s\": %s", needle, re.getErrorString());
+  s   = Str::create(haystack);
+  found = re.test(s);
+  if (found)
+    return re;
+  // Return the unwanted Regex object to the obstack
+  Obstack#(Regex)::put(re);
+  return null;
+endfunction
+
+// REVISIT: negative numbers must be accepted
+function bit scanVerilogInt(string s, output integer result);
+  Regex re;
+  Str str;
+  re = Obstack#(Regex)::get();
+  str = Obstack#(Str)::get();
+  str.set(s);
+  // First sieve: is it syntactically anything like an integer?
+  re.setRE("^[[:space:]]*(([[:digit:]]+)?'([hxdob]))?([[:xdigit:]xz_]+)[[:space:]]*$");
+  re.setOpts(Regex::NOCASE);
+  if (!re.test(str)) begin
+    Obstack#(Str)::put(str);
+    Obstack#(Regex)::put(re);
+    return 0;
+  end
+  else begin
+    string nBitsStr, radixLetter, valueStr;
+    bit ok;
+    int nBits;
+    nBitsStr    = re.getMatchString(2);
+    radixLetter = re.getMatchString(3);
+    valueStr    = re.getMatchString(4);
+    if (nBitsStr == "")
+      nBits = 32;
+    else
+      nBits = nBitsStr.atoi;
+    ok = scanInt(radixLetter, valueStr, result);
+    Obstack#(Regex)::put(re);
+    Obstack#(Str)::put(str);
+    return ok;
+  end
+endfunction
+
+
+`include "svlib_impl_Regex.sv"

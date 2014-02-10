@@ -2,7 +2,7 @@
 
 module test_forenum;
 
-  import svlib_Enum_pkg::*;
+  import svlib_pkg::*;
 
   typedef enum {iA=7, iB, iC} IntEnum;
   typedef enum logic[1:0] {bA=2'b1z, bB=2'b01, bC=2'bz0} TwobitEnum;

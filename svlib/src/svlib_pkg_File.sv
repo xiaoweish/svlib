@@ -1,7 +1,5 @@
 class Path extends Str;
 
-  `SVLIB_CLASS_UTILS(Path)
-
   extern static function bit    isAbsolute    (string path);
   extern static function string dirname       (string path, int backsteps=1);
   extern static function string extension     (string path);

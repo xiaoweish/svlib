@@ -2,9 +2,7 @@
 
 module node_test;
 
-  import svlib_Str_pkg::*;
-  import svlib_Cfg_pkg::*;
-  import svlib_Sys_pkg::*;
+  import svlib_pkg::*;
   
   class TrialSerializableSmall;
   
