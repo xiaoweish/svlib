@@ -244,7 +244,6 @@ module node_test;
       Str haystack;
       Regex re;
       int n, m;
-      sysFileStat_s fs;
       longint manytime[10];
       
       walltime = sys_clockResolution();
@@ -296,8 +295,8 @@ module node_test;
     end
     
     begin
-      sysFileStat_s f;
-      f = fileStat("bad file");
+      sys_fileStat_s f;
+      f = sys_fileStat("bad file");
     end
   end
 

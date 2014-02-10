@@ -73,6 +73,13 @@ module Regex_unit_test;
   
   int result;
   
+  re.setRE("[A-Z]{3}");
+  str.set("012ABC678");
+  result = re.test(str, 0);
+  `FAIL_UNLESS(result)
+  `FAIL_UNLESS_EQUAL(re.getMatchStart(0),3);
+  `FAIL_UNLESS_EQUAL(re.getMatchLength(0),3);
+
   re.setRE("a(b)c");
   str.set("012abc678");
   result = re.test(str, 0);

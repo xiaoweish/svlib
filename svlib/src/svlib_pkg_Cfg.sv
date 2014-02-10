@@ -61,7 +61,7 @@ virtual class svlibCfgBase extends svlibBase;
   virtual function string     getName();             return name;             endfunction
   virtual function string     getLastErrorDetails(); return lastErrorDetails; endfunction
   virtual function cfgError_e getLastError();        return lastError;        endfunction
-  virtual function string kind_str();
+  virtual function string kindStr();
     cfgObjKind_e k = kind();
     return k.name;
   endfunction
@@ -74,7 +74,7 @@ virtual class svlibCfgBase extends svlibBase;
     cfgNode_check_validity : 
       assert (err == CFG_OK) else
         $error("%s \"%s\": %s",
-         kind_str(), name, lastErrorDetails);
+         kindStr(), name, lastErrorDetails);
   endfunction
   protected virtual function string errorDetails(cfgError_e err);
     return $sformatf("operation failed because %s", err.name);

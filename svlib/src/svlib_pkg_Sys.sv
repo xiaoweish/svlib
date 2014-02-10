@@ -34,7 +34,7 @@ typedef struct {
   longint       ctime;
   longint       size;
   sysFileMode_s mode;
-} sysFileStat_s;
+} sys_fileStat_s;
 
 function automatic string sys_formattedTime(
     input longint epochSeconds,
@@ -68,7 +68,7 @@ function automatic longint unsigned sys_nanoseconds();
   return 1e9*seconds + nanoseconds;
 endfunction
 
-function automatic sysFileStat_s fileStat(string path, bit asLink=0);
+function automatic sys_fileStat_s sys_fileStat(string path, bit asLink=0);
   longint stats[statARRAYSIZE];
   int err;
   err = svlib_dpi_imported_fileStat(path, asLink, stats);
@@ -80,15 +80,15 @@ function automatic sysFileStat_s fileStat(string path, bit asLink=0);
         );
   end
   if (!err) begin
-    fileStat.mtime = stats[statMTIME];
-    fileStat.atime = stats[statATIME];
-    fileStat.ctime = stats[statCTIME];
-    fileStat.size  = stats[statSIZE ];
-    fileStat.mode  = stats[statMODE ];
+    sys_fileStat.mtime = stats[statMTIME];
+    sys_fileStat.atime = stats[statATIME];
+    sys_fileStat.ctime = stats[statCTIME];
+    sys_fileStat.size  = stats[statSIZE ];
+    sys_fileStat.mode  = stats[statMODE ];
   end
 endfunction
 
-function automatic qs fileGlob(string wildPath);
+function automatic qs sys_fileGlob(string wildPath);
   qs      paths;
   chandle hnd;
   int     count;

@@ -78,7 +78,7 @@ class Str extends svlibBase;
 endclass
 
 
-function automatic bit isspace(byte unsigned ch);
+function automatic bit isSpace(byte unsigned ch);
   return (ch inside {"\t", "\n", " ", 13, 160});  // CR, nbsp
 endfunction
 

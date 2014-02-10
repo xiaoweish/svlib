@@ -109,10 +109,10 @@ function void Str::trim(side_e side=BOTH);
   first = 0;
   last  = value.len-1;
   if (side inside {LEFT, BOTH}) begin
-    while ((first <= last) && isspace(value[first])) first++;
+    while ((first <= last) && isSpace(value[first])) first++;
   end
   if (side inside {RIGHT, BOTH}) begin
-    while ((first <= last) && isspace(value[last])) last--;
+    while ((first <= last) && isSpace(value[last])) last--;
   end
   value = value.substr(first, last);
 endfunction

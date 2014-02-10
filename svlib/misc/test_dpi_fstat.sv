@@ -1,8 +1,6 @@
 module test_dpi_fstat;
 
-  import svlib_Base_pkg::*;
-  import svlib_Sys_pkg::*;
-  import svlib_Str_pkg::*;
+  import svlib_pkg::*;
 
   initial begin
     string s;
@@ -12,7 +10,7 @@ module test_dpi_fstat;
     longint stats[statARRAYSIZE];
     sysFileStat_s stat;
     
-    result = SvLib_getcwd(s);
+    result = sys_getcwd(s);
     if (result) begin
       $display("failed, result=%0d \"%s\"", result, s);
     end
@@ -24,7 +22,7 @@ module test_dpi_fstat;
     svlibUserHandlesErrors(0);
     
     $display("Illegal glob attempt");
-    paths = fileGlob("../foo/*");
+    paths = sys_fileGlob("../foo/*");
     /*if (svlibLastError()) begin
       $display("Glob call yielded %s", svlibErrorDetails());
     end
@@ -36,9 +34,9 @@ module test_dpi_fstat;
     end
     
     $display("Empty glob attempt");
-    paths = fileGlob("../foo");
+    paths = sys_fileGlob("../foo");
     if (svlibLastError()) begin
-      $display("Glob call yielded %s", svlibErrorDetails());
+      $display("sys_fileGlob call yielded %s", svlibErrorDetails());
     end
     else begin
       $display("Directory listing of ../foo :");
@@ -48,9 +46,9 @@ module test_dpi_fstat;
     end
     
     $display("Non-empty glob attempt");
-    paths = fileGlob("../*");
+    paths = sys_fileGlob("../*");
     if (svlibLastError()) begin
-      $display("Glob call yielded %s", svlibErrorDetails());
+      $display("sys_fileGlob call yielded %s", svlibErrorDetails());
     end
     else begin
       $display("Directory listing of ../* :");

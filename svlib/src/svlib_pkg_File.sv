@@ -13,6 +13,32 @@ class Path extends Str;
 
 endclass
 
+function automatic longint file_mTime(string path, bit asLink=0);
+  sys_fileStat_s stat = sys_fileStat(path, asLink);
+  return stat.mtime;
+endfunction
+
+function automatic longint file_aTime(string path, bit asLink=0);
+  sys_fileStat_s stat = sys_fileStat(path, asLink);
+  return stat.atime;
+endfunction
+
+function automatic longint file_cTime(string path, bit asLink=0);
+  sys_fileStat_s stat = sys_fileStat(path, asLink);
+  return stat.ctime;
+endfunction
+
+function automatic longint file_size(string path, bit asLink=0);
+  sys_fileStat_s stat = sys_fileStat(path, asLink);
+  return stat.size;
+endfunction
+
+function automatic longint file_mode(string path, bit asLink=0);
+  sys_fileStat_s stat = sys_fileStat(path, asLink);
+  return stat.mode;
+endfunction
+
+
 /////////////////////////////////////////////////////////////////////////////
 
 function bit Path::isAbsolute(string path);
