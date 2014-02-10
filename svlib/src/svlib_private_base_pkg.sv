@@ -1,8 +1,5 @@
-`ifndef SVLIB_BASE_PKG__DEFINED
-`define SVLIB_BASE_PKG__DEFINED
-
 // -------------------------------------------------------------
-// This file defines svlib_Base_pkg, a collection of underlying
+// This file defines svlib_private_base_pkg, a collection of
 // functionality that is required by other parts of svLib.
 // It also imports all the DPI functions that are required by
 // other parts of the package.
@@ -16,12 +13,7 @@
 // allowing svLib to take full control of the SV/C interaction.
 // -------------------------------------------------------------
 
-
-`include "svlib_macros.svh"
-
-package svlib_Base_pkg;
-
-  `include "svlib_dpi_imports.sv"
+package svlib_private_base_pkg;
 
   // Queue-of-strings is needed very widely in this library, so
   // we create a convenient typedef for it here.
@@ -56,7 +48,7 @@ package svlib_Base_pkg;
   class svlibBase;// #(parameter type T = int);
     svlibBase obstack_link;
   endclass
-  
+
 
   virtual class Obstack #(parameter type T=int) extends svlibBase;
     local static svlibBase head;
@@ -250,5 +242,3 @@ package svlib_Base_pkg;
   endfunction
 
 endpackage
-
-`endif
