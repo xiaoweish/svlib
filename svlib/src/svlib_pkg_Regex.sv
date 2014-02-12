@@ -114,6 +114,7 @@ function bit scanVerilogInt(string s, inout logic signed [63:0] result);
     if (nBits < 64) value &= ((64'b1 << nBits) - 1);
     // now negate if necessary, so sign-ext is correct
     if (ok && (signStr == "-")) value = -value;
+    if (ok) result = value;
     Obstack#(Regex)::put(re);
     Obstack#(Str)::put(str);
     return ok;

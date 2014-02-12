@@ -243,62 +243,107 @@ package svlib_private_base_pkg;
     return $sformatf("errno=%0d (%s)", err, svlib_dpi_imported_getCErrStr(err));
   endfunction
 
-//--------------------------------------------------------------
-// function scanUint64: not for public API! Assumes that the 
-// radix letter is OK, and the value-string has been stripped
-// of spaces and is reasonably sane. No handling of -ve numbers.
-// Result is always zero-filled to 64 bits.
-//--------------------------------------------------------------
-// This function reads from a string representation into a 64-bit value.
-// X/Z values are supported. Underscores are ignored. Otherwise, illegal
-// digits cause an error (0) to be returned and the result is not updated.
-// Unfortunately, sscanf can't be used because it doesn't tell us when 
-// it stopped, so we can't detect bad characters.
-// We already know that the characters are sure to be underscores,
-// hex digits, or X/Z.
+  //--------------------------------------------------------------
+  // function scanUint64: not for public API! Assumes that the 
+  // radix letter is OK, and the value-string has been stripped
+  // of spaces and is reasonably sane. No handling of -ve numbers.
+  // Result is always zero-filled to 64 bits.
+  //--------------------------------------------------------------
+  // This function reads from a string representation into a 64-bit value.
+  // X/Z values are supported. Underscores are ignored. Otherwise, illegal
+  // digits cause an error (0) to be returned and the result is not updated.
+  // Unfortunately, sscanf can't be used because it doesn't tell us when 
+  // it stopped, so we can't detect bad characters.
+  // We already know that the characters are sure to be underscores,
+  // hex digits, or X/Z.
 
-function bit scanUint64(string radixLetter, string v, inout logic [63:0] result);
-  logic [63:0] value;
-  int radix, shift;
-  bit [3:0] digit;
-  bit fail;
-  case (radixLetter)
-    "h", "H", "x", "X" :
-      begin radix= 16; shift = 4; end
-    "o", "O" :
-      begin radix = 8; shift = 3; end
-    "d", "D" , "" :
-      begin radix = 10; end // shift is not used
-    "b", "B" :
-      begin radix = 2; shift = 1; end
-    default :
-      return 0; // immediate fail
-  endcase
-  
-  v = v.toupper();
-  
-  if (radix == 10) begin
-    // Special treatment for decimal numbers. If there is
-    // an X or Z, it must be the one and only digit.
-    if (v == "X") begin
-    end
-    else if (v == "Z") begin
+  function automatic bit scanUint64(string radixLetter, string v, inout logic [63:0] result);
+    logic [63:0] value;
+    int radix, shift;
+    bit fail;
+    case (radixLetter)
+      "h", "H", "x", "X" :
+        begin radix= 16; shift = 4; end
+      "o", "O" :
+        begin radix = 8; shift = 3; end
+      "d", "D" , "" :
+        begin radix = 10; end // shift is not used
+      "b", "B" :
+        begin radix = 2; shift = 1; end
+      default :
+        return 0; // immediate fail
+    endcase
+
+    v = v.toupper();
+
+    value = 0;
+
+    if (radix == 10) begin
+      // Special treatment for decimal numbers. If there is
+      // an X or Z, it must be the one and only digit.
+      if (v == "X") begin
+        value = 'x;
+      end
+      else if (v == "Z") begin
+        value = 'z;
+      end
+      else begin
+      
+        foreach (v[i]) begin
+          if (v[i] == "_") begin
+            continue;
+          end
+          else if (v[i] inside {["0":"9"]}) begin
+            value = 10*value + v[i] - "0";
+          end
+          else begin
+            fail = 1;
+            break;
+          end
+        end
+
+        if (fail) begin
+          return 0;
+        end
+        else begin
+          result = value;
+          return 1;
+        end
+
+      end
     end
     else begin
-    
+      // radix is 2/8/16
+
       foreach (v[i]) begin
+        logic [3:0] digit;
         if (v[i] == "_") begin
           continue;
         end
+        else if (v[i] == "X") begin
+          digit = 'x;
+        end 
+        else if (v[i] == "Z") begin
+          digit = 'z;
+        end
         else if (v[i] inside {["0":"9"]}) begin
-          value = 10*value + v[i] - "0";
+          digit = v[i] - "0";
+        end
+        else if (v[i] inside {["A":"F"]}) begin
+          digit = v[i] - "A" + 10;
         end
         else begin
           fail = 1;
           break;
         end
+        if (digit >= radix) begin
+          fail = 1;
+          break;
+        end
+        value <<= shift;
+        for (int b=0; b<shift; b++) value[b] = digit[b];
       end
-      
+
       if (fail) begin
         return 0;
       end
@@ -306,51 +351,9 @@ function bit scanUint64(string radixLetter, string v, inout logic [63:0] result)
         result = value;
         return 1;
       end
-      
-    end
-  end
-  else begin
-    // radix is 2/8/16
-  
-    foreach (v[i]) begin
-      bit [3:0] digit;
-      if (v[i] == "_") begin
-        continue;
-      end
-      else if (v[i] == "X") begin
-        digit = 'x;
-      end 
-      else if (v[i] == "Z") begin
-        digit = 'z;
-      end
-      else if (v[i] inside {["0":"9"]}) begin
-        digit = v[i] - "0";
-      end
-      else if (v[i] inside {["A":"F"]}) begin
-        digit = v[i] - "A" + 10;
-      end
-      else begin
-        fail = 1;
-        break;
-      end
-      if (digit >= radix) begin
-        fail = 1;
-        break;
-      end
-      value <<= shift;
-      for (int b=0; b<shift; b++) value[b] = digit[b];
-    end
-    
-    if (fail) begin
-      return 0;
-    end
-    else begin
-      result = value;
-      return 1;
+
     end
 
-  end
-  
-endfunction
+  endfunction
 
 endpackage
