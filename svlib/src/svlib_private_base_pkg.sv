@@ -251,16 +251,16 @@ package svlib_private_base_pkg;
   //--------------------------------------------------------------
   // This function reads from a string representation into a 64-bit value.
   // X/Z values are supported. Underscores are ignored. Otherwise, illegal
-  // digits cause an error (0) to be returned and the result is not updated.
+  // digits cause an error (0) to be returned and the result is undefined.
   // Unfortunately, sscanf can't be used because it doesn't tell us when 
   // it stopped, so we can't detect bad characters.
   // We already know that the characters are sure to be underscores,
-  // hex digits, or X/Z.
+  // hex digits, or X/Z. Leading and trailing underscores have already
+  // been removed by the regex that got us here.
 
-  function automatic bit scanUint64(string radixLetter, string v, inout logic [63:0] result);
+  function automatic bit scanUint64(int nBits, bit isSigned, string radixLetter, string v, output logic [63:0] result);
     logic [63:0] value;
-    int radix, shift;
-    bit fail;
+    int radix, shift, msb;
     case (radixLetter)
       "h", "H", "x", "X" :
         begin radix= 16; shift = 4; end
@@ -281,11 +281,16 @@ package svlib_private_base_pkg;
     if (radix == 10) begin
       // Special treatment for decimal numbers. If there is
       // an X or Z, it must be the one and only digit.
+      // Leading and trailing underscores have already been
+      // removed, so this test is valid.
+      msb = 63;
       if (v == "X") begin
-        value = 'x;
+        result = 'x;
+        return 1;
       end
       else if (v == "Z") begin
-        value = 'z;
+        result = 'z;
+        return 1;
       end
       else begin
       
@@ -297,17 +302,8 @@ package svlib_private_base_pkg;
             value = 10*value + v[i] - "0";
           end
           else begin
-            fail = 1;
-            break;
+            return 0;
           end
-        end
-
-        if (fail) begin
-          return 0;
-        end
-        else begin
-          result = value;
-          return 1;
         end
 
       end
@@ -315,12 +311,16 @@ package svlib_private_base_pkg;
     else begin
       // radix is 2/8/16
 
+      msb = -1;
       foreach (v[i]) begin
         logic [3:0] digit;
         if (v[i] == "_") begin
           continue;
         end
-        else if (v[i] == "X") begin
+        else begin
+          msb += shift;
+        end
+        if (v[i] == "X") begin
           digit = 'x;
         end 
         else if (v[i] == "Z") begin
@@ -333,26 +333,30 @@ package svlib_private_base_pkg;
           digit = v[i] - "A" + 10;
         end
         else begin
-          fail = 1;
-          break;
+          return 0;
         end
         if (digit >= radix) begin
-          fail = 1;
-          break;
+          return 0;
         end
         value <<= shift;
         for (int b=0; b<shift; b++) value[b] = digit[b];
       end
 
-      if (fail) begin
-        return 0;
-      end
-      else begin
-        result = value;
-        return 1;
-      end
-
     end
+
+    // Protect against too many digits
+    if (msb >= nBits) begin
+      for (int i=nBits; i<=msb; i++) value[i] = 1'b0;
+    end
+    // Z/X fill to specified width
+    if ($isunknown(value[msb])) begin
+      for (int i=msb+1; i<nBits; i++) value[i] = value[msb];
+    end
+    if (isSigned) begin
+      for (int i=nBits; i<64; i++) value[i] = value[nBits-1];
+    end
+    result = value;
+    return 1;
 
   endfunction
 

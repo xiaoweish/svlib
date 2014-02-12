@@ -80,45 +80,63 @@ function automatic Regex regexMatch(string haystack, string needle, int options=
   return null;
 endfunction
 
-function bit scanVerilogInt(string s, inout logic signed [63:0] result);
+function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result);
   logic signed [63:0] value;
+  bit ok, isSigned;
   Regex re;
   Str str;
   str = Obstack#(Str)::get();
   str.set(s);
   
   // First sieve: is it syntactically anything like an integer?
+  // The RE also strips leading and trailing underscores from 
+  // the digit string.
   re = Obstack#(Regex)::get();
-  re.setRE("^[[:space:]]*(-?)[[:space:]]*(([[:digit:]]+)?'([hxdob]))?([[:xdigit:]xz_]+)[[:space:]]*$");
+  re.setRE({
+    "^[[:space:]]*",                // Arbitrary leading space
+    "(-?)[[:space:]]*",             // Optional minus sign in $1
+  // 1  1
+    "(([[:digit:]]+)?'(s?)([hxdob]))?", // $3=nBits, $5=signing, $4=radix
+  // 23            3  4  45       52
+    "_*([[:xdigit:]xz_]*[[:xdigit:]xz])_*",  // $6=digit string
+  //   6                              6
+    "[[:space:]]*$"                 // Arbitrary trailing space
+  });
+  
   re.setOpts(Regex::NOCASE);
-  if (!re.test(str)) begin
-    Obstack#(Str)::put(str);
-    Obstack#(Regex)::put(re);
-    return 0;
-  end
-  else begin
+  
+  ok = re.test(str);
+  
+  if (ok) begin
     string nBitsStr, radixLetter, valueStr, signStr;
     bit ok;
     int nBits;
+    int msbIndex;
     signStr     = re.getMatchString(1);
     nBitsStr    = re.getMatchString(3);
-    radixLetter = re.getMatchString(4);
-    valueStr    = re.getMatchString(5);
+    isSigned    = re.getMatchLength(4) > 0;
+    radixLetter = re.getMatchString(5);
+    valueStr    = re.getMatchString(6);
     
     if (nBitsStr == "")
       nBits = 32;
     else
       nBits = nBitsStr.atoi;
-    ok = scanUint64(radixLetter, valueStr, value);
-    // prune to width
-    if (nBits < 64) value &= ((64'b1 << nBits) - 1);
-    // now negate if necessary, so sign-ext is correct
-    if (ok && (signStr == "-")) value = -value;
-    if (ok) result = value;
-    Obstack#(Regex)::put(re);
-    Obstack#(Str)::put(str);
-    return ok;
+
+    ok = scanUint64(nBits, isSigned, radixLetter, valueStr, value);
+    if (ok) begin
+      // negate if necessary, so sign-ext is correct
+      if (signStr == "-") value = -value;
+      result = value;
+    end
   end
+  
+  // dispose of temp objects
+  Obstack#(Regex)::put(re);
+  Obstack#(Str)::put(str);
+  
+  return ok;
+  
 endfunction
 
 
