@@ -163,6 +163,8 @@ function qs Str::split(string splitset="", bit keepSplitters=0);
   end
 endfunction
 
+// Join a queue of strings using the Str object's string as joiner
+//
 function string Str::sjoin(qs strings);
   string result;
   foreach (strings[i]) begin

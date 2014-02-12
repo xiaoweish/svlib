@@ -222,18 +222,18 @@ virtual class cfgTypedScalar #(type T = int) extends cfgScalar;
   virtual function void set(T v); value = v;    endfunction
 endclass
 
-class cfgScalarInt extends cfgTypedScalar#(int);
+class cfgScalarInt extends cfgTypedScalar#(logic signed [63:0]);
   function string str();
     return $sformatf("%0d", value);
   endfunction
   extern function bit scan(string s);
   function cfgObjKind_e kind(); return SCALAR_INT; endfunction
-  static function cfgScalarInt create(int v = 0);
+  static function cfgScalarInt create(T v = 0);
     create = Obstack#(cfgScalarInt)::get();
     create.name = "";
     create.value = v;
   endfunction
-  static function cfgNodeScalar createNode(string name, int v = 0);
+  static function cfgNodeScalar createNode(string name, T v = 0);
     cfgNodeScalar ns = cfgNodeScalar::create(name);
     ns.value = cfgScalarInt::create(v);
     return ns;

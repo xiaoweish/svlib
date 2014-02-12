@@ -80,15 +80,16 @@ function automatic Regex regexMatch(string haystack, string needle, int options=
   return null;
 endfunction
 
-// REVISIT: negative numbers must be accepted
-function bit scanVerilogInt(string s, output integer result);
+function bit scanVerilogInt(string s, inout logic signed [63:0] result);
+  logic signed [63:0] value;
   Regex re;
   Str str;
-  re = Obstack#(Regex)::get();
   str = Obstack#(Str)::get();
   str.set(s);
+  
   // First sieve: is it syntactically anything like an integer?
-  re.setRE("^[[:space:]]*(([[:digit:]]+)?'([hxdob]))?([[:xdigit:]xz_]+)[[:space:]]*$");
+  re = Obstack#(Regex)::get();
+  re.setRE("^[[:space:]]*(-?)[[:space:]]*(([[:digit:]]+)?'([hxdob]))?([[:xdigit:]xz_]+)[[:space:]]*$");
   re.setOpts(Regex::NOCASE);
   if (!re.test(str)) begin
     Obstack#(Str)::put(str);
@@ -96,17 +97,23 @@ function bit scanVerilogInt(string s, output integer result);
     return 0;
   end
   else begin
-    string nBitsStr, radixLetter, valueStr;
+    string nBitsStr, radixLetter, valueStr, signStr;
     bit ok;
     int nBits;
-    nBitsStr    = re.getMatchString(2);
-    radixLetter = re.getMatchString(3);
-    valueStr    = re.getMatchString(4);
+    signStr     = re.getMatchString(1);
+    nBitsStr    = re.getMatchString(3);
+    radixLetter = re.getMatchString(4);
+    valueStr    = re.getMatchString(5);
+    
     if (nBitsStr == "")
       nBits = 32;
     else
       nBits = nBitsStr.atoi;
-    ok = scanInt(radixLetter, valueStr, result);
+    ok = scanUint64(radixLetter, valueStr, value);
+    // prune to width
+    if (nBits < 64) value &= ((64'b1 << nBits) - 1);
+    // now negate if necessary, so sign-ext is correct
+    if (ok && (signStr == "-")) value = -value;
     Obstack#(Regex)::put(re);
     Obstack#(Str)::put(str);
     return ok;

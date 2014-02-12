@@ -121,35 +121,6 @@ function automatic string str_replace(string s, string rs, int p, int n,
   Obstack#(Str)::put(str);
 endfunction
 
-//--------------------------------------------------------------
-
-function bit scanInt(string radixLetter, string v, output integer result);
-  int radix;
-  case (radixLetter)
-    "h", "H", "x", "X" :
-      radix= 16;
-    "o", "O" :
-      radix = 8;
-    "d", "D" , "" :
-      radix = 10;
-    "b", "B" :
-      radix = 2;
-    default :
-      return 0;
-  endcase
-  if (radix == 16) begin
-    result = v.atohex();
-    return 1;
-  end
-  ///////////////////// REVISIT error checking for illegal digits
-  case (radix)
-    10: result = v.atoi();
-     8: result = v.atooct();
-     2: result = v.atobin();
-   endcase
-   return 1;
-endfunction
-
 /////////////////////// IMPLEMENTATIONS OF EXTERN METHODS ///////////////////
 
 `include "svlib_impl_Str.sv"
