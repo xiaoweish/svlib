@@ -224,7 +224,17 @@ endclass
 
 class cfgScalarInt extends cfgTypedScalar#(logic signed [63:0]);
   function string str();
-    return $sformatf("%0d", value);
+    if (!$isunknown(value)) begin
+      return $sformatf("%0d", value);
+    end
+    else if (value < 0) begin
+      // Has X/Z but is known to be -ve
+      return $sformatf("-'h%0h", -value);
+    end
+    else begin
+      // Has X/Z but is not -ve
+      return $sformatf("'h%0h", value);
+    end
   endfunction
   extern function bit scan(string s);
   function cfgObjKind_e kind(); return SCALAR_INT; endfunction
@@ -273,8 +283,23 @@ class cfgFileINI extends cfgFile;
   endfunction
 
   protected function cfgError_e writeScalar(string key, cfgNodeScalar ns);
+    cfgScalarString css;
+    Str str;
+    bit must_quote;
     writeComments(ns);
-    $fdisplay(fd, "%s=%s", key, ns.sformat());
+    // Special case: protect strings with quotes if they contain spaces.
+    if ($cast(css, ns.value)) begin
+      str = Obstack#(Str)::get();
+      str.set(css.value);
+      must_quote = (str.first(" ") >= 0);
+      Obstack#(Str)::put(str);
+    end
+    if (must_quote) begin
+      $fdisplay(fd, "%s=%s", key, str_quote(ns.sformat()));
+    end
+    else begin
+      $fdisplay(fd, "%s=%s", key, ns.sformat());
+    end
     return CFG_OK;
   endfunction
 
@@ -364,7 +389,7 @@ class cfgFileINI extends cfgFile;
 
     reComment.setRE("^\\s*[;#]\\s?(.*)$");
     reSection.setRE("^\\s*\\[\\s*(\\w+)\\s*\\]$");
-    reKeyVal.setRE("^\\s*(\\w+)\\s*[=:]\\s*((\\w+)|(['\"])(.*)\\4)$");
+    reKeyVal.setRE("^\\s*(\\w+)\\s*[=:]\\s*((.*[^ '\"])|(['\"])(.*)\\4)\\s*$");
 
     `foreach_line(fd, line, linenum) begin
 
@@ -402,7 +427,7 @@ class cfgFileINI extends cfgFile;
       end
       else begin
         lastError = CFG_DESERIALIZE_INI_BAD_SYNTAX;
-        //$display("bad syntax in line %0d \"%s\"", linenum, strLine.get());
+        $display("bad syntax in line %0d \"%s\"", linenum, strLine.get());
       end
 
     end

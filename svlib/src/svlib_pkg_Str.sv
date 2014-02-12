@@ -110,6 +110,11 @@ function automatic string str_pad(string s, int width, Str::side_e side=Str::BOT
   Obstack#(Str)::put(str);
 endfunction
 
+function automatic string str_quote(string s);
+  // IMPERFECT IMPLEMENTATION - need to escape quotes and backslashes
+  return $sformatf("\"%s\"", s);
+endfunction
+
   // Replace the range p/n with some other string, not necessarily same length.
   // If n==0 this is an insert operation.
 function automatic string str_replace(string s, string rs, int p, int n,

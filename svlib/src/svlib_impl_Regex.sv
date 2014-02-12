@@ -62,6 +62,7 @@ endfunction
 
 function Regex  Regex::copy();
   Regex it = create(text, options);
+  return it;
 endfunction
 
 function int    Regex::test(Str s, int startPos=0);
