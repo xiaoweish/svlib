@@ -81,8 +81,7 @@ function automatic Regex regexMatch(string haystack, string needle, int options=
 endfunction
 
 function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result);
-  logic signed [63:0] value;
-  bit ok, isSigned;
+  bit ok;
   Regex re;
   Str str;
   str = Obstack#(Str)::get();
@@ -93,14 +92,14 @@ function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result
   // the digit string.
   re = Obstack#(Regex)::get();
   re.setRE({
-    "^[[:space:]]*",                // Arbitrary leading space
-    "(-?)[[:space:]]*",             // Optional minus sign in $1
+    "^[[:space:]]*",                        // Arbitrary leading space
+    "(-?)[[:space:]]*",                     // Optional minus sign in $1
   // 1  1
-    "(([[:digit:]]+)?'(s?)([hxdob]))?", // $3=nBits, $5=signing, $4=radix
+    "(([[:digit:]]+)?'(s?)([hxdob]))?",     // $3=nBits, $5=signing, $4=radix
   // 23            3  4  45       52
-    "_*([[:xdigit:]xz_]*[[:xdigit:]xz])_*",  // $6=digit string
+    "_*([[:xdigit:]xz_]*[[:xdigit:]xz])_*", // $6=digit string
   //   6                              6
-    "[[:space:]]*$"                 // Arbitrary trailing space
+    "[[:space:]]*$"                         // Arbitrary trailing space
   });
   
   re.setOpts(Regex::NOCASE);
@@ -108,11 +107,11 @@ function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result
   ok = re.test(str);
   
   if (ok) begin
-    string nBitsStr, radixLetter, valueStr, signStr;
-    bit ok;
-    int nBits;
-    int msbIndex;
-    signStr     = re.getMatchString(1);
+    logic signed [63:0] value;
+    string nBitsStr, radixLetter, valueStr;
+    int    nBits;
+    bit    negate, isSigned;
+    negate      = re.getMatchLength(1) > 0;
     nBitsStr    = re.getMatchString(3);
     isSigned    = re.getMatchLength(4) > 0;
     radixLetter = re.getMatchString(5);
@@ -126,7 +125,7 @@ function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result
     ok = scanUint64(nBits, isSigned, radixLetter, valueStr, value);
     if (ok) begin
       // negate if necessary, so sign-ext is correct
-      if (signStr == "-") value = -value;
+      if (negate) value = -value;
       result = value;
     end
   end
