@@ -36,7 +36,7 @@ typedef struct {
   sysFileMode_s mode;
 } sys_fileStat_s;
 
-function automatic string sys_formattedTime(
+function automatic string sys_formatTime(
     input longint epochSeconds,
     input string  format
   );
@@ -111,4 +111,20 @@ function automatic qs sys_fileGlob(string wildPath);
   end
 
   return paths;
+endfunction
+
+function automatic string sys_getcwd();
+  string cwd;
+  int err;
+  
+  err = svlib_dpi_imported_getcwd(cwd);
+  if (err != 0) cwd = "";
+  
+  if (errorManager.check(err)) begin
+    getcwd_check_ok:
+      assert (!err) else
+       $error("sys_getcwd() failed: %s", svlibErrorDetails());
+  end
+
+  return cwd;
 endfunction

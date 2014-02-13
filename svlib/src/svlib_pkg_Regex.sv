@@ -95,7 +95,7 @@ function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result
     "^[[:space:]]*",                        // Arbitrary leading space
     "(-?)[[:space:]]*",                     // Optional minus sign in $1
   // 1  1
-    "(([[:digit:]]+)?'(s?)([hxdob]))?",     // $3=nBits, $5=signing, $4=radix
+    "(([[:digit:]]+)?'(s?)([hxdob]))?",     // $3=nBits, $4=signing, $5=radix
   // 23            3  4  45       52
     "_*([[:xdigit:]xz_]*[[:xdigit:]xz])_*", // $6=digit string
   //   6                              6

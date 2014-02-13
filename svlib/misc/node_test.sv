@@ -274,8 +274,8 @@ module node_test;
       longint t;
       t = sys_dayTime();
       $display("Epoch time is %0d seconds", t);
-      $display(sys_formattedTime(t, "Today's time and date is %c"));
-      $display("That's %s", sys_formattedTime(t, "%Q"));
+      $display(sys_formatTime(t, "Today's time and date is %c"));
+      $display("That's %s", sys_formatTime(t, "%Q"));
     
       for (int unsigned x=0; x<25; x++) begin
         int f;

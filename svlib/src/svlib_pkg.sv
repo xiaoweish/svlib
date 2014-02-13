@@ -8,6 +8,7 @@ package svlib_pkg;
 
   import svlib_private_base_pkg::*;
 
+  `include "svlib_pkg_Error.svh"
   `include "svlib_pkg_Str.sv"
   `include "svlib_pkg_Regex.sv"
   `include "svlib_pkg_Enum.sv"

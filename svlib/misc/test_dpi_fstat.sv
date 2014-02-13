@@ -6,17 +6,16 @@ module test_dpi_fstat;
     string s;
     int result;
     longint ftime, fval;
-    qs paths;
-    longint stats[statARRAYSIZE];
-    sysFileStat_s stat;
+    string paths[$];
+    sys_fileStat_s stat;
     
-    result = sys_getcwd(s);
+    s = sys_getcwd();
+    result = svlibLastError();
     if (result) begin
-      $display("failed, result=%0d \"%s\"", result, s);
+      $display("getcwd failed, result=%0d \"%s\"", result, s);
     end
     else begin
-      $display("success, s.len=%0d", s.len);
-      $display("         s=\"%s\"", s);
+      $display("getcwd success, \"%s\"", s);
     end
     
     svlibUserHandlesErrors(0);
@@ -60,7 +59,7 @@ module test_dpi_fstat;
 
     svlibUserHandlesErrors(1);
     
-    stat = fileStat("README");
+    stat = sys_fileStat("README");
     if (svlibLastError()) begin
       $display("fileStat(\"README\") yielded %s", svlibErrorDetails());
     end
@@ -69,9 +68,10 @@ module test_dpi_fstat;
     end
    
     $display("mtime = %0d", stat.mtime);
-    result = SvLib_timeFormat(stat.mtime, "%c", s);
+    s = sys_formatTime(stat.mtime, "%c");
+    result = svlibLastError();
     if (result != 0)
-      $display("  Oops, timeFormat result = %0d (%s)", result, svlibErrorString(result));
+      $display("  Oops, sys_formatTime result = %0d (%s)", result, svlibErrorString(result));
     else
       $display("  That's \"%s\"", s);
       
@@ -82,10 +82,10 @@ module test_dpi_fstat;
     $display("perms = 0%04o", stat.mode.fPermissions);
     
     fork
-      stat = fileStat("nonexistentFile");
+      stat = sys_fileStat("nonexistentFile");
     join_none
     fork begin
-      stat = fileStat("nonexistentFile");
+      stat = sys_fileStat("nonexistentFile");
       if (svlibLastError()) begin
         $display("fileStat(\"nonexistentFile\") yielded an error (%s)", svlibErrorString());
       end
@@ -95,11 +95,12 @@ module test_dpi_fstat;
     end join_none
     wait fork;
     
-    ftime = SvLib_dayTime();
+    ftime = sys_dayTime();
     $display("unix time now = %0d", ftime);
-    result = SvLib_timeFormat(ftime, "%c", s);
+    s = sys_formatTime(ftime, "%c");
+    result = svlibLastError();
     if (result != 0)
-      $display("  Oops, timeFormat result = %0d (%s)", result, svlibErrorString(result));
+      $display("  Oops, sys_formatTime error = %0d (%s)", result, svlibErrorString(result));
     else
       $display("  That's \"%s\"", s);
     

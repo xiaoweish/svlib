@@ -4,8 +4,8 @@ module mtime;
   
   function void fileStats(string path);
     $display("file \"%s\":", path);
-    $display(sys_formattedTime(file_mTime(path), "  mtime = %c"));
-    $display(sys_formattedTime(file_mTime(path), "%Q"));
+    $display(sys_formatTime(file_mTime(path), "  mtime = %c"));
+    $display(sys_formatTime(file_mTime(path), "%Q"));
   endfunction
   
   initial begin
