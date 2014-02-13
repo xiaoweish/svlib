@@ -15,7 +15,7 @@
 
 package svlib_private_base_pkg;
 
-  `include "svlib_dpi_imports.sv"
+  `include "svlib_dpi_imports.svh"
 
   // Queue-of-strings is needed very widely in the library code,
   // so we create a convenient typedef for it here.

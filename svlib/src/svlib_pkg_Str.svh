@@ -128,4 +128,4 @@ endfunction
 
 /////////////////////// IMPLEMENTATIONS OF EXTERN METHODS ///////////////////
 
-`include "svlib_impl_Str.sv"
+`include "svlib_impl_Str.svh"

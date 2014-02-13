@@ -28,4 +28,4 @@ class EnumUtils #(type ENUM = int);
 
 endclass
 
-`include "svlib_impl_Enum.sv"
+`include "svlib_impl_Enum.svh"

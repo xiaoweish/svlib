@@ -458,4 +458,4 @@ class cfgFileYAML extends cfgFile;
   endfunction
 endclass
 
-`include "svlib_impl_Cfg.sv"
+`include "svlib_impl_Cfg.svh"

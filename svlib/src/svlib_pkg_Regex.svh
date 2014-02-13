@@ -139,4 +139,4 @@ function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result
 endfunction
 
 
-`include "svlib_impl_Regex.sv"
+`include "svlib_impl_Regex.svh"
