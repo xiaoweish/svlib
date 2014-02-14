@@ -16,7 +16,8 @@ class Regex extends svlibBase;
   // Retrieve the option bitmap
   extern virtual function int    getOpts();
   // Retrieve the test string
-  extern virtual function string getStr ();
+  extern virtual function Str    getStr();
+  extern virtual function string getStrContents();
 
   // Clone this regex into another, preserving all values
   extern virtual function Regex  copy   ();

@@ -39,7 +39,11 @@ function string Regex::getRE();
   return text;
 endfunction
 
-function string Regex::getStr();
+function Str Regex::getStr();
+  return runStr;
+endfunction
+
+function string Regex::getStrContents();
   if (runStr == null)
     return "";
   else
