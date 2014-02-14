@@ -1,0 +1,39 @@
+@media screen {
+
+div#sublinks {position: relative; left: 10px; 
+	width: 100px; 
+	height: auto; 
+	border: 1px solid; 
+	border-color:#eeeeee #aaaaaa #aaaaaa #eeeeee;
+	font: 12px avantgarde, sans-serif;}
+
+div#sublinks a {display: block; text-align: right; 
+	padding: 5px 10px; margin: 0px; 
+	/* background: #222244; */
+	text-decoration: none; color: black}
+
+div#sublinks a.left {display: block; text-align: left; 
+	text-decoration: none; color: black;}
+
+div#sublinks a.sel {display: block; text-align: right; 
+	background: #FF6620;
+	text-decoration: none; color: black;}
+
+div#sublinks a:hover {
+	background: #444466;
+	text-align: right;
+	color: white ;}
+
+div#sublinks a.left:hover {background: #444466;
+	text-align: left;
+	color: white ;}
+
+div#sublinks a.sel:hover {background: #444466;
+	color: white ;} 
+}
+
+@media print {
+
+div#sublinks {display: none; }
+
+}

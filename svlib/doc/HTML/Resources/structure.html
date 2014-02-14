@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<meta name="keywords" content="svlib Users Guide and Programmer Reference">
+	<meta name="description" content="svlib Users Guide and Programmer Reference">
+
+	<link rel=stylesheet type="text/css" href="../css/basic.css">
+	<style type="text/css">@import url("../css/core.css");</style>
+	<style type="text/css">@import url("../css/scroll.css");</style>
+	<style type="text/css">@import url("../css/sublinks.css");</style>
+
+   <title>svlib Users Guide and Programmer Reference - Document Structure</title>
+</head>
+
+<!-- Be nice to netscape 4 -->
+<body bgcolor=black text="ffff4c" alink="#8888FF" vlink="ffff4c" link="ffff4c">
+
+
+<!-- Logo -->
+<div id="Header">
+	<center>
+		<a href="index.html" title="svlib Users Guide and Programmer Reference">Master Index</a>
+	</center>
+</div>
+
+<!--Main Navigation section-->
+<div id="TopNav">
+	<center>
+	<a href="#">Overview</a>
+	<a href="Section1/index.html">String Manipulation</a>
+	<a href="Section2/index.html">Config Files</a>
+	<a href="Section3/index.html">Usage Examples</a>
+	<a href="Section4/index.html">Class Reference</a>
+	</center>
+</div>
+<!-- Content section -->
+<div id="content">
+	<h1>Document Structure</h1>
+	<p>This HTML document template is built with two components: the content and the style definitions. The content is in HTML4.01 and use is made of some simple container elements to define the regions for the different forms of content. The directory struture of the document follows the structure of each main page with a sub-directory for each major heading.
+	<ul>
+		<li>Directory Structure<br>
+		Common element directories
+		<ul>
+			<li>css
+			<li>Images
+		</ul>
+		Content element directories
+		<ul>
+			<li>Section1
+			<li>Section2
+			<li>Section3
+			<li>Resources
+		</ul>
+		<li>Page structure<br>
+		Each page in the manual consists of several main container elements, plus the required HTML header. The header is where all the appropriate format code, specified using cascading style sheets, is imported. The main element containers, specified as HTML &lt;div id="name"&gt; elements where the names are
+		<ul>
+			<li>Header
+			<li class="white">TopNav
+			<li class="white">content
+			<li class="white">LeftNav
+			<li>Banner
+			<li>copyright
+		</ul>
+		The highlighted items are the containers that a developer needs to edit to add content for a page. In general, TopNav items are links to the index page for that major topic, the one exception being the Resources, this page being part of that set of content that is only accessible from the main Index (which is contained in the Header div).
+		<li>Formatting Buttons<br>
+		Buttons are formed by placing anchor elements in the appropriate TopNav or LeftNav &lt;div&gt; containers. Class specifiers can be used to give a button the appearance of being pressed - this is useful to indicate visually that a particular page is currently being viewed. This is achieved thus: &lt;a class="sel"  href="...some url"&gt; ButtonName &lt;/a&gt;<br>
+		For buttons in the LeftNav  &lt;div&gt;, there are two extra containers used to give the appearance of a list and sublist of buttons. These additional  &lt;div&gt; elements are of the form  &lt;div id=links"&gt; and  &lt;div id="sublinks"&gt;. The same formatting of an anchor element is used to create the button and a class="sel" specifier to give the appearance of a selected button. The Example Source button in the left menu of this page has the source code for these effects, as well as showing the other container elements in each page.
+		<li>Relative Links<br>
+		Just to note that most of the navigation functions to get to different pages of the document use relative links. Care must be taken to ensure the links are correct relative to where the actual page is in the directory tree. Do not use full path names for the links, these will only be correct for your own localisation of the document. Always use relative names. 
+	</ul>
+	<p>
+
+</div>
+
+<!--Banner Advert-->
+<div id="Banner">
+Created by <br>
+<a href="http://www.verilab.com"><img src="../Images/verilab-150-25.jpg" width=150 height=25 title="Created by Verilab" align=middle border=0 alt="http://www.verilab.com"></A>
+</div>
+
+<!--Left Navigation section-->
+<div id="LeftNav">
+<p class="whoops">More Navigation</p>
+	<div id="links">
+		<a class="sel"href="index.html">Resources</a>
+		<div id="sublinks">
+			<a class="sel" href="structure.html">Structure</a>
+			<a href="example_source.html">Example Source</a>
+			<a href="format.html">Formatting</a>
+		</div>
+	</div>
+</div>
+<!--Copyright-->
+<div id="copyright">
+	<small> &copy; 2014 All rights reserved. </small>
+</div>
+</body>
+</html>

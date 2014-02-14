@@ -1,0 +1,333 @@
+@media screen {
+
+body>p.whoops { display: none; }
+body>p.noprint { display: none; }
+
+.red {
+	border: 5px solid red;
+	padding: 5px;
+	background: #FAFFFF;
+	color: black;
+}
+div#content {/*position: absolute; top: 150px; left: 122px; right: 38px; */
+	margin-top: 5px;
+	margin-left: 140px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	height: 725px;
+	padding: 5px; 
+	background: #c4cdd6;
+	border-top: 1px solid #eeeeee; 
+	border-left: 1px solid #eeeeee; 
+	border-right: 1px solid #aaaaaa; 
+	border-bottom: 1px solid #aaaaaa; 
+	text-align: center; }
+
+div#content h1 { margin: 0.5ex; 
+	padding: 5px 0 5px; 
+	background-color: #c6ccfe;
+	border-top: 1px solid #eeeeee; 
+	border-left: 1px solid #eeeeee; 
+	border-right: 1px solid #aaaaaa; 
+	border-bottom: 1px solid #aaaaaa; 
+	text-align: center; 
+	font-family: avantgarde, sans-serif;
+	font-size:28px; 
+	line-height:28px; 
+	font-weight:400; }
+
+div#content h2 { text-align: center; }
+div#content h3 { text-align: left; }
+div#content h3.centre { text-align: center; }
+div#content h4 { text-align: left; }
+div#content h4.centre { text-align: center; }
+div#content p {margin: 0 1em 1em;}
+div#content p.quote + p.quote { text-indent: 0em; }
+div#content pre {text-align: left;}
+
+
+div#content>p.whoops { display: none; }
+div#content>.noprint { display: none; }
+
+/* IE6 doesn't like the above so let's hack it */
+.whoops { display: none; }
+.noprint { display: none; }
+
+div#content dd,dt,ul,ol,dl, a { text-decoration: none;}
+div#content ol {font-weight: 900; 
+		text-align: left;
+		margin 0.5 em; }
+div#content dt {font-weight: 400;
+		text-align: justify; }
+div#content a { text-decoration: none;}
+div#content a:link { color: #404040; background-color:#d4ddd6;}
+div#content a:visited {  color: #404040; background-color:#d4ddd6;}
+div#content a:link:hover { color: #404040; background-color: red;}
+div#content a:visited:hover { color: #404040; background-color: red;}
+div#content li span.highlight {background: white;}
+
+div#content span.button a {text-align: center; 
+	padding: 5px 5px; margin: 0 0 0px; 
+	border-bottom: 2px solid #111144;
+	border-right: 2px solid #111144;
+	border-left: 2px solid #555577;
+	border-top: 2px solid #555577;
+	font-size:18px; 
+	font-weight: 900; 
+	background-color: #d4ddd6;
+	text-decoration: none; color: black;}
+
+div#content span.button a:hover:active {
+	color: red;}
+
+div#content span.button a:hover {background: #FFFF66;
+	border-top: 2px solid #111144;
+	border-left: 2px solid #111144;
+	border-right: 2px solid #555577;
+	border-bottom: 2px solid #555577;
+	color: black;}
+
+div#Header {position: absolute; top: 10px; left: 8px;
+	/*margin:2px 600px 2px 5px;*/
+	padding:0px 0px;
+	font-family: avantgarde, sans-serif;
+	font-size:18px; 
+	/*background: #c4cdd6;
+	background: #c4cdd6;*/
+	line-height:18px; 
+	border-style:solid;
+	border-color:#eeeeee #aaaaaa #aaaaaa #eeeeee;
+	border-width:1px 1px; 
+	text-align: center; }
+/*	height:40px; } */
+
+div#Header a{text-align: right; 
+	background: #ffff4c; 
+	padding:1px 1px;
+	border-bottom: 1px solid #224059;
+	border-right: 1px solid #224059;
+	border-left: 1px solid #eaedf4;
+	border-top: 1px solid #eaedf4;
+	text-decoration: none; color: black;}
+div#Header a:hover {
+	background: red;
+	color: black;
+	border-top: 1px solid #31557f;
+	border-left: 1px solid #31557f;
+	border-right: 1px solid #f8f9fb;
+	border-bottom: 1px solid #f8f9fb; } 
+
+div#Header a.sel{
+	background: #ffff4c; 
+	color: black;
+	border-top: 1px solid #31557f;
+	border-left: 1px solid #31557f;
+	border-right: 1px solid #f8f9fb;
+	border-bottom: 1px solid #f8f9fb; } 
+
+div#Header a.sel:hover {
+	background: red;
+	color: black;
+	border-top: 1px solid #31557f;
+	border-left: 1px solid #31557f;
+	border-right: 1px solid #f8f9fb;
+	border-bottom: 1px solid #f8f9fb; } 
+div#TopNav {/*position: absolute; top: 65px; left: 120px; */
+	margin-top: 3px;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-bottom: 3px;
+	padding: 5px; 
+	/*background-color: #D1CFB0; */
+	background: #c4cdd6; 
+	border: 1px solid; 
+	border-color:#eeeeee #aaaaaa #aaaaaa #eeeeee;
+	height: auto;
+	text-align: center;
+	font: 18px avantgarde, sans-serif;
+	color: black;
+	font-weight: 400;}
+
+div#TopNav a {text-align: left; 
+	padding: 3px 3px; margin: 0 0 0px; 
+	border-bottom: 1px solid #224059;
+	border-right: 1px solid #224059;
+	border-left: 1px solid #eaedf4;
+	border-top: 1px solid #eaedf4;
+	background: #99aabf; 
+	color: black;
+	font-weight: 900; 
+	text-decoration: none; }
+
+div#TopNav a:hover {
+	background: #b8d0e6;
+	border-top: 1px solid #31557f;
+	border-left: 1px solid #31557f;
+	border-right: 1px solid #f8f9fb;
+	border-bottom: 1px solid #f8f9fb; }
+
+div#TopNav a:active { color: white;}
+
+div#TopNav a.sel:hover {background: #FF6620;
+	border-left: 1px solid #f8f9fb;
+	border-top: 1px solid #f8f9fb;
+	border-bottom: 1px solid #31557f;
+	border-right: 1px solid #31557f; }
+
+div#TopNav a.sel {text-align: right; 
+	border-top: 1px solid #31557f;
+	border-left: 1px solid #31557f;
+	border-right: 1px solid #f8f9fb;
+	border-bottom: 1px solid #f8f9fb;
+	background: #FF6620; }
+
+div#TopNav>p.whoops { display: none; }
+
+div#LeftNav {position: absolute; top: 55px; left: 1px; 
+	width: 138px; 
+	height: auto; 
+	font: 12px avantgarde, sans-serif;
+	background-color: #D1CFB0;
+	border: 1px solid; 
+	border-color:#eeeeee #aaaaaa #aaaaaa #eeeeee;
+	font-weight: 400;}
+
+body>div#LeftNav{
+	  position: fixed; }		/* Overrides 'absolute' above */
+}
+
+
+div#links {/*position: absolute; top: 65px; left: 120px; */
+	margin: 3px;
+	padding: 3px; 
+}
+
+
+div#links h2 {text-align: center;
+		font-style: italic; }
+div#links a {display: block; text-align: left; 
+	padding: 3px 3px; margin: 2 0px; 
+	border-top: 1px solid #f8f9fb;
+	border-left: 1px solid #f8f9fb;
+	border-bottom: 1px solid #31557f;
+	border-right: 1px solid #31557f;
+	font-weight: 900; 
+	text-decoration: none; color: black;}
+
+div#links a:hover {
+	background: #444466;
+	border-left: 1px solid #555577;
+	border-top: 1px solid #555577;
+	border-bottom: 1px solid #f8f9fb;
+	border-right: 1px solid #f8f9fb;
+	color: white ;}
+
+
+div#links a.sel:hover {background: #FF6620;
+	color: black;
+	border-left: 1px solid #f8f9fb;
+	border-top: 1px solid #f8f9fb;
+	border-bottom: 1px solid #31557f;
+	border-right: 1px solid #31557f; }
+
+div#links a.sel {text-align: right; 
+	background: #FF6620;
+	border-top: 1px solid #31557f;
+	border-left: 1px solid #31557f; 
+	border-bottom: 1px solid #f8f9fb;
+	border-right: 1px solid #f8f9fb; }
+
+div#links a.sel:active, a:active { color: white ;}
+
+div#Banner { margin: 0;
+	display: block;
+	font: 16px avantgarde, sans-serif;
+	font-weight: 900;
+	color: black;
+	border-top: 1px solid #eeeeee; 
+	border-left: 1px solid #eeeeee; 
+	border-right: 1px solid #aaaaaa; 
+	border-bottom: 1px solid #aaaaaa; 
+	text-align: center;
+	position: absolute;		/* Fallback if 'fixed' is not supported */
+	top: 650px;
+	left: 1ex;
+	padding: 3px; }
+
+body>div#Banner {
+	  position: fixed;  		
+	  top: auto;
+	  bottom: 1ex;
+	  right: auto;
+	  left: 3px; } 
+
+div#copyright { margin: 0;
+	display: block;
+	text-align: center;
+	font-size: 8pt;
+	font-family: Arial, Verdana, sans-serif;
+	position: absolute;		/* Fallback if 'fixed' is not supported */
+	top: 1ex;
+	right: 2ex;
+	left: auto;
+	width: auto;
+	padding: 1px;
+	border: 1px solid; 
+	border-color:#eeeeee #aaaaaa #aaaaaa #eeeeee; }
+
+body>div#copyright{
+	  position: fixed; }		/* Overrides 'absolute' above */
+}
+div#CFA{ margin: 5px;
+	display: block;
+	color: #404040;
+	background-color: transparent;
+	text-align: center;
+	position: absolute;		/* Fallback if 'fixed' is not supported */
+	bottom: 1ex;
+	left: 220px; 
+	border-bottom: 1px solid #eeeeee;
+	border-top: 1px solid #eeeeee; }
+
+@media print {
+
+body { color: black; background-color: white; 
+	font: 10pt Arial, Helvetica, Verdana, sans-serif;
+	margin: 0; 
+	padding: 0;}
+
+.whitefont {color: black;}
+.blackfont {color: black;}
+a { color: black; background-color: white; }
+body>div#Banner {
+	  position: fixed;  		
+	  bottom: auto;
+	  top: -3ex;
+	  left: auto;
+	  right: 0ex; } 
+div#TopNav { display: none;}
+div#LeftNav { display: none;}
+div#links  { display: none;}
+div#Header { display: none;}
+div#Photos { display: none;}
+div#content { top: 40px; overflow: visible; }
+div#copyright { margin: 0;
+	display: block;
+	text-align: center;
+	font-size: 8pt;
+	font-family: Arial, Verdana, sans-serif;
+	position: absolute;		/* Fallback if 'fixed' is not supported */
+	top: auto;
+	bottom: 1ex;
+	left: 2ex;
+	right: auto;
+	width: auto;
+	border: 0px; 
+	padding: 1px; }
+
+body>div#copyright{
+	  position: fixed; }		/* Overrides 'absolute' above */
+}
+body>p.whoops { display: none; }
+div#content>p.whoops { display: none; }
+}

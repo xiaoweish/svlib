@@ -1,0 +1,3 @@
+@media screen {
+	div#content {height: 700px; overflow: auto; }
+}

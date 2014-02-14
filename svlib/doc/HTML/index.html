@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<meta name="keywords" content="svlib Users Guide and Programmer Reference">
+	<meta name="description" content="svlib Users Guide and Programmer Reference">
+
+	<link rel=stylesheet type="text/css" href="css/basic.css">
+	<style type="text/css">@import url("css/core.css");</style>
+	<style type="text/css">@import url("css/scroll.css");</style>
+	<style type="text/css">@import url("css/sublinks.css");</style>
+
+   <title>svlib Users Guide and Programmer Reference</title>
+</head>
+
+<!-- Be nice to netscape 4 -->
+<body bgcolor=black text="ffff4c" alink="#8888FF" vlink="ffff4c" link="ffff4c">
+
+
+<!-- Logo -->
+<div id="Header">
+	<center>
+		<a href="index.html" title="svlib Users Guide and Programmer Reference">Master Index</a>
+	</center>
+</div>
+
+<!--Main Navigation section-->
+<div id="TopNav">
+	<center>
+	<a class="sel" href="#">Overview</a>
+	<a href="Section1/index.html">String Manipulation</a>
+	<a href="Section2/index.html">Config Files</a>
+	<a href="Section3/index.html">Usage Examples</a>
+	<a href="Section4/index.html">Class Reference</a>
+	</center>
+</div>
+
+<!-- Content section -->
+<div id="content">
+	<h1>svlib Users Guide and Programmer Reference</h1>
+
+<h2>A few notes about general principles of use</h2>
+<p>
+svlib has been designed to be as un-selfish and un-intrusive as possible for use in any SystemVerilog environment. To achieve these goals it was necessary to introduce some underlying behaviours that are common to the whole library. It is important for users to be aware of these behaviours to avoid unpleasant surprises.
+Overall structure of the library
+<h3>The package</h3>
+<p>
+svlib is organized as a single SystemVerilog package named svlib_pkg. Having compiled this package using their simulator of choice, users should then import this package into their own code so that the facilities of svlib are readily available.
+<p>
+The package should always be imported at the start of any module or package that needs it, just after the module or package header. Do not be tempted to put your import statement at the outermost scope, outside any module or package - this is very bad practice and should always be avoided.
+<h3>Macros</h3>
+<p>
+In addition to the package, svlib has a few macros that are useful or necessary when using the package features. To make these macro definitions available, users should do
+<code>`include "svlib_macros.svh"</code>
+at the outermost ($unit) scope of their code, outside any module or package. It is safe to include this file as often as you wish, because it is protected by sentinels so that it cannot be compiled twice. Consequently it is a good idea to provide this include at the top of any file that makes use of svlib facilities.
+</div>
+
+<!--Banner Advert-->
+<div id="Banner">
+Created by <br>
+<a href="http://www.verilab.com"><img src="Images/verilab-150-25.jpg" width=150 height=25 title="Created by Verilab" align=middle border=0 alt="http://www.verilab.com"></A>
+</div>
+
+<!--Left Navigation section-->
+<div id="LeftNav">
+<p class="whoops">More Navigation</p>
+	<div id="links">
+		<a href="Resources/index.html">Template Guide</a>
+	</div>
+</div>
+<!--Copyright-->
+<div id="copyright">
+	<small> &copy; 2014 All rights reserved. </small>
+</div>
+</body>
+</html>

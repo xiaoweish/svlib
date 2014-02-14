@@ -1,0 +1,56 @@
+body { background: #c4cdd6; 
+	font-family: Georgia,"Times New Roman",Times,serif;
+	font-size: 14px; 
+	line-height: 19px; 
+	color: #404040;
+	margin: 0; 
+	padding: 0;}
+
+.white { background-color: white; }
+.black { background-color: black; }
+.whitefont {color: white;}
+.blackfont {color: black;}
+.trans { background-color: transparent; }
+.centre { text-align: center; }
+
+h1 {	font-size: 175%;
+	font-weight: normal; }
+h2 {	font-size: 130% }
+h3 {	font-size: 120% }
+h4 {	font-size: 105% }
+sup,sub {	font-size: 75% }
+
+p { text-align: justify; 
+	margin-left: 3em;
+	margin-right: 3em;
+	margin-top: 1em;
+	margin-bottom: 1em; }
+
+p.quote { color: #ffffff; 
+          background: #949aa6;
+	text-indent: 1em;
+	font-family: "Times New Roman", Times, serif; }
+
+p.section { text-indent: -1em; }
+
+dt {font-weight: bold; 
+	text-align: justify;
+	margin-bottom: 0.5em; }
+dd {margin-bottom: 0.66em; text-align: justify;}
+ul,dl { margin: 0 2em 2em; text-align: left; }
+
+td.photolabel1 { text-align: center;
+	color: black;
+	background-color: #ffeeee }
+
+td.photolabel2 { text-align: center;
+	color: black;
+	background-color: #eeeeff }
+	
+a	{ color: #ffffff; }
+
+a:active { text-decoration: underline;
+	color: #ffffff; }
+
+a:hover { text-decoration: underline;
+	color: #dddddd; } 
