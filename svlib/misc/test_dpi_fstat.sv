@@ -10,7 +10,7 @@ module test_dpi_fstat;
     sys_fileStat_s stat;
     
     s = sys_getcwd();
-    result = svlibLastError();
+    result = error_getLast();
     if (result) begin
       $display("getcwd failed, result=%0d \"%s\"", result, s);
     end
@@ -18,12 +18,12 @@ module test_dpi_fstat;
       $display("getcwd success, \"%s\"", s);
     end
     
-    svlibUserHandlesErrors(0);
+    error_userHandling(0);
     
     $display("Illegal glob attempt");
     paths = sys_fileGlob("../foo/*");
-    /*if (svlibLastError()) begin
-      $display("Glob call yielded %s", svlibErrorDetails());
+    if (error_getLast()) begin
+      $display("Glob call yielded %s", error_details());
     end
     else*/ begin
       $display("Directory listing of ../foo/* :");
@@ -34,8 +34,8 @@ module test_dpi_fstat;
     
     $display("Empty glob attempt");
     paths = sys_fileGlob("../foo");
-    if (svlibLastError()) begin
-      $display("sys_fileGlob call yielded %s", svlibErrorDetails());
+    if (error_getLast()) begin
+      $display("sys_fileGlob call yielded %s", error_details());
     end
     else begin
       $display("Directory listing of ../foo :");
@@ -46,8 +46,8 @@ module test_dpi_fstat;
     
     $display("Non-empty glob attempt");
     paths = sys_fileGlob("../*");
-    if (svlibLastError()) begin
-      $display("sys_fileGlob call yielded %s", svlibErrorDetails());
+    if (error_getLast()) begin
+      $display("sys_fileGlob call yielded %s", error_details());
     end
     else begin
       $display("Directory listing of ../* :");
@@ -57,11 +57,11 @@ module test_dpi_fstat;
     end
     
 
-    svlibUserHandlesErrors(1);
+    error_userHandling(1);
     
     stat = sys_fileStat("README");
-    if (svlibLastError()) begin
-      $display("fileStat(\"README\") yielded %s", svlibErrorDetails());
+    if (error_getLast()) begin
+      $display("fileStat(\"README\") yielded %s", error_details());
     end
     else begin
       $display("fileStat(\"README\") worked");
@@ -69,9 +69,9 @@ module test_dpi_fstat;
    
     $display("mtime = %0d", stat.mtime);
     s = sys_formatTime(stat.mtime, "%c");
-    result = svlibLastError();
+    result = error_getLast();
     if (result != 0)
-      $display("  Oops, sys_formatTime result = %0d (%s)", result, svlibErrorString(result));
+      $display("  Oops, sys_formatTime result = %0d (%s)", result, error_text(result));
     else
       $display("  That's \"%s\"", s);
       
@@ -86,8 +86,8 @@ module test_dpi_fstat;
     join_none
     fork begin
       stat = sys_fileStat("nonexistentFile");
-      if (svlibLastError()) begin
-        $display("fileStat(\"nonexistentFile\") yielded an error (%s)", svlibErrorString());
+      if (error_getLast()) begin
+        $display("fileStat(\"nonexistentFile\") yielded an error (%s)", error_text());
       end
       else begin
         $display("fileStat(\"nonexistentFile\") worked");
@@ -98,9 +98,8 @@ module test_dpi_fstat;
     ftime = sys_dayTime();
     $display("unix time now = %0d", ftime);
     s = sys_formatTime(ftime, "%c");
-    result = svlibLastError();
-    if (result != 0)
-      $display("  Oops, sys_formatTime error = %0d (%s)", result, svlibErrorString(result));
+    if (error_getLast())
+      $display("  Oops, sys_formatTime error = %0d (%s)", result, error_text());
     else
       $display("  That's \"%s\"", s);
     

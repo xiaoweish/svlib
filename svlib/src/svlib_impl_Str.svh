@@ -36,7 +36,7 @@ endfunction
 // Save a string as an object so that further manipulations can
 // be performed on it.
 function Str Str::create(string s = "");
-  Str result = Obstack#(Str)::get();
+  Str result = Obstack#(Str)::obtain();
   result.setClean(s);
   return result;
 endfunction

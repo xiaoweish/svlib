@@ -71,12 +71,13 @@ endfunction
 function automatic sys_fileStat_s sys_fileStat(string path, bit asLink=0);
   longint stats[statARRAYSIZE];
   int err;
+  svlibErrorManager errorManager = error_getManager();
   err = svlib_dpi_imported_fileStat(path, asLink, stats);
-  if (errorManager.check(err)) begin
+  if (errorManager.check(err, "sys_fileStat: error in system call")) begin
     fileStat_check_syscall_ok:
       assert (!err) else 
         $error("Failed to stat \"%s\": %s", 
-                                path, svlibErrorDetails()
+                                path, error_fullMessage()
         );
   end
   if (!err) begin
@@ -93,20 +94,23 @@ function automatic qs sys_fileGlob(string wildPath);
   chandle hnd;
   int     count;
   int     err;
+  svlibErrorManager errorManager = error_getManager();
 
   err = svlib_dpi_imported_globStart(wildPath, hnd, count);
   if (errorManager.check(err)) begin
+    errorManager.setDetails($sformatf("error in sys_fileGlob(\"%s\")", wildPath));
     fileGlob_check_globStart_ok:
       assert (!err) else
-        $error("Failed to glob \"%s\": %s", wildPath, svlibErrorDetails());
+        $error("Failed to glob \"%s\": %s", wildPath, error_fullMessage());
   end
 
   if (!err) begin
     err = svlib_private_getQS(hnd, paths);
     if (errorManager.check(err)) begin
+      errorManager.setDetails($sformatf("DPI fail getting result strings from sys_fileGlob(\"%s\"", wildPath));
       fileGlob_check_getQS_ok:
         assert (!err) else
-         $error("Failed to get glob strings: %s", svlibErrorDetails());
+         $error("Failed to get glob strings: %s", error_fullMessage());
     end
   end
 
@@ -116,6 +120,7 @@ endfunction
 function automatic string sys_getcwd();
   string cwd;
   int err;
+  svlibErrorManager errorManager = error_getManager();
   
   err = svlib_dpi_imported_getcwd(cwd);
   if (err != 0) cwd = "";
@@ -123,7 +128,7 @@ function automatic string sys_getcwd();
   if (errorManager.check(err)) begin
     getcwd_check_ok:
       assert (!err) else
-       $error("sys_getcwd() failed: %s", svlibErrorDetails());
+       $error("sys_getcwd() failed: %s", error_fullMessage());
   end
 
   return cwd;

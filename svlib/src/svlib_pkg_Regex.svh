@@ -66,7 +66,7 @@ function automatic Regex regexMatch(string haystack, string needle, int options=
   Regex re;
   Str   s;
   bit   found;
-  re  = Obstack#(Regex)::get();
+  re  = Obstack#(Regex)::obtain();
   re.setRE(needle);
   re.setOpts(options);
   regexMatch_check_RE_valid: 
@@ -77,7 +77,7 @@ function automatic Regex regexMatch(string haystack, string needle, int options=
   if (found)
     return re;
   // Return the unwanted Regex object to the obstack
-  Obstack#(Regex)::put(re);
+  Obstack#(Regex)::relinquish(re);
   return null;
 endfunction
 
@@ -85,21 +85,22 @@ function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result
   bit ok;
   Regex re;
   Str str;
-  str = Obstack#(Str)::get();
+  str = Obstack#(Str)::obtain();
   str.set(s);
   
   // First sieve: is it syntactically anything like an integer?
   // The RE also strips leading and trailing underscores from 
   // the digit string.
-  re = Obstack#(Regex)::get();
+  re = Obstack#(Regex)::obtain();
   re.setRE({
     "^[[:space:]]*",                        // Arbitrary leading space
     "(-?)[[:space:]]*",                     // Optional minus sign in $1
-  // 1  1
+  // 1--1
     "(([[:digit:]]+)?'(s?)([hxdob]))?",     // $3=nBits, $4=signing, $5=radix
-  // 23            3  4  45       52
+  //  3------------3  4--45-------5
+  // 2-----------------------------2
     "_*([[:xdigit:]xz_]*[[:xdigit:]xz])_*", // $6=digit string
-  //   6                              6
+  //   6------------------------------6
     "[[:space:]]*$"                         // Arbitrary trailing space
   });
   
@@ -132,8 +133,8 @@ function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result
   end
   
   // dispose of temp objects
-  Obstack#(Regex)::put(re);
-  Obstack#(Str)::put(str);
+  Obstack#(Regex)::relinquish(re);
+  Obstack#(Str)::relinquish(str);
   
   return ok;
   

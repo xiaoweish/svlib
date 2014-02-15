@@ -11,6 +11,13 @@ class Str extends svlibBase;
   typedef enum {NONE, LEFT, RIGHT, BOTH} side_e;
   typedef enum {START, END} origin_e;
 
+  // Protect the constructor so that users can't call it
+  protected function new(); endfunction
+  
+  protected function void purge();
+    setClean("");
+  endfunction
+  
   // Save a string as an object so that further manipulations can
   // be performed on it.  Get and set the object's string value.
   extern static  function Str    create(string s = "");
@@ -83,10 +90,10 @@ function automatic bit isSpace(byte unsigned ch);
 endfunction
 
 function automatic string str_sjoin(qs elements, string joiner);
-  Str str = Obstack#(Str)::get();
+  Str str = Obstack#(Str)::obtain();
   str.set(joiner);
   str_sjoin = str.sjoin(elements);
-  Obstack#(Str)::put(str);
+  Obstack#(Str)::relinquish(str);
 endfunction
 
 function automatic string str_repeat(string s, int n);
@@ -95,19 +102,19 @@ function automatic string str_repeat(string s, int n);
 endfunction
 
 function automatic string str_trim(string s, Str::side_e side=Str::BOTH);
-  Str str = Obstack#(Str)::get();
+  Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.trim(side);
   str_trim = str.get();
-  Obstack#(Str)::put(str);
+  Obstack#(Str)::relinquish(str);
 endfunction
 
 function automatic string str_pad(string s, int width, Str::side_e side=Str::BOTH);
-  Str str = Obstack#(Str)::get();
+  Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.pad(width, side);
   str_pad = str.get();
-  Obstack#(Str)::put(str);
+  Obstack#(Str)::relinquish(str);
 endfunction
 
 function automatic string str_quote(string s);
@@ -119,11 +126,11 @@ endfunction
   // If n==0 this is an insert operation.
 function automatic string str_replace(string s, string rs, int p, int n,
                                       Str::origin_e origin=Str::START);
-  Str str = Obstack#(Str)::get();
+  Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.replace(rs, p, n, origin);
   str_replace = str.get();
-  Obstack#(Str)::put(str);
+  Obstack#(Str)::relinquish(str);
 endfunction
 
 /////////////////////// IMPLEMENTATIONS OF EXTERN METHODS ///////////////////

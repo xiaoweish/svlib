@@ -5,7 +5,7 @@ endfunction
 
 function cfgNode cfgNode::lookup(string path);
   int nextPos;
-  Regex re = Obstack#(Regex)::get();
+  Regex re = Obstack#(Regex)::obtain();
   re.setStrContents(path);
   re.setRE(
   //   1: first path component, complete with leading/trailing whitespace
@@ -63,7 +63,7 @@ function cfgNode cfgNode::lookup(string path);
       break;
     end
   end
-  Obstack#(Regex)::put(re);
+  Obstack#(Regex)::relinquish(re);
   foundPath = path.substr(0,nextPos-1);
   return (lastError == CFG_OK) ? foundNode : null;
 endfunction

@@ -65,6 +65,11 @@ virtual class svlibCfgBase extends svlibBase;
     cfgObjKind_e k = kind();
     return k.name;
   endfunction
+  protected virtual function void purge();
+    name = "";
+    lastError = CFG_OK;
+    lastErrorDetails = "";
+  endfunction
   protected virtual function void cfgObjError(cfgError_e err);
     if (err == CFG_OK) return;
     // There was an error. Set up the error information:
@@ -102,6 +107,12 @@ virtual class cfgNode extends svlibCfgBase;
   virtual function cfgNode    getFoundNode(); return foundNode;   endfunction
   virtual function string     getFoundPath(); return foundPath;   endfunction
   virtual function cfgNode    getParent();    return parent;      endfunction
+  protected virtual function void purge();
+    super.purge();
+    comments.delete();
+    serializationHint = "";
+    parent = null;
+  endfunction
 endclass
 
 virtual class cfgSerDes extends svlibCfgBase;
@@ -116,6 +127,10 @@ virtual class cfgFile extends cfgSerDes;
   virtual function string getFilePath(); return filePath;     endfunction
   virtual function string getMode();     return mode;         endfunction
   virtual function int    getFD();       return fd;           endfunction
+  protected virtual function void purge();
+    super.purge();
+    if (fd) void'(close());
+  endfunction
   protected virtual function cfgError_e open(string fp, string rw);
     void'(close());
     if (!(rw inside {"r", "w"})) begin
@@ -150,6 +165,10 @@ class cfgNodeScalar extends cfgNode;
   function string sformat(int indent = 0);
     return $sformatf("%s%s", str_repeat(" ", indent), value.str());
   endfunction
+  protected virtual function void purge();
+    super.purge();
+    value = null;
+  endfunction
   function cfgObjKind_e kind(); return NODE_SCALAR; endfunction
   function cfgNode childByName(string idx); return null; endfunction
 endclass
@@ -157,6 +176,10 @@ endclass
 class cfgNodeSequence extends cfgNode;
   `SVLIB_CFG_NODE_UTILS(cfgNodeSequence)
   cfgNode value[$];
+  protected virtual function void purge();
+    super.purge();
+    value.delete();
+  endfunction
   function string sformat(int indent = 0);
     foreach (value[i]) begin
       if (i != 0) sformat = {sformat, "\n"};
@@ -185,6 +208,10 @@ endclass
 class cfgNodeMap extends cfgNode;
   `SVLIB_CFG_NODE_UTILS(cfgNodeMap)
   cfgNode value[string];
+  protected virtual function void purge();
+    super.purge();
+    value.delete();
+  endfunction
   function string sformat(int indent = 0);
     bit first = 1;
     foreach (value[s]) begin
@@ -218,6 +245,11 @@ endclass
 
 virtual class cfgTypedScalar #(type T = int) extends cfgScalar;
   T value;
+  protected virtual function void purge();
+    T tmp;  // initializes itself
+    super.purge();
+    value = tmp;
+  endfunction
   virtual function T    get();    return value; endfunction
   virtual function void set(T v); value = v;    endfunction
 endclass
@@ -239,7 +271,7 @@ class cfgScalarInt extends cfgTypedScalar#(logic signed [63:0]);
   extern function bit scan(string s);
   function cfgObjKind_e kind(); return SCALAR_INT; endfunction
   static function cfgScalarInt create(T v = 0);
-    create = Obstack#(cfgScalarInt)::get();
+    create = Obstack#(cfgScalarInt)::obtain();
     create.name = "";
     create.value = v;
   endfunction
@@ -260,7 +292,7 @@ class cfgScalarString extends cfgTypedScalar#(string);
   endfunction
   function cfgObjKind_e kind(); return SCALAR_STRING; endfunction
   static function cfgScalarString create(string v = "");
-    create = Obstack#(cfgScalarString)::get();
+    create = Obstack#(cfgScalarString)::obtain();
     create.name = "";
     create.value = v;
   endfunction
@@ -274,7 +306,7 @@ endclass
 class cfgFileINI extends cfgFile;
   function cfgObjKind_e kind(); return FILE_INI; endfunction
   static function cfgFileINI create(string name = "INI_FILE");
-    create = Obstack#(cfgFileINI)::get();
+    create = Obstack#(cfgFileINI)::obtain();
     create.name = name;
   endfunction
   protected virtual function void writeComments(cfgNode node);
@@ -289,10 +321,10 @@ class cfgFileINI extends cfgFile;
     writeComments(ns);
     // Special case: protect strings with quotes if they contain spaces.
     if ($cast(css, ns.value)) begin
-      str = Obstack#(Str)::get();
+      str = Obstack#(Str)::obtain();
       str.set(css.value);
       must_quote = (str.first(" ") >= 0);
-      Obstack#(Str)::put(str);
+      Obstack#(Str)::relinquish(str);
     end
     if (must_quote) begin
       $fdisplay(fd, "%s=%s", key, str_quote(ns.sformat()));
@@ -382,10 +414,10 @@ class cfgFileINI extends cfgFile;
       return null;
     end
 
-    reComment = Obstack#(Regex)::get();
-    reSection = Obstack#(Regex)::get();
-    reKeyVal  = Obstack#(Regex)::get();
-    strLine   = Obstack#(Str)::get();
+    reComment = Obstack#(Regex)::obtain();
+    reSection = Obstack#(Regex)::obtain();
+    reKeyVal  = Obstack#(Regex)::obtain();
+    strLine   = Obstack#(Str)::obtain();
 
     reComment.setRE("^\\s*[;#]\\s?(.*)$");
     reSection.setRE("^\\s*\\[\\s*(\\w+)\\s*\\]$");
@@ -432,10 +464,10 @@ class cfgFileINI extends cfgFile;
 
     end
 
-    Obstack#(Regex)::put(reComment);
-    Obstack#(Regex)::put(reSection);
-    Obstack#(Regex)::put(reKeyVal);
-    Obstack#(Str)::put(strLine);
+    Obstack#(Regex)::relinquish(reComment);
+    Obstack#(Regex)::relinquish(reSection);
+    Obstack#(Regex)::relinquish(reKeyVal);
+    Obstack#(Str)::relinquish(strLine);
     cfgObjError(lastError);
     return (lastError == CFG_OK) ? root : null;
 
@@ -444,9 +476,12 @@ class cfgFileINI extends cfgFile;
 endclass
 
 class cfgFileYAML extends cfgFile;
+  protected function void purge();
+    super.purge();
+  endfunction
   function cfgObjKind_e kind(); return FILE_YAML; endfunction
   static function cfgFileYAML create(string name = "YAML_FILE");
-    create = Obstack#(cfgFileYAML)::get();
+    create = Obstack#(cfgFileYAML)::obtain();
     create.name = name;
   endfunction
   function cfgError_e serialize  (cfgNode node, int options=0);

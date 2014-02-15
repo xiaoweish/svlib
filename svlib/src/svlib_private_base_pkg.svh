@@ -26,7 +26,7 @@ package svlib_private_base_pkg;
   // from data that's been set up on the DPI-C side. ~hnd~ is the C pointer,
   // supplied by some earlier DPI call, referencing the C string array data.
   // This function repeatedly calls svlib_dpi_imported_saBufNext to retrieve
-  // one string from the C array and push the handle variable on to the next.
+  // one string from the C array and bump the handle variable on to the next.
   // Flag ~keep_ss~ set: function appends to existing contents of ss.
   //    ~keep_ss~ clear: function deletes existing contents of ss before starting.
   //
@@ -42,29 +42,31 @@ package svlib_private_base_pkg;
       ss.push_back(s);
     end
   endfunction
+  
+  
+  // Mystery problem: Trying to call process::self() from a static
+  // method of Obstack#(T) crashes the compiler in VCS 2013.06.
+  // Providing this function seems to work around the problem OK.
+  function automatic process get_running_process();
+    return process::self();
+  endfunction
 
 
-  // svlibBase: base class for almost all svlib classes. Provides the "Obstack"
-  // mechanism that allows us to recycle unused objects.
-  //
-  class svlibBase;// #(parameter type T = int);
-    svlibBase obstack_link;
-  endclass
-
-
-  virtual class Obstack #(parameter type T=int) extends svlibBase;
-    local static svlibBase head;
+  // Obstack needs to extend T so that it can do new()
+  // even if T's constructor is protected.
+  class Obstack #(parameter type T=int) extends T;
+    local static T   stack[$];
     local static int constructed_ = 0;
     local static int get_calls_ = 0;
     local static int put_calls_ = 0;
 
-    static function T get();
+    static function T obtain();
       T result;
-      if (head == null) begin
+      if (stack.size()==0) begin
         `ifdef SVLIB_NO_RANDSTABLE_NEW
         result = new();
         `else
-        std::process p = std::process::self();
+        process p = get_running_process();
         string randstate = p.get_randstate();
         result = new();
         p.set_randstate(randstate);
@@ -72,18 +74,19 @@ package svlib_private_base_pkg;
         constructed_++;
       end
       else begin
-        $cast(result, head);
-        head = head.obstack_link;
+        result = stack.pop_back();
+        result.purge();
       end
       get_calls_++;
       return result;
     endfunction
-    static function void put(svlibBase t);
+
+    static function void relinquish(T t);
       put_calls_++;
       if (t == null) return;
-      t.obstack_link = head;
-      head = t;
+      stack.push_back(t);
     endfunction
+
     // debug/test only - DO NOT USE normally
     static function void stats(
         output int depth,
@@ -91,17 +94,179 @@ package svlib_private_base_pkg;
         output int get_calls,
         output int put_calls
       );
-      svlibBase p = head;
-      depth = 0;
-      while (p != null) begin
-        depth++;
-        p = p.obstack_link;
-      end
+      depth = stack.size();
       constructed = constructed_;
       get_calls = get_calls_;
       put_calls = put_calls_;
     endfunction
 
+  endclass
+
+  // svlibBase: base class for almost all svlib classes.
+  //
+  virtual class svlibBase;
+    // purge() wipes any content from the existing object,
+    // restoring it to the same pristine state as a new object
+    pure virtual protected function void purge();
+  endclass
+
+  // svlibErrorManager: singleton class to handle
+  // per-process error management. A single instance
+  // is stored as a static variable and can be returned
+  // by the static getInstance method.
+  //
+  class svlibErrorManager extends svlibBase;
+
+    `ifdef INCA
+      typedef string INDEX_T;
+      protected function INDEX_T indexFromProcess(process p);
+        return $sformatf("%p", p);
+      endfunction
+    `else
+      typedef process INDEX_T;
+      protected function INDEX_T indexFromProcess(process p);
+        return p;
+      endfunction
+    `endif
+
+    protected int    valuePerProcess   [INDEX_T];
+    protected bit    pendingPerProcess [INDEX_T];
+    protected bit    userPerProcess    [INDEX_T];
+    protected string detailsPerProcess [INDEX_T];
+    protected bit    defaultUserBit;
+
+    protected function void purge();
+      valuePerProcess.delete();
+      pendingPerProcess.delete();
+      userPerProcess.delete();
+      detailsPerProcess.delete();
+      defaultUserBit = 0;
+    endfunction
+    
+    protected function INDEX_T getIndex();
+      return indexFromProcess(process::self());
+    endfunction
+
+    static svlibErrorManager singleton = null;
+    static function svlibErrorManager getInstance();
+      if (singleton == null)
+        singleton = Obstack#(svlibErrorManager)::obtain();
+      return singleton;
+    endfunction
+
+    protected virtual function bit has(INDEX_T idx);
+      return valuePerProcess.exists(idx);
+    endfunction
+
+    protected virtual function void newIndex(INDEX_T idx, int value, string details = "");
+      pendingPerProcess [idx] = (value != 0);
+      valuePerProcess   [idx] = value;
+      userPerProcess    [idx] = defaultUserBit;
+      detailsPerProcess [idx] = details;
+    endfunction
+
+    virtual function bit check(int value, string details = "");
+      INDEX_T idx = getIndex();
+      if (!has(idx)) begin
+        newIndex(idx, value, details);
+      end
+      else begin
+        if (pendingPerProcess[idx]) begin
+          svlibBase_check_unhandledError: assert (0) else
+            $error("Not yet handled before next errorable call: %s",
+                              getFullMessage()
+            );
+        end
+        valuePerProcess[idx] = value;
+        pendingPerProcess[idx] = (value != 0);
+        detailsPerProcess[idx] = details;
+      end
+      return !userPerProcess[idx];
+    endfunction
+
+    virtual function int getLast(bit clear = 1);
+      INDEX_T idx = getIndex();
+      if (has(idx)) begin
+        if (clear)
+          pendingPerProcess[idx] = 0;
+        return valuePerProcess[idx];
+      end
+      else begin
+        return 0;
+      end
+    endfunction
+
+    virtual function bit getUserHandling(bit getDefault=0);
+      if (getDefault) begin
+        return defaultUserBit;
+      end else begin
+        INDEX_T idx = getIndex();
+        if (!has(idx))
+          return defaultUserBit;
+        else
+          return userPerProcess[idx];
+      end
+    endfunction
+
+    virtual function void setUserHandling(bit user, bit setDefault=0);
+      if (setDefault) begin
+        defaultUserBit = user;
+      end
+      else begin
+        INDEX_T idx = getIndex();
+        if (!has(idx)) begin
+          newIndex(idx, 0);
+        end
+        userPerProcess[idx] = user;
+      end
+    endfunction
+
+    virtual function qs report();
+      report.push_back($sformatf("----\\/---- Per-Process Error Manager ----\\/----"));
+      report.push_back($sformatf("  Default user-mode = %b", defaultUserBit));
+      if (userPerProcess.num) begin
+        report.push_back($sformatf("  user pend errno err"));
+        foreach (userPerProcess[idx]) begin
+          report.push_back($sformatf("    %b    %b  %4d  %s",
+                        userPerProcess[idx], pendingPerProcess[idx],
+                           valuePerProcess[idx], getText(valuePerProcess[idx])));
+        end
+      end
+      report.push_back($sformatf("----/\\---- Per-Process Error Manager ----/\\----"));
+    endfunction
+
+    // Get the string corresponding to a specific C error number.
+    // If err=0, use the most recent error instead.
+    virtual function string getText(int err=0);
+      if (err==0) begin
+        // Find the last error without clearing it
+        err = getLast(0);
+      end
+      return svlib_dpi_imported_getCErrStr(err);
+    endfunction
+
+    // Set/get a programmer-supplied string for context information
+    virtual function void setDetails(string details);
+      INDEX_T idx = getIndex();
+      if (!has(idx)) begin
+        newIndex(idx, 0);
+      end
+      detailsPerProcess[idx] = details;
+    endfunction
+    virtual function string getDetails();
+      INDEX_T idx = getIndex();
+      if (has(idx)) begin
+        return detailsPerProcess[idx];
+      end
+      else begin
+        return "";
+      end
+    endfunction
+    
+    virtual function string getFullMessage();
+      return $sformatf("%s (errno=%0d): %s", getText(), getLast(0), getDetails());
+    endfunction
+    
   endclass
 
   //--------------------------------------------------------------

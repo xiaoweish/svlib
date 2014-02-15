@@ -175,8 +175,9 @@
 // of svLib" in the Developer's Guide.
 //-------------------------------------------------------------------
 `define SVLIB_CFG_NODE_UTILS(T)                                     \
+  protected function new(); endfunction                             \
   static function T create(string name = "");                       \
-    T me = Obstack#(T)::get();                                      \
+    T me = Obstack#(T)::obtain();                                   \
     me.name = name;                                                 \
     me.parent = null;                                               \
     return me;                                                      \

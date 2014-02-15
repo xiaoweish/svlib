@@ -57,7 +57,7 @@ endfunction
 
 function string Path::extension(string path);
   string result = tail(path);
-  Str str = Obstack#(Str)::get();
+  Str str = Obstack#(Str)::obtain();
   int dotpos;
   str.set(result);
   dotpos = str.last(".");
@@ -65,7 +65,7 @@ function string Path::extension(string path);
     return "";
   end
   else begin
-    Obstack#(Str)::put(str);
+    Obstack#(Str)::relinquish(str);
     return result.substr(dotpos, result.len()-1);
   end
 endfunction
@@ -94,10 +94,10 @@ endfunction
 
 function qs Path::decompose(string path);
   qs components, result;
-  Str pstr = Obstack#(Str)::get();
+  Str pstr = Obstack#(Str)::obtain();
   pstr.set(path);
   components = pstr.split("/", 0);
-  Obstack#(Str)::put(pstr);
+  Obstack#(Str)::relinquish(pstr);
   if (isAbsolute(path))
     result.push_back("/");
   foreach (components[i])
@@ -110,7 +110,7 @@ function string Path::compose(qs subpaths);
   string result;
   qs  pathComps;
   int firstUseful = 0;
-  Str path = Obstack#(Str)::get();
+  Str path = Obstack#(Str)::obtain();
   bit notFirst = 0;
   path.set("");
   for (int i=subpaths.size()-1; i>=0; i--) if (isAbsolute(subpaths[i])) begin
@@ -128,7 +128,7 @@ function string Path::compose(qs subpaths);
     end
   end
   result = path.get();
-  Obstack#(Str)::put(path);
+  Obstack#(Str)::relinquish(path);
   return result;
 endfunction
 

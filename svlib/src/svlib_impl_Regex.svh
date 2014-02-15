@@ -6,8 +6,7 @@
 // should not be used in any other context.
 
 function Regex  Regex::create(string s = "", int options=0);
-  Regex r = Obstack#(Regex)::get();
-  r.purge();
+  Regex r = Obstack#(Regex)::obtain();
   r.text = s;
   r.options = options;
   return r;
@@ -56,7 +55,7 @@ endfunction
 
 function void Regex::setStrContents(string s);
   if (runStr == null)
-    runStr = Obstack#(Str)::get();
+    runStr = Obstack#(Str)::obtain();
   runStr.set(s);
 endfunction
 
@@ -165,7 +164,7 @@ endfunction
 //
 function int Regex::match_subst(string substStr);
   qs  parts;
-  Str realSubst = Obstack#(Str)::get();
+  Str realSubst = Obstack#(Str)::obtain();
   int i, result, m;
   realSubst.set(substStr);
   parts = realSubst.split("");
@@ -193,6 +192,6 @@ function int Regex::match_subst(string substStr);
   end
   runStr.replace(realSubst.get(), getMatchStart(0), getMatchLength(0));
   result = getMatchStart(0) + realSubst.len();
-  Obstack#(Str)::put(realSubst);
+  Obstack#(Str)::relinquish(realSubst);
   return result;
 endfunction
