@@ -1,5 +1,8 @@
 class Regex extends svlibBase;
 
+  // forbid construction
+  protected function new(); endfunction
+
   typedef enum {NOCASE=regexNOCASE, NOLINE=regexNOLINE} regexOptions;
 
   extern static  function Regex  create (string s = "", int options=0);

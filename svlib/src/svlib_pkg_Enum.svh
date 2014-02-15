@@ -9,6 +9,8 @@ class EnumUtils #(type ENUM = int);
 
   typedef ENUM qe[$];
   typedef logic [$bits(ENUM)-1:0] BASE;
+  
+  protected function new(); endfunction // forbid construction
 
   // Public methods (implementation appears later)
   extern static function ENUM from_name  (string s);

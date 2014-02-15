@@ -60,6 +60,9 @@ package svlib_private_base_pkg;
     local static int get_calls_ = 0;
     local static int put_calls_ = 0;
 
+    // forbid construction
+    protected function new(); endfunction
+
     static function T obtain();
       T result;
       if (stack.size()==0) begin
@@ -128,6 +131,9 @@ package svlib_private_base_pkg;
         return p;
       endfunction
     `endif
+
+    // forbid construction
+    protected function new(); endfunction
 
     protected int    valuePerProcess   [INDEX_T];
     protected bit    pendingPerProcess [INDEX_T];

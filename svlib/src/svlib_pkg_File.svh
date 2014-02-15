@@ -1,5 +1,8 @@
 class Path extends Str;
 
+  // forbid construction
+  protected function new(); endfunction
+
   extern static function bit    isAbsolute    (string path);
   extern static function string dirname       (string path, int backsteps=1);
   extern static function string extension     (string path);

@@ -255,6 +255,8 @@ virtual class cfgTypedScalar #(type T = int) extends cfgScalar;
 endclass
 
 class cfgScalarInt extends cfgTypedScalar#(logic signed [63:0]);
+  // forbid construction
+  protected function new(); endfunction
   function string str();
     if (!$isunknown(value)) begin
       return $sformatf("%0d", value);
@@ -283,6 +285,8 @@ class cfgScalarInt extends cfgTypedScalar#(logic signed [63:0]);
 endclass
 
 class cfgScalarString extends cfgTypedScalar#(string);
+  // forbid construction
+  protected function new(); endfunction
   function string str();
     return get();
   endfunction
@@ -304,6 +308,8 @@ class cfgScalarString extends cfgTypedScalar#(string);
 endclass
 
 class cfgFileINI extends cfgFile;
+  // forbid construction
+  protected function new(); endfunction
   function cfgObjKind_e kind(); return FILE_INI; endfunction
   static function cfgFileINI create(string name = "INI_FILE");
     create = Obstack#(cfgFileINI)::obtain();
@@ -476,6 +482,8 @@ class cfgFileINI extends cfgFile;
 endclass
 
 class cfgFileYAML extends cfgFile;
+  // forbid construction
+  protected function new(); endfunction
   protected function void purge();
     super.purge();
   endfunction
