@@ -173,6 +173,22 @@ extern int32_t svlib_dpi_imported_getcwd(char ** p_result) {
 }
 
 /*----------------------------------------------------------------
+ * import "DPI-C" function int svlib_dpi_imported_getenv(
+ *                           string envVar, output string result);
+ *----------------------------------------------------------------
+ */
+extern int32_t svlib_dpi_imported_getenv(char *envVar, char ** p_result) {
+  char * envStr = getenv(envVar);
+  if (envStr == NULL) {
+    *p_result = NULL;
+    return 1;
+  } else {
+    *p_result = envStr;
+    return 0;
+  }
+}
+
+/*----------------------------------------------------------------
  *   import "DPI-C" function int svlib_dpi_imported_fileStat(
  *                            input  longint epochSeconds,
  *                            output int     timeItems[tmARRAYSIZE]);
@@ -343,6 +359,8 @@ extern int32_t svlib_dpi_imported_fileStat(const char *path, int asLink, int64_t
     stats[statATIME] = s.st_atime;
     stats[statCTIME] = s.st_ctime;
     stats[statSIZE]  = s.st_size;
+    stats[statUID]   = s.st_uid;
+    stats[statGID]   = s.st_gid;
     stats[statMODE]  = s.st_mode;
     return 0;
   }

@@ -11,6 +11,8 @@ typedef enum {
   statMTIME,
   statATIME,
   statCTIME,
+  statUID,
+  statGID,
   statSIZE,
   statMODE,
   statARRAYSIZE /* must always be the last one */

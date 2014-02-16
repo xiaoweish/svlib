@@ -155,8 +155,10 @@ package svlib_private_base_pkg;
 
     static svlibErrorManager singleton = null;
     static function svlibErrorManager getInstance();
-      if (singleton == null)
+      if (singleton == null) begin
+        $display("Making the error manager");
         singleton = Obstack#(svlibErrorManager)::obtain();
+      end
       return singleton;
     endfunction
 
@@ -164,30 +166,34 @@ package svlib_private_base_pkg;
       return valuePerProcess.exists(idx);
     endfunction
 
-    protected virtual function void newIndex(INDEX_T idx, int value, string details = "");
+    protected virtual function void update(INDEX_T idx, int value, string details = "");
       pendingPerProcess [idx] = (value != 0);
       valuePerProcess   [idx] = value;
-      userPerProcess    [idx] = defaultUserBit;
       detailsPerProcess [idx] = details;
     endfunction
 
-    virtual function bit check(int value, string details = "");
+    protected virtual function void newIndex(INDEX_T idx, int value, string details = "");
+      userPerProcess [idx] = defaultUserBit;
+      update(idx, value, details);
+    endfunction
+
+    virtual function void submit(int err, string details = "");
       INDEX_T idx = getIndex();
       if (!has(idx)) begin
-        newIndex(idx, value, details);
+        newIndex(idx, err, details);
       end
       else begin
-        if (pendingPerProcess[idx]) begin
-          svlibBase_check_unhandledError: assert (0) else
-            $error("Not yet handled before next errorable call: %s",
-                              getFullMessage()
-            );
+        svlibBase_check_unhandledError: assert (!pendingPerProcess[idx]) else
+          $error("Previous error not yet handled before next errorable call:\n  %s",
+                            getFullMessage()
+          );
+        update(idx, err, details);
+        if (!userPerProcess[idx]) begin
+          pendingPerProcess[idx] = 0;
+          assert (err == 0) else
+            $error(getFullMessage());
         end
-        valuePerProcess[idx] = value;
-        pendingPerProcess[idx] = (value != 0);
-        detailsPerProcess[idx] = details;
       end
-      return !userPerProcess[idx];
     endfunction
 
     virtual function int getLast(bit clear = 1);
@@ -231,11 +237,12 @@ package svlib_private_base_pkg;
       report.push_back($sformatf("----\\/---- Per-Process Error Manager ----\\/----"));
       report.push_back($sformatf("  Default user-mode = %b", defaultUserBit));
       if (userPerProcess.num) begin
-        report.push_back($sformatf("  user pend errno err"));
+        report.push_back($sformatf("  user pend details"));
         foreach (userPerProcess[idx]) begin
-          report.push_back($sformatf("    %b    %b  %4d  %s",
-                        userPerProcess[idx], pendingPerProcess[idx],
-                           valuePerProcess[idx], getText(valuePerProcess[idx])));
+          report.push_back($sformatf("    %b    %b  %s",
+                         userPerProcess[idx],
+                            pendingPerProcess[idx],
+                                fullMessageByIndex(idx)));
         end
       end
       report.push_back($sformatf("----/\\---- Per-Process Error Manager ----/\\----"));
@@ -269,8 +276,21 @@ package svlib_private_base_pkg;
       end
     endfunction
     
+    protected virtual function string fullMessageByIndex(INDEX_T idx);
+      return $sformatf("%s (errno=%0d): %s", 
+               getText(valuePerProcess[idx]), 
+                 valuePerProcess[idx], 
+                   detailsPerProcess[idx]);
+    endfunction
+    
     virtual function string getFullMessage();
-      return $sformatf("%s (errno=%0d): %s", getText(), getLast(0), getDetails());
+      INDEX_T idx = getIndex();
+      if (has(idx)) begin
+        return fullMessageByIndex(idx);
+      end
+      else begin
+        return "Unknown process";
+      end
     endfunction
     
   endclass

@@ -33,6 +33,8 @@ typedef struct {
   longint       atime;
   longint       ctime;
   longint       size;
+  int unsigned  uid;
+  int unsigned  gid;
   sysFileMode_s mode;
 } sys_fileStat_s;
 
@@ -73,19 +75,20 @@ function automatic sys_fileStat_s sys_fileStat(string path, bit asLink=0);
   int err;
   svlibErrorManager errorManager = error_getManager();
   err = svlib_dpi_imported_fileStat(path, asLink, stats);
-  if (errorManager.check(err, "sys_fileStat: error in system call")) begin
-    fileStat_check_syscall_ok:
-      assert (!err) else 
-        $error("Failed to stat \"%s\": %s", 
-                                path, error_fullMessage()
-        );
+  if (err) begin
+    errorManager.submit(err, 
+      $sformatf("sys_fileStat(.path(%s), .asLink(%b)): error in system call",
+                       str_quote(path),       asLink));
   end
-  if (!err) begin
+  else begin
+    errorManager.submit(0);
     sys_fileStat.mtime = stats[statMTIME];
     sys_fileStat.atime = stats[statATIME];
     sys_fileStat.ctime = stats[statCTIME];
     sys_fileStat.size  = stats[statSIZE ];
     sys_fileStat.mode  = stats[statMODE ];
+    sys_fileStat.uid   = stats[statUID  ];
+    sys_fileStat.gid   = stats[statGID  ];
   end
 endfunction
 
@@ -97,39 +100,52 @@ function automatic qs sys_fileGlob(string wildPath);
   svlibErrorManager errorManager = error_getManager();
 
   err = svlib_dpi_imported_globStart(wildPath, hnd, count);
-  if (errorManager.check(err)) begin
-    errorManager.setDetails($sformatf("error in sys_fileGlob(\"%s\")", wildPath));
-    fileGlob_check_globStart_ok:
-      assert (!err) else
-        $error("Failed to glob \"%s\": %s", wildPath, error_fullMessage());
+  if (err) begin
+    errorManager.submit(err,
+      $sformatf("error in sys_fileGlob(\"%s\")", wildPath));
   end
-
-  if (!err) begin
+  else begin
     err = svlib_private_getQS(hnd, paths);
-    if (errorManager.check(err)) begin
-      errorManager.setDetails($sformatf("DPI fail getting result strings from sys_fileGlob(\"%s\"", wildPath));
-      fileGlob_check_getQS_ok:
-        assert (!err) else
-         $error("Failed to get glob strings: %s", error_fullMessage());
+    if (err) begin
+      errorManager.submit(err, 
+        $sformatf("DPI fail getting result strings from sys_fileGlob(\"%s\"", wildPath));
+    end
+    else begin
+      errorManager.submit(0);
     end
   end
 
   return paths;
 endfunction
 
-function automatic string sys_getcwd();
+function automatic string sys_getEnv(string envVar);
+  string envStr;
+  if (svlib_dpi_imported_getenv(envVar, envStr) == 0) begin
+    return envStr;
+  end
+  else begin
+    return "";
+  end
+endfunction
+
+function automatic bit    sys_hasEnv(string envVar);
+  string envStr;
+  return (svlib_dpi_imported_getenv(envVar, envStr) == 0);
+endfunction
+
+function automatic string sys_getCwd();
   string cwd;
   int err;
   svlibErrorManager errorManager = error_getManager();
   
   err = svlib_dpi_imported_getcwd(cwd);
-  if (err != 0) cwd = "";
-  
-  if (errorManager.check(err)) begin
-    getcwd_check_ok:
-      assert (!err) else
-       $error("sys_getcwd() failed: %s", error_fullMessage());
+  if (err) begin
+    cwd = "";
+    errorManager.submit(err, "error in sys_getcwd()");
   end
-
+  else begin
+    errorManager.submit(0);
+  end
+  
   return cwd;
 endfunction

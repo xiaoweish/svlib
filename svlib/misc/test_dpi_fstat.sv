@@ -9,7 +9,7 @@ module test_dpi_fstat;
     string paths[$];
     sys_fileStat_s stat;
     
-    s = sys_getcwd();
+    s = sys_getCwd();
     result = error_getLast();
     if (result) begin
       $display("getcwd failed, result=%0d \"%s\"", result, s);
@@ -25,7 +25,7 @@ module test_dpi_fstat;
     if (error_getLast()) begin
       $display("Glob call yielded %s", error_details());
     end
-    else*/ begin
+    else begin
       $display("Directory listing of ../foo/* :");
       foreach (paths[i]) begin
         $display("  path[%0d]=\"%s\"", i, paths[i]);
@@ -82,7 +82,7 @@ module test_dpi_fstat;
     $display("perms = 0%04o", stat.mode.fPermissions);
     
     fork
-      stat = sys_fileStat("nonexistentFile");
+      #1 stat = sys_fileStat("nonexistentFile");
     join_none
     fork begin
       stat = sys_fileStat("nonexistentFile");
@@ -93,6 +93,7 @@ module test_dpi_fstat;
         $display("fileStat(\"nonexistentFile\") worked");
       end
     end join_none
+    $display(str_sjoin(error_debugReport(), "\n"));
     wait fork;
     
     ftime = sys_dayTime();
@@ -105,7 +106,12 @@ module test_dpi_fstat;
     
 
     $display("Finishing");
-    $display(str_sjoin(errorManager.report(), "\n"));
+    $display(str_sjoin(error_debugReport(), "\n"));
+    
+    $display("getEnv(ARK_USER_SETUP_DIR)=\"%s\"", sys_getEnv("ARK_USER_SETUP_DIR"));
+    $display("hasEnv(ARK_USER_SETUP_DIR)=%0d", sys_hasEnv("ARK_USER_SETUP_DIR"));
+    $display("getEnv(ark_USER_SETUP_DIR)=\"%s\"", sys_getEnv("ark_USER_SETUP_DIR"));
+    $display("hasEnv(ark_USER_SETUP_DIR)=%0d", sys_hasEnv("ark_USER_SETUP_DIR"));
     
   end
 

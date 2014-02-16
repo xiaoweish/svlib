@@ -13,6 +13,10 @@ import "DPI-C" function int     svlib_dpi_imported_regexRun(input  string re,
                                                output int    matchList[]);
 
 import "DPI-C" function int     svlib_dpi_imported_getcwd      (output string result);
+
+import "DPI-C" function int     svlib_dpi_imported_getenv(
+                                               input  string envVar,
+                                               output string result);
 import "DPI-C" function int     svlib_dpi_imported_globStart   (input  string pattern,
                                                    output chandle hnd,
                                                    output int     count);

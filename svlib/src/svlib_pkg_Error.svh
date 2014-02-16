@@ -1,13 +1,26 @@
+// Get a reference to the singleton errorManager object.
+// User code won't normally need this, but it's provided
+// to allow for future extensions.
 function automatic svlibErrorManager error_getManager();
   return svlibErrorManager::getInstance();
 endfunction
 
+// Set user error handling.
+// If setDefault is false or not supplied, the ~user~ bit specifies
+// whether future svlib errors in the current process will be handled
+// automatically by an assertion (0), or should be handled by the user (1).
+// If setDefault is true, the ~user~ bit specifies the default value
+// of userHandling for processes created in the future - it does NOT
+// change the userHandling setting for the current process.
 function automatic void error_userHandling(bit user, bit setDefault=0);
   svlibErrorManager errorManager = error_getManager();
   errorManager.setUserHandling(user, setDefault);
 endfunction
 
-// Get the most recent error, and clear it from the error tracker
+// Get the most recent error. Optionally, mark it as cleared
+// in the error tracker. Clearing the error does NOT destroy
+// the last-error and detailed error text until another
+// error occurs.
 function automatic int error_getLast(bit clear = 1);
   svlibErrorManager errorManager = error_getManager();
   return errorManager.getLast(clear);
@@ -28,9 +41,17 @@ function automatic string error_details();
   return errorManager.getDetails();
 endfunction
 
-// Get user-supplied details for the most recent error,
-// without clearing it.
+// Get a consistent, complete error message for the
+// most recent error, without clearing it. The message
+// is in the same format as used by svlib's built-in 
+// assertions.
 function automatic string error_fullMessage();
   svlibErrorManager errorManager = error_getManager();
   return errorManager.getFullMessage();
+endfunction
+
+// Debug reporting.
+function automatic qs error_debugReport();
+  svlibErrorManager errorManager = error_getManager();
+  return errorManager.report();
 endfunction
