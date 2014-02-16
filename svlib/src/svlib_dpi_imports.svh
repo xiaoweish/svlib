@@ -33,4 +33,9 @@ import "DPI-C" function int     svlib_dpi_imported_localTime   (input  longint e
                                                    output int     timeItems[tmARRAYSIZE]);
 import "DPI-C" function int     svlib_dpi_imported_timeFormatST(input  longint epochSeconds,
                                                    output string  formatted);
+                                                   
+import "DPI-C" function int     svlib_dpi_imported_access(
+                                              input string path,
+                                              input int mode,
+                                              output int ok);
   

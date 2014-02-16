@@ -26,6 +26,8 @@ class Pathname extends svlibBase;
 
 endclass
 
+/////////////////////////////////////////////////////////////////////////////
+
 function automatic longint file_mTime(string path, bit asLink=0);
   sys_fileStat_s stat = sys_fileStat(path, asLink);
   return stat.mtime;
@@ -51,8 +53,33 @@ function automatic longint file_mode(string path, bit asLink=0);
   return stat.mode;
 endfunction
 
+function automatic bit file_accessible(string path, ACCESS_MODE_E mode);
+  int ok;
+  svlibErrorManager errorManager = error_getManager();
+  int err = svlib_dpi_imported_access(path, mode, ok);
+  if (err) begin
+    qs modes;
+    ACCESS_MODE_E all_modes[$];
+    all_modes = EnumUtils#(ACCESS_MODE_E)::all_values();
+    foreach(all_modes[i]) begin
+      if (mode & all_modes[i]) begin
+        modes.push_back(all_modes[i].name);
+      end
+    end
+    // special case for the oddball, known to be zero
+    if (modes.size()==0) begin
+      modes.push_back("accessEXISTS");
+    end
+    errorManager.submit(err, 
+      $sformatf("file_accessible(%s, %s) failed", path, str_sjoin(modes, " | ")));
+  end
+  else begin
+    errorManager.submit(0);
+  end
 
-/////////////////////////////////////////////////////////////////////////////
+  return ok;
+endfunction
+
 
 `include "svlib_impl_File.svh"
 

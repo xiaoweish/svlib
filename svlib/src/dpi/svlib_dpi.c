@@ -534,6 +534,34 @@ extern uint32_t svlib_dpi_imported_regexRun(
   return result;
 }
 
+
+/*----------------------------------------------------------------
+ * import "DPI-C" function int svlib_dpi_imported_access(
+ *              input string path, input int mode, output int ok);
+ *----------------------------------------------------------------
+ */
+extern int32_t svlib_dpi_imported_access(char *path, int mode, int *ok) {
+  int flag;
+  int err;
+  
+  if (mode == accessEXISTS) {
+    flag = F_OK;
+  } else {
+    flag = 0;
+    if (mode & accessREAD)  flag |= R_OK; 
+    if (mode & accessWRITE) flag |= W_OK; 
+    if (mode & accessEXEC)  flag |= X_OK;
+  }
+  
+  err = access(path, flag);
+  *ok = (err == 0);
+  if ((err == EACCES) || (err == EROFS)) err = 0;
+  
+  return err;
+
+}
+
+
 #ifdef _CPLUSPLUS
 }
 #endif

@@ -45,3 +45,14 @@ typedef enum {
   regexNOCASE  = 1,
   regexNOLINE  = 2
 } REGEX_OPTIONS_E;
+
+/*  ACCESS_MODE_E
+ *  Bitmap to represent the various kinds of access (RWX) that
+ *  can be made to a file, for access() checking.
+ */
+typedef enum {
+  accessEXISTS = 0,
+  accessREAD   = 4,
+  accessWRITE  = 2,
+  accessEXEC   = 1
+} ACCESS_MODE_E;
