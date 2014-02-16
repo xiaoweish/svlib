@@ -91,23 +91,27 @@
 ../src/svlib_pkg_Error.svh: function automatic string error_text(int err=0);
 ../src/svlib_pkg_Error.svh: function automatic string error_details();
 ../src/svlib_pkg_Error.svh: function automatic string error_fullMessage();
-../src/svlib_pkg_File.svh: class Path extends Str;
-../src/svlib_pkg_File.svh:   extern static function bit    isAbsolute    (string path);
-../src/svlib_pkg_File.svh:   extern static function string dirname       (string path, int backsteps=1);
-../src/svlib_pkg_File.svh:   extern static function string extension     (string path);
-../src/svlib_pkg_File.svh:   extern static function string tail          (string path, int backsteps=1);
-../src/svlib_pkg_File.svh:   extern static function string commonAncestor(string path, string other);
-../src/svlib_pkg_File.svh:   extern static function string relPathTo     (string path, string other);
-../src/svlib_pkg_File.svh:   extern static function string normalize     (string path);
-../src/svlib_pkg_File.svh:   extern static function qs     decompose     (string path);
-../src/svlib_pkg_File.svh:   extern static function string compose       (qs subpaths);
-../src/svlib_pkg_File.svh:   extern static function string volume        (string path);  // always '/' on *nix
+../src/svlib_pkg_Error.svh: function automatic qs error_debugReport();
+../src/svlib_pkg_File.svh: class Pathname extends svlibBase;
+../src/svlib_pkg_File.svh:   extern static function Pathname create(string s = "");
+../src/svlib_pkg_File.svh:   extern virtual function string   get           ();
+../src/svlib_pkg_File.svh:   extern virtual function bit      isAbsolute    ();
+../src/svlib_pkg_File.svh:   extern virtual function string   dirname       (int backsteps=1);
+../src/svlib_pkg_File.svh:   extern virtual function string   extension     ();
+../src/svlib_pkg_File.svh:   extern virtual function string   basename      ();
+../src/svlib_pkg_File.svh:   extern virtual function string   tail          (int backsteps=1);
+../src/svlib_pkg_File.svh:   extern virtual function string   volume        ();  // always '/' on *nix
+../src/svlib_pkg_File.svh:   extern virtual function Pathname copy          ();
+../src/svlib_pkg_File.svh:   extern virtual function void     set           (string path);
+../src/svlib_pkg_File.svh:   extern virtual function void     append        (string tail);
+../src/svlib_pkg_File.svh:   extern virtual function void     appendPN      (Pathname tailPN);
 ../src/svlib_pkg_File.svh: endclass
 ../src/svlib_pkg_File.svh: function automatic longint file_mTime(string path, bit asLink=0);
 ../src/svlib_pkg_File.svh: function automatic longint file_aTime(string path, bit asLink=0);
 ../src/svlib_pkg_File.svh: function automatic longint file_cTime(string path, bit asLink=0);
 ../src/svlib_pkg_File.svh: function automatic longint file_size(string path, bit asLink=0);
 ../src/svlib_pkg_File.svh: function automatic longint file_mode(string path, bit asLink=0);
+../src/svlib_pkg_File.svh: function automatic bit file_accessible(string path, ACCESS_MODE_E mode);
 ../src/svlib_pkg_Regex.svh: class Regex extends svlibBase;
 ../src/svlib_pkg_Regex.svh:   extern static  function Regex  create (string s = "", int options=0);
 ../src/svlib_pkg_Regex.svh:   extern virtual function void   setRE  (string s);
@@ -161,4 +165,6 @@
 ../src/svlib_pkg_Sys.svh: function automatic longint unsigned sys_nanoseconds();
 ../src/svlib_pkg_Sys.svh: function automatic sys_fileStat_s sys_fileStat(string path, bit asLink=0);
 ../src/svlib_pkg_Sys.svh: function automatic qs sys_fileGlob(string wildPath);
-../src/svlib_pkg_Sys.svh: function automatic string sys_getcwd();
+../src/svlib_pkg_Sys.svh: function automatic string sys_getEnv(string envVar);
+../src/svlib_pkg_Sys.svh: function automatic bit    sys_hasEnv(string envVar);
+../src/svlib_pkg_Sys.svh: function automatic string sys_getCwd();
