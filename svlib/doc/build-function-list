@@ -1,0 +1,1 @@
+egrep '^( *(pure|virtual|static|extern))* *(function|class|endclass)' ../src/*_pkg_*  | grep -v '::.*(' |sed 's/svh:/svh: /' > function-list

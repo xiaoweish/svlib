@@ -1,0 +1,164 @@
+../src/svlib_pkg_Cfg.svh: virtual class svlibCfgBase extends svlibBase;
+../src/svlib_pkg_Cfg.svh:   pure virtual function cfgObjKind_e kind();
+../src/svlib_pkg_Cfg.svh:   virtual function string     getName();             return name;             endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function string     getLastErrorDetails(); return lastErrorDetails; endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function cfgError_e getLastError();        return lastError;        endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function string kindStr();
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: virtual class cfgScalar extends svlibCfgBase;
+../src/svlib_pkg_Cfg.svh:   pure virtual function string       str();
+../src/svlib_pkg_Cfg.svh:   pure virtual function bit          scan(string s);
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: virtual class cfgNode extends svlibCfgBase;
+../src/svlib_pkg_Cfg.svh:   pure virtual function string       sformat(int indent = 0);
+../src/svlib_pkg_Cfg.svh:   pure virtual function cfgNode      childByName(string idx);
+../src/svlib_pkg_Cfg.svh:   extern virtual function cfgNode lookup(string path);
+../src/svlib_pkg_Cfg.svh:   virtual function void addNode(cfgNode nd);
+../src/svlib_pkg_Cfg.svh:   virtual function cfgNode    getFoundNode(); return foundNode;   endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function string     getFoundPath(); return foundPath;   endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function cfgNode    getParent();    return parent;      endfunction
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: virtual class cfgSerDes extends svlibCfgBase;
+../src/svlib_pkg_Cfg.svh:   pure virtual function cfgError_e serialize  (cfgNode node, int options=0);
+../src/svlib_pkg_Cfg.svh:   pure virtual function cfgNode    deserialize(int options=0);
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: virtual class cfgFile extends cfgSerDes;
+../src/svlib_pkg_Cfg.svh:   virtual function string getFilePath(); return filePath;     endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function string getMode();     return mode;         endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function int    getFD();       return fd;           endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function cfgError_e openW(string fp); return open(fp, "w"); endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function cfgError_e openR(string fp); return open(fp, "r"); endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function cfgError_e close();
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: class cfgNodeScalar extends cfgNode;
+../src/svlib_pkg_Cfg.svh:   function string sformat(int indent = 0);
+../src/svlib_pkg_Cfg.svh:   function cfgObjKind_e kind(); return NODE_SCALAR; endfunction
+../src/svlib_pkg_Cfg.svh:   function cfgNode childByName(string idx); return null; endfunction
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: class cfgNodeSequence extends cfgNode;
+../src/svlib_pkg_Cfg.svh:   function string sformat(int indent = 0);
+../src/svlib_pkg_Cfg.svh:   function cfgObjKind_e kind(); return NODE_SEQUENCE; endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function void addNode(cfgNode nd);
+../src/svlib_pkg_Cfg.svh:   function cfgNode childByName(string idx);
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: class cfgNodeMap extends cfgNode;
+../src/svlib_pkg_Cfg.svh:   function string sformat(int indent = 0);
+../src/svlib_pkg_Cfg.svh:   function cfgObjKind_e kind(); return NODE_MAP; endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function void addNode(cfgNode nd);
+../src/svlib_pkg_Cfg.svh:   function cfgNode childByName(string idx);
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: virtual class cfgTypedScalar #(type T = int) extends cfgScalar;
+../src/svlib_pkg_Cfg.svh:   virtual function T    get();    return value; endfunction
+../src/svlib_pkg_Cfg.svh:   virtual function void set(T v); value = v;    endfunction
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: class cfgScalarInt extends cfgTypedScalar#(logic signed [63:0]);
+../src/svlib_pkg_Cfg.svh:   function string str();
+../src/svlib_pkg_Cfg.svh:   extern function bit scan(string s);
+../src/svlib_pkg_Cfg.svh:   function cfgObjKind_e kind(); return SCALAR_INT; endfunction
+../src/svlib_pkg_Cfg.svh:   static function cfgScalarInt create(T v = 0);
+../src/svlib_pkg_Cfg.svh:   static function cfgNodeScalar createNode(string name, T v = 0);
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: class cfgScalarString extends cfgTypedScalar#(string);
+../src/svlib_pkg_Cfg.svh:   function string str();
+../src/svlib_pkg_Cfg.svh:   function bit scan(string s);
+../src/svlib_pkg_Cfg.svh:   function cfgObjKind_e kind(); return SCALAR_STRING; endfunction
+../src/svlib_pkg_Cfg.svh:   static function cfgScalarString create(string v = "");
+../src/svlib_pkg_Cfg.svh:   static function cfgNodeScalar createNode(string name, string v = "");
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: class cfgFileINI extends cfgFile;
+../src/svlib_pkg_Cfg.svh:   function cfgObjKind_e kind(); return FILE_INI; endfunction
+../src/svlib_pkg_Cfg.svh:   static function cfgFileINI create(string name = "INI_FILE");
+../src/svlib_pkg_Cfg.svh:   function cfgError_e serialize  (cfgNode node, int options=0);
+../src/svlib_pkg_Cfg.svh:   function cfgNode deserialize(int options=0);
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Cfg.svh: class cfgFileYAML extends cfgFile;
+../src/svlib_pkg_Cfg.svh:   function cfgObjKind_e kind(); return FILE_YAML; endfunction
+../src/svlib_pkg_Cfg.svh:   static function cfgFileYAML create(string name = "YAML_FILE");
+../src/svlib_pkg_Cfg.svh:   function cfgError_e serialize  (cfgNode node, int options=0);
+../src/svlib_pkg_Cfg.svh:   function cfgNode deserialize(int options=0);
+../src/svlib_pkg_Cfg.svh: endclass
+../src/svlib_pkg_Enum.svh: class EnumUtils #(type ENUM = int);
+../src/svlib_pkg_Enum.svh:   extern static function ENUM from_name  (string s);
+../src/svlib_pkg_Enum.svh:   extern static function int  pos        (BASE   b);
+../src/svlib_pkg_Enum.svh:   extern static function bit  has_name   (string s);
+../src/svlib_pkg_Enum.svh:   extern static function bit  has_value  (BASE   b);
+../src/svlib_pkg_Enum.svh:   extern static function qe   all_values ();
+../src/svlib_pkg_Enum.svh:   extern static function ENUM match      (BASE   b, bit requireUnique = 0);
+../src/svlib_pkg_Enum.svh: endclass
+../src/svlib_pkg_Error.svh: function automatic svlibErrorManager error_getManager();
+../src/svlib_pkg_Error.svh: function automatic void error_userHandling(bit user, bit setDefault=0);
+../src/svlib_pkg_Error.svh: function automatic int error_getLast(bit clear = 1);
+../src/svlib_pkg_Error.svh: function automatic string error_text(int err=0);
+../src/svlib_pkg_Error.svh: function automatic string error_details();
+../src/svlib_pkg_Error.svh: function automatic string error_fullMessage();
+../src/svlib_pkg_File.svh: class Path extends Str;
+../src/svlib_pkg_File.svh:   extern static function bit    isAbsolute    (string path);
+../src/svlib_pkg_File.svh:   extern static function string dirname       (string path, int backsteps=1);
+../src/svlib_pkg_File.svh:   extern static function string extension     (string path);
+../src/svlib_pkg_File.svh:   extern static function string tail          (string path, int backsteps=1);
+../src/svlib_pkg_File.svh:   extern static function string commonAncestor(string path, string other);
+../src/svlib_pkg_File.svh:   extern static function string relPathTo     (string path, string other);
+../src/svlib_pkg_File.svh:   extern static function string normalize     (string path);
+../src/svlib_pkg_File.svh:   extern static function qs     decompose     (string path);
+../src/svlib_pkg_File.svh:   extern static function string compose       (qs subpaths);
+../src/svlib_pkg_File.svh:   extern static function string volume        (string path);  // always '/' on *nix
+../src/svlib_pkg_File.svh: endclass
+../src/svlib_pkg_File.svh: function automatic longint file_mTime(string path, bit asLink=0);
+../src/svlib_pkg_File.svh: function automatic longint file_aTime(string path, bit asLink=0);
+../src/svlib_pkg_File.svh: function automatic longint file_cTime(string path, bit asLink=0);
+../src/svlib_pkg_File.svh: function automatic longint file_size(string path, bit asLink=0);
+../src/svlib_pkg_File.svh: function automatic longint file_mode(string path, bit asLink=0);
+../src/svlib_pkg_Regex.svh: class Regex extends svlibBase;
+../src/svlib_pkg_Regex.svh:   extern static  function Regex  create (string s = "", int options=0);
+../src/svlib_pkg_Regex.svh:   extern virtual function void   setRE  (string s);
+../src/svlib_pkg_Regex.svh:   extern virtual function void   setOpts(int options);
+../src/svlib_pkg_Regex.svh:   extern virtual function void   setStr (Str s);
+../src/svlib_pkg_Regex.svh:   extern virtual function void   setStrContents (string s);
+../src/svlib_pkg_Regex.svh:   extern virtual function string getRE  ();
+../src/svlib_pkg_Regex.svh:   extern virtual function int    getOpts();
+../src/svlib_pkg_Regex.svh:   extern virtual function Str    getStr();
+../src/svlib_pkg_Regex.svh:   extern virtual function string getStrContents();
+../src/svlib_pkg_Regex.svh:   extern virtual function Regex  copy   ();
+../src/svlib_pkg_Regex.svh:   extern virtual function int    getError();
+../src/svlib_pkg_Regex.svh:   extern virtual function string getErrorString();
+../src/svlib_pkg_Regex.svh:   extern virtual function int    test   (Str s, int startPos=0);
+../src/svlib_pkg_Regex.svh:   extern virtual function int    retest (int startPos);
+../src/svlib_pkg_Regex.svh:   extern virtual function int    getMatchCount ();
+../src/svlib_pkg_Regex.svh:   extern virtual function int    getMatchStart (int match);
+../src/svlib_pkg_Regex.svh:   extern virtual function int    getMatchLength(int match);
+../src/svlib_pkg_Regex.svh:   extern virtual function string getMatchString(int match);
+../src/svlib_pkg_Regex.svh:   extern virtual function int    subst(Str s, string substStr, int startPos = 0);
+../src/svlib_pkg_Regex.svh:   extern virtual function int    substAll(Str s, string substStr, int startPos = 0);
+../src/svlib_pkg_Regex.svh: endclass
+../src/svlib_pkg_Regex.svh: function automatic Regex regexMatch(string haystack, string needle, int options=0);
+../src/svlib_pkg_Regex.svh: function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result);
+../src/svlib_pkg_Str.svh: class Str extends svlibBase;
+../src/svlib_pkg_Str.svh:   extern static  function Str    create(string s = "");
+../src/svlib_pkg_Str.svh:   extern virtual function string get   ();
+../src/svlib_pkg_Str.svh:   extern virtual function Str    copy  ();
+../src/svlib_pkg_Str.svh:   extern virtual function int    len   ();
+../src/svlib_pkg_Str.svh:   extern virtual function void   set   (string s);
+../src/svlib_pkg_Str.svh:   extern virtual function void   append(string s);
+../src/svlib_pkg_Str.svh:   extern virtual function int    first (string substr, int ignore=0);
+../src/svlib_pkg_Str.svh:   extern virtual function int    last  (string substr, int ignore=0);
+../src/svlib_pkg_Str.svh:   extern virtual function qs     split (string splitset="", bit keepSplitters=0);
+../src/svlib_pkg_Str.svh:   extern virtual function string sjoin (qs strings);
+../src/svlib_pkg_Str.svh:   extern virtual function string range (int p, int n, origin_e origin=START);
+../src/svlib_pkg_Str.svh:   extern virtual function void   replace(string rs, int p, int n, origin_e origin=START);
+../src/svlib_pkg_Str.svh:   extern virtual function void   trim  (side_e side=BOTH);
+../src/svlib_pkg_Str.svh:   extern virtual function void   pad   (int width, side_e side=BOTH);
+../src/svlib_pkg_Str.svh: endclass
+../src/svlib_pkg_Str.svh: function automatic bit isSpace(byte unsigned ch);
+../src/svlib_pkg_Str.svh: function automatic string str_sjoin(qs elements, string joiner);
+../src/svlib_pkg_Str.svh: function automatic string str_repeat(string s, int n);
+../src/svlib_pkg_Str.svh: function automatic string str_trim(string s, Str::side_e side=Str::BOTH);
+../src/svlib_pkg_Str.svh: function automatic string str_pad(string s, int width, Str::side_e side=Str::BOTH);
+../src/svlib_pkg_Str.svh: function automatic string str_quote(string s);
+../src/svlib_pkg_Str.svh: function automatic string str_replace(string s, string rs, int p, int n,
+../src/svlib_pkg_Sys.svh: function automatic string sys_formatTime(
+../src/svlib_pkg_Sys.svh: function automatic longint sys_dayTime();
+../src/svlib_pkg_Sys.svh: function automatic longint unsigned sys_clockResolution();
+../src/svlib_pkg_Sys.svh: function automatic longint unsigned sys_nanoseconds();
+../src/svlib_pkg_Sys.svh: function automatic sys_fileStat_s sys_fileStat(string path, bit asLink=0);
+../src/svlib_pkg_Sys.svh: function automatic qs sys_fileGlob(string wildPath);
+../src/svlib_pkg_Sys.svh: function automatic string sys_getcwd();
