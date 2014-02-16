@@ -1,39 +1,71 @@
-function Pathname Pathname::create(string s = "");
+// Render some subset of the path. Use first<0 if you
+// want the / volume indicator to appear as a prefix,
+// if the path is absolute.
+function string Pathname::render(int first, int last);
+  bit volPrefix;
+  string result;
+  if (first < 0) begin
+    first = 0;
+    volPrefix = absolute;
+  end
+  if ((first < comps.size()) && (last >= first)) begin
+    if (last >= comps.size()) last = comps.size()-1;
+    result = separator.sjoin(comps[first:last]);
+  end
+  if (volPrefix) begin
+    result = {volume(), result};
+  end
+  return result;
 endfunction
 
-function string Pathname::render(int first, int last);
-  if (!absolute || (first != 0)) begin
-    return separator.sjoin(comps[first:last]);
-  end
-  else if (last < first) begin
-    return volume();
-  end
-  else begin
-    return {volume(), separator.sjoin(comps[first:last])};
-  end
+function Pathname Pathname::create(string s = "");
+  Pathname p = Obstack#(Pathname)::obtain();
+  p.purge();
+  return p;
 endfunction
 
 function string Pathname::get();
-  return render(0, comps.size()-1);
+  return render(-1, comps.size()-1);
 endfunction
 
 function void Pathname::set(string path);
+  Str value = Str::create(path);
+  qs components = value.split("/", 0);
+  absolute = (value.first("/") == 0);
+  comps.delete();
+  foreach (components[i])
+    if (components[i] != "")
+      comps.push_back(components[i]);
 endfunction
 
-function string Pathname::append(string tail);
+function void Pathname::appendPN(Pathname tailPN);
+  if (tailPN.absolute) begin
+    // Ignore previous contents of this
+    this.absolute = 1;
+    this.comps = tailPN.comps;
+  end
+  else begin
+    this.comps = {this.comps, tailPN.comps};
+  end
+endfunction
+
+function void Pathname::append(string tail);
+  Pathname tailPN = Obstack#(Pathname)::obtain();
+  tailPN.set(tail);
+  appendPN(tailPN);
+  Obstack#(Pathname)::relinquish(tailPN);
 endfunction
 
 function Pathname Pathname::copy();
   Pathname result = Obstack#(Pathname)::obtain();
   result.comps = this.comps;
   result.absolute = this.absolute;
-  result.value = this.value.copy();
+  return result;
 endfunction
 
 function void Pathname::purge();
   comps = {};
   absolute = 0;
-  value.set("");
 endfunction
 
 function bit Pathname::isAbsolute();
@@ -41,7 +73,7 @@ function bit Pathname::isAbsolute();
 endfunction
 
 function string Pathname::dirname(int backsteps=1);
-  return render(0, comps.size()-(1+backsteps));
+  return render(-1, comps.size()-(1+backsteps));
 endfunction
 
 function string Pathname::extension();
@@ -59,16 +91,15 @@ function string Pathname::extension();
   end
 endfunction
 
-function string Pathname::tail(int backsteps=1);
-  return render(comps.size()-backsteps, comps.size()-1);
+function string Pathname::basename();
+  string s = extension();
+  int extLen = s.len();
+  s = get();
+  return s.substr(0, s.len() - (extLen + 1));
 endfunction
 
-function void Pathname::decompose();
-  qs components = value.split("/", 0);
-  absolute = (value.first("/") == 0);
-  foreach (components[i])
-    if (components[i] != "")
-      comps.push_back(components[i]);
+function string Pathname::tail(int backsteps=1);
+  return render(comps.size()-backsteps, comps.size()-1);
 endfunction
 
 function string Pathname::volume();  // always '/' on *nix

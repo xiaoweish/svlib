@@ -3,25 +3,25 @@ class Pathname extends svlibBase;
   extern static function Pathname create(string s = "");
 
   extern virtual function string   get           ();
-  extern virtual function void     set           (string path);
-  
   extern virtual function bit      isAbsolute    ();
   extern virtual function string   dirname       (int backsteps=1);
   extern virtual function string   extension     ();
+  extern virtual function string   basename      ();
   extern virtual function string   tail          (int backsteps=1);
-  extern virtual function string   append        (string tail);
   extern virtual function string   volume        ();  // always '/' on *nix
+  
   extern virtual function Pathname copy          ();
+  extern virtual function void     set           (string path);
+  extern virtual function void     append        (string tail);
+  extern virtual function void     appendPN      (Pathname tailPN);
   
   // forbid construction
   protected function new(); endfunction
-  extern protected virtual function void purge();
-  extern protected virtual function void decompose();
+  extern protected virtual function void   purge();
   extern protected virtual function string render(int first, int last);
 
   protected qs  comps;
   protected bit absolute;
-  protected Str value;
   static protected Str separator = Str::create("/");
 
 endclass
