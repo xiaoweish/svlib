@@ -1,4 +1,27 @@
-/*  These enum typedefs are valid syntax in both C and SV,
+/*=============================================================================
+ *  @brief  
+ *  @author Jonathan Bromley, Verilab (www.verilab.com)
+ * =============================================================================
+ *
+ *                      svlib SystemVerilab Utilities Library
+ *
+ * @File: svlib_shared_c_sv.h
+ *
+ * Copyright 2014 Verilab, Inc.
+ * 
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *=============================================================================
+ *  These enum typedefs are valid syntax in both C and SV,
  *  so this file can be #included into C code or `included into SV.
  *  The types are used to share constants specifying mapping between
  *  fields of some C struct and elements of an SV array.
