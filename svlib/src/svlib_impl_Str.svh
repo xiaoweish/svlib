@@ -29,7 +29,7 @@
 // should not be used in any other context.
 
 function void Str::get_range_positions(
-  int p, int n, origin_e origin=START,
+  int p, int n, origin_enum origin=START,
   output int L, output int R
 );
   int len = value.len;
@@ -105,7 +105,7 @@ function int Str::last(string substr, int ignore=0);
 endfunction
 
 // Replace the range p/n with some other string, not necessarily same length
-function void Str::replace(string rs, int p, int n, origin_e origin=START);
+function void Str::replace(string rs, int p, int n, origin_enum origin=START);
   int len = value.len;
   int L, R;
   get_range_positions(p, n, origin, L, R);
@@ -114,7 +114,7 @@ function void Str::replace(string rs, int p, int n, origin_e origin=START);
   value = {value.substr(0, L-1), rs, value.substr(R, len-1)};
 endfunction
 
-function string Str::range(int p, int n, origin_e origin=START);
+function string Str::range(int p, int n, origin_enum origin=START);
   int L, R;
   get_range_positions(p, n, origin, L, R);
   clip_to_bounds(L);
@@ -125,7 +125,7 @@ function string Str::range(int p, int n, origin_e origin=START);
 endfunction
 
 // Trim a string (remove leading and/or trailing whitespace)
-function void Str::trim(side_e side=BOTH);
+function void Str::trim(side_enum side=BOTH);
   int first;
   int last;
   if (side == NONE) return;
@@ -141,7 +141,7 @@ function void Str::trim(side_e side=BOTH);
 endfunction
 
 // Pad a string to ~width~ with spaces on left/right/both
-function void Str::pad(int width, side_e side=BOTH);
+function void Str::pad(int width, side_enum side=BOTH);
   int n, n2;
   if (side == NONE) return;
   n = width - signed'(value.len);

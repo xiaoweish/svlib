@@ -25,7 +25,7 @@ typedef enum {
   NODE_SCALAR, NODE_SEQUENCE, NODE_MAP,
   SCALAR_STRING, SCALAR_INT,
   FILE_INI, FILE_YAML
-} cfgObjKind_e;
+} cfgObjKind_enum;
 
 typedef enum { // Codes for errors from this package
 
@@ -69,23 +69,23 @@ typedef enum { // Codes for errors from this package
   CFG_LOOKUP_NULL_NODE,    // found a null node in the hierarchy
   CFG_LOOKUP_NOT_FOUND     // [N] out of range, or .key not found
 
-} cfgError_e;
+} cfgError_enum;
 
 // This enumeration actually represents a bit mask.
 typedef enum int {
   CFG_OPT_NONE = 'h0000
-} cfgOptions_e;
+} cfgOptions_enum;
 
 virtual class svlibCfgBase extends svlibBase;
-  pure virtual function cfgObjKind_e kind();
+  pure virtual function cfgObjKind_enum kind();
   protected string     name;
-  protected cfgError_e lastError;
+  protected cfgError_enum lastError;
   protected string     lastErrorDetails;
   virtual function string     getName();             return name;             endfunction
   virtual function string     getLastErrorDetails(); return lastErrorDetails; endfunction
-  virtual function cfgError_e getLastError();        return lastError;        endfunction
+  virtual function cfgError_enum getLastError();        return lastError;        endfunction
   virtual function string kindStr();
-    cfgObjKind_e k = kind();
+    cfgObjKind_enum k = kind();
     return k.name;
   endfunction
   protected virtual function void purge();
@@ -93,7 +93,7 @@ virtual class svlibCfgBase extends svlibBase;
     lastError = CFG_OK;
     lastErrorDetails = "";
   endfunction
-  protected virtual function void cfgObjError(cfgError_e err);
+  protected virtual function void cfgObjError(cfgError_enum err);
     if (err == CFG_OK) return;
     // There was an error. Set up the error information:
     lastError = err;
@@ -104,7 +104,7 @@ virtual class svlibCfgBase extends svlibBase;
         $error("%s \"%s\": %s",
          kindStr(), name, lastErrorDetails);
   endfunction
-  protected virtual function string errorDetails(cfgError_e err);
+  protected virtual function string errorDetails(cfgError_enum err);
     return $sformatf("operation failed because %s", err.name);
   endfunction
 endclass
@@ -139,7 +139,7 @@ virtual class cfgNode extends svlibCfgBase;
 endclass
 
 virtual class cfgSerDes extends svlibCfgBase;
-  pure virtual function cfgError_e serialize  (cfgNode node, int options=0);
+  pure virtual function cfgError_enum serialize  (cfgNode node, int options=0);
   pure virtual function cfgNode    deserialize(int options=0);
 endclass
 
@@ -154,7 +154,7 @@ virtual class cfgFile extends cfgSerDes;
     super.purge();
     if (fd) void'(close());
   endfunction
-  protected virtual function cfgError_e open(string fp, string rw);
+  protected virtual function cfgError_enum open(string fp, string rw);
     void'(close());
     if (!(rw inside {"r", "w"})) begin
       return CFG_OPEN_BAD_FILE_MODE;
@@ -166,9 +166,9 @@ virtual class cfgFile extends cfgSerDes;
     end
     return (mode != "") ? CFG_OK : CFG_OPEN_NO_FILE;
   endfunction
-  virtual function cfgError_e openW(string fp); return open(fp, "w"); endfunction
-  virtual function cfgError_e openR(string fp); return open(fp, "r"); endfunction
-  virtual function cfgError_e close();
+  virtual function cfgError_enum openW(string fp); return open(fp, "w"); endfunction
+  virtual function cfgError_enum openR(string fp); return open(fp, "r"); endfunction
+  virtual function cfgError_enum close();
     mode = "";
     filePath = "";
     if (fd) begin
@@ -192,7 +192,7 @@ class cfgNodeScalar extends cfgNode;
     super.purge();
     value = null;
   endfunction
-  function cfgObjKind_e kind(); return NODE_SCALAR; endfunction
+  function cfgObjKind_enum kind(); return NODE_SCALAR; endfunction
   function cfgNode childByName(string idx); return null; endfunction
 endclass
 
@@ -209,7 +209,7 @@ class cfgNodeSequence extends cfgNode;
       sformat = {sformat, str_repeat(" ", indent), "- \n", value[i].sformat(indent+1)};
     end
   endfunction
-  function cfgObjKind_e kind(); return NODE_SEQUENCE; endfunction
+  function cfgObjKind_enum kind(); return NODE_SEQUENCE; endfunction
   virtual function void addNode(cfgNode nd);
     if (nd == null) begin
       cfgObjError(CFG_ADDNODE_NULL);
@@ -245,7 +245,7 @@ class cfgNodeMap extends cfgNode;
       sformat = {sformat, str_repeat(" ", indent), s, " : \n", value[s].sformat(indent+1)};
     end
   endfunction
-  function cfgObjKind_e kind(); return NODE_MAP; endfunction
+  function cfgObjKind_enum kind(); return NODE_MAP; endfunction
   virtual function void addNode(cfgNode nd);
     if (nd == null) begin
       cfgObjError(CFG_ADDNODE_NULL);
@@ -294,7 +294,7 @@ class cfgScalarInt extends cfgTypedScalar#(logic signed [63:0]);
     end
   endfunction
   extern function bit scan(string s);
-  function cfgObjKind_e kind(); return SCALAR_INT; endfunction
+  function cfgObjKind_enum kind(); return SCALAR_INT; endfunction
   static function cfgScalarInt create(T v = 0);
     create = Obstack#(cfgScalarInt)::obtain();
     create.name = "";
@@ -317,7 +317,7 @@ class cfgScalarString extends cfgTypedScalar#(string);
     set(s);
     return 1;
   endfunction
-  function cfgObjKind_e kind(); return SCALAR_STRING; endfunction
+  function cfgObjKind_enum kind(); return SCALAR_STRING; endfunction
   static function cfgScalarString create(string v = "");
     create = Obstack#(cfgScalarString)::obtain();
     create.name = "";
@@ -333,7 +333,7 @@ endclass
 class cfgFileINI extends cfgFile;
   // forbid construction
   protected function new(); endfunction
-  function cfgObjKind_e kind(); return FILE_INI; endfunction
+  function cfgObjKind_enum kind(); return FILE_INI; endfunction
   static function cfgFileINI create(string name = "INI_FILE");
     create = Obstack#(cfgFileINI)::obtain();
     create.name = name;
@@ -343,7 +343,7 @@ class cfgFileINI extends cfgFile;
     foreach (node.comments[i]) $fdisplay(fd, "# %s", node.comments[i]);
   endfunction
 
-  protected function cfgError_e writeScalar(string key, cfgNodeScalar ns);
+  protected function cfgError_enum writeScalar(string key, cfgNodeScalar ns);
     cfgScalarString css;
     Str str;
     bit must_quote;
@@ -364,8 +364,8 @@ class cfgFileINI extends cfgFile;
     return CFG_OK;
   endfunction
 
-  protected function cfgError_e writeMap(string key, cfgNodeMap nm);
-    cfgError_e err;
+  protected function cfgError_enum writeMap(string key, cfgNodeMap nm);
+    cfgError_enum err;
     $fdisplay(fd);
     writeComments(nm);
     $fdisplay(fd, "[%s]", key);
@@ -384,9 +384,9 @@ class cfgFileINI extends cfgFile;
     return CFG_OK;
   endfunction
 
-  function cfgError_e serialize  (cfgNode node, int options=0);
+  function cfgError_enum serialize  (cfgNode node, int options=0);
     cfgNodeMap root;
-    cfgError_e err;
+    cfgError_enum err;
     if (mode != "w")             return CFG_SERIALIZE_FILE_NOT_WRITE;
     if (node == null)            return CFG_SERIALIZE_NULL;
     if (node.kind() != NODE_MAP) return CFG_SERIALIZE_INI_TOP_NOT_MAP;
@@ -510,12 +510,12 @@ class cfgFileYAML extends cfgFile;
   protected function void purge();
     super.purge();
   endfunction
-  function cfgObjKind_e kind(); return FILE_YAML; endfunction
+  function cfgObjKind_enum kind(); return FILE_YAML; endfunction
   static function cfgFileYAML create(string name = "YAML_FILE");
     create = Obstack#(cfgFileYAML)::obtain();
     create.name = name;
   endfunction
-  function cfgError_e serialize  (cfgNode node, int options=0);
+  function cfgError_enum serialize  (cfgNode node, int options=0);
     return CFG_YAML_NOT_YET_IMPLEMENTED;
   endfunction
   function cfgNode deserialize(int options=0);

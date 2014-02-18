@@ -31,8 +31,8 @@
 //
 class Str extends svlibBase;
 
-  typedef enum {NONE, LEFT, RIGHT, BOTH} side_e;
-  typedef enum {START, END} origin_e;
+  typedef enum {NONE, LEFT, RIGHT, BOTH} side_enum;
+  typedef enum {START, END} origin_enum;
 
   // Protect the constructor so that users can't call it
   protected function new(); endfunction
@@ -81,17 +81,17 @@ class Str extends svlibBase;
   // beyond the end (or start) of the string.
   // Clip result to smaller than n if necessary so that the result remains
   // entirely within the bounds of the original string.
-  extern virtual function string range (int p, int n, origin_e origin=START);
+  extern virtual function string range (int p, int n, origin_enum origin=START);
 
   // Replace the range p/n with some other string, not necessarily same length.
   // If n==0 this is an insert operation.
-  extern virtual function void   replace(string rs, int p, int n, origin_e origin=START);
+  extern virtual function void   replace(string rs, int p, int n, origin_enum origin=START);
 
   // Trim a string (remove leading and/or trailing whitespace)
-  extern virtual function void   trim  (side_e side=BOTH);
+  extern virtual function void   trim  (side_enum side=BOTH);
 
   // Pad a string to width with spaces on left/right/both
-  extern virtual function void   pad   (int width, side_e side=BOTH);
+  extern virtual function void   pad   (int width, side_enum side=BOTH);
 
   protected string value;
   protected function void setClean(string s);
@@ -100,7 +100,7 @@ class Str extends svlibBase;
   endfunction
 
   extern protected function void get_range_positions(
-    int p, int n, origin_e origin=START,
+    int p, int n, origin_enum origin=START,
     output int L, output int R
   );
   extern protected function void clip_to_bounds(inout int n);
@@ -124,7 +124,7 @@ function automatic string str_repeat(string s, int n);
   return {n{s}};
 endfunction
 
-function automatic string str_trim(string s, Str::side_e side=Str::BOTH);
+function automatic string str_trim(string s, Str::side_enum side=Str::BOTH);
   Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.trim(side);
@@ -132,7 +132,7 @@ function automatic string str_trim(string s, Str::side_e side=Str::BOTH);
   Obstack#(Str)::relinquish(str);
 endfunction
 
-function automatic string str_pad(string s, int width, Str::side_e side=Str::BOTH);
+function automatic string str_pad(string s, int width, Str::side_enum side=Str::BOTH);
   Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.pad(width, side);
@@ -148,7 +148,7 @@ endfunction
   // Replace the range p/n with some other string, not necessarily same length.
   // If n==0 this is an insert operation.
 function automatic string str_replace(string s, string rs, int p, int n,
-                                      Str::origin_e origin=Str::START);
+                                      Str::origin_enum origin=Str::START);
   Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.replace(rs, p, n, origin);

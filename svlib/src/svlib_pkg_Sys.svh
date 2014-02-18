@@ -44,10 +44,10 @@ typedef enum bit [3:0] {
   fTypeFile    = 4'h8,
   fTypeSymLink = 4'hA,
   fTypeSocket  = 4'hC
-} sysFileType_e;
+} sysFileType_enum;
 
 typedef struct packed {
-  sysFileType_e        fType;
+  sysFileType_enum     fType;
   sysFilePermissions_s fPermissions;
 } sysFileMode_s;
 
