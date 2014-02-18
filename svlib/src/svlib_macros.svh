@@ -1,5 +1,5 @@
 //=============================================================================
-//  @brief  
+//  @brief macro definitions
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //
@@ -24,7 +24,7 @@
 `ifndef SVLIB_MACROS__DEFINED
 `define SVLIB_MACROS__DEFINED
 
-// ------------------------------------------------------------------
+//=============================================================================
 // This file defines various macros for svLib. Users should 
 // `include this file in any source file that uses any of these
 // macros.  Doing so will NOT compile or import any of the svLib
@@ -33,7 +33,7 @@
 // Note that the macros should normally be `include-d at the 
 // outermost level, whereas packages should always be imported
 // into a module, interface or package.
-// ------------------------------------------------------------------
+//=============================================================================
 
 // foreach_enum
 // ------------

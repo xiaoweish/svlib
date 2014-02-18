@@ -1,5 +1,5 @@
 //=============================================================================
-//  @brief  
+//  @brief  Regex class and methods
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //
@@ -21,12 +21,33 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //=============================================================================
+
+//=============================================================================
+// class definitions
+
 class Regex extends svlibBase;
 
-  // forbid construction
-  protected function new(); endfunction
-
   typedef enum {NOCASE=regexNOCASE, NOLINE=regexNOLINE} regexOptions;
+
+  //-----------------------------------------------------------------------------
+  // Protected functions and members
+
+  protected int nMatches;
+  protected int lastError;
+  protected int matchList[20];
+  protected Str runStr;
+
+  //protected int     compiledRegexKey;    // for lookup on C side
+  //protected chandle compiledRegexHandle; // check on C-side pointer
+
+  protected int    options;
+  protected string text;
+
+  // forbid construction
+  protected function new(); 
+            endfunction: new
+
+  //-----------------------------------------------------------------------------
 
   extern static  function Regex  create (string s = "", int options=0);
   // Set the regular expression string
@@ -75,19 +96,12 @@ class Regex extends svlibBase;
   extern protected virtual function void   purge();
   extern protected virtual function int    match_subst(string substStr);
 
-  protected int nMatches;
-  protected int lastError;
-  protected int matchList[20];
-  protected Str runStr;
+endclass: Regex
 
-  //protected int     compiledRegexKey;    // for lookup on C side
-  //protected chandle compiledRegexHandle; // check on C-side pointer
+//=============================================================================
+// Function definitions that are not part of classes
 
-  protected int    options;
-  protected string text;
-
-endclass
-
+// regexMatch =================================================================
 function automatic Regex regexMatch(string haystack, string needle, int options=0);
   Regex re;
   Str   s;
@@ -105,8 +119,9 @@ function automatic Regex regexMatch(string haystack, string needle, int options=
   // Return the unwanted Regex object to the obstack
   Obstack#(Regex)::relinquish(re);
   return null;
-endfunction
+endfunction: regexMatch
 
+// scanVerilogInt =============================================================
 function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result);
   bit ok;
   Regex re;
@@ -164,7 +179,9 @@ function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result
   
   return ok;
   
-endfunction
+endfunction: scanVerilogInt
 
+// ============================================================================
+/////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////
 
 `include "svlib_impl_Regex.svh"

@@ -1,5 +1,5 @@
-//=============================================================================
-//  @brief  
+//==============================================================================
+//  @brief  Package of sys types and functions
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //
@@ -21,6 +21,11 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //=============================================================================
+
+
+//=============================================================================
+// Type definitions 
+
 typedef struct packed {
   bit r;
   bit w;
@@ -61,6 +66,13 @@ typedef struct {
   sysFileMode_s mode;
 } sys_fileStat_s;
 
+//=============================================================================
+
+
+//=============================================================================
+// Function Definitions
+
+// sys_formatTime =============================================================
 function automatic string sys_formatTime(
     input longint epochSeconds,
     input string  format
@@ -73,26 +85,30 @@ function automatic string sys_formatTime(
     void'(svlib_dpi_imported_timeFormat(epochSeconds, format, result));
   end
   return result;
-endfunction
+endfunction: sys_formatTime
 
+// sys_dayTime ================================================================
 function automatic longint sys_dayTime();
   longint result, junk_ns;
   svlib_dpi_imported_hiResTime(0, result, junk_ns);
   return result;
-endfunction
+endfunction: sys_dayTime
 
+// sys_clockResolution ========================================================
 function automatic longint unsigned sys_clockResolution();
   longint seconds, nanoseconds;
   svlib_dpi_imported_hiResTime(1, seconds, nanoseconds);
   return 1e9*seconds + nanoseconds;
-endfunction
+endfunction: sys_clockResolution
 
+// sys_nsTime =================================================================
 function automatic longint unsigned sys_nsTime();
   longint seconds, nanoseconds;
   svlib_dpi_imported_hiResTime(0, seconds, nanoseconds);
   return 1e9*seconds + nanoseconds;
-endfunction
+endfunction: sys_nsTime
 
+// sys_fileStat ===============================================================
 function automatic sys_fileStat_s sys_fileStat(string path, bit asLink=0);
   longint stats[statARRAYSIZE];
   int err;
@@ -113,8 +129,9 @@ function automatic sys_fileStat_s sys_fileStat(string path, bit asLink=0);
     sys_fileStat.uid   = stats[statUID  ];
     sys_fileStat.gid   = stats[statGID  ];
   end
-endfunction
+endfunction: sys_fileStat
 
+// sys_fileGlob ===============================================================
 function automatic qs sys_fileGlob(string wildPath);
   qs      paths;
   chandle hnd;
@@ -139,8 +156,9 @@ function automatic qs sys_fileGlob(string wildPath);
   end
 
   return paths;
-endfunction
+endfunction: sys_fileGlob
 
+// sys_getEnv ==================================================================
 function automatic string sys_getEnv(string envVar);
   string envStr;
   if (svlib_dpi_imported_getenv(envVar, envStr) == 0) begin
@@ -149,13 +167,15 @@ function automatic string sys_getEnv(string envVar);
   else begin
     return "";
   end
-endfunction
+endfunction: sys_getEnv
 
+// sys_hasEnv ==================================================================
 function automatic bit    sys_hasEnv(string envVar);
   string envStr;
   return (svlib_dpi_imported_getenv(envVar, envStr) == 0);
-endfunction
+endfunction: sys_hasEnv
 
+// sys_getCwd ==================================================================
 function automatic string sys_getCwd();
   string cwd;
   int err;
@@ -171,4 +191,4 @@ function automatic string sys_getCwd();
   end
   
   return cwd;
-endfunction
+endfunction: sys_getCwd

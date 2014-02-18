@@ -1,5 +1,5 @@
 //=============================================================================
-//  @brief  
+//  @brief  Class to provide utility services for an enum.
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //
@@ -28,21 +28,18 @@
 // at all on the type parameter, enforcing the requirement for an override;
 // but certain tools that shall remain nameless don't yet support that.
 //
+
+//=============================================================================
+// class definitions
+
 class EnumUtils #(type ENUM = int);
 
   typedef ENUM qe[$];
   typedef logic [$bits(ENUM)-1:0] BASE;
+
+  //-----------------------------------------------------------------------------
+  // Protected functions and members
   
-  protected function new(); endfunction // forbid construction
-
-  // Public methods (implementation appears later)
-  extern static function ENUM from_name  (string s);
-  extern static function int  pos        (BASE   b);
-  extern static function bit  has_name   (string s);
-  extern static function bit  has_value  (BASE   b);
-  extern static function qe   all_values ();
-  extern static function ENUM match      (BASE   b, bit requireUnique = 0);
-
   // List of all values, lazy-evaluated
   protected static qe   m_all_values;
   protected static ENUM m_map[string];
@@ -51,6 +48,20 @@ class EnumUtils #(type ENUM = int);
   // The lazy-evaluator
   extern protected static function void m_build();
 
-endclass
+  // forbid construction
+  protected function new(); 
+            endfunction: new
+
+  extern static function ENUM from_name  (string s);
+  extern static function int  pos        (BASE   b);
+  extern static function bit  has_name   (string s);
+  extern static function bit  has_value  (BASE   b);
+  extern static function qe   all_values ();
+  extern static function ENUM match      (BASE   b, bit requireUnique = 0);
+
+endclass: EnumUtils
+
+// ============================================================================
+/////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////
 
 `include "svlib_impl_Enum.svh"

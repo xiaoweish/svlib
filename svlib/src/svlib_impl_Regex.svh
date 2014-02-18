@@ -1,5 +1,5 @@
 //=============================================================================
-//  @brief  
+//  @brief  Implementations (bodies) of extern functions in class Regex
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //

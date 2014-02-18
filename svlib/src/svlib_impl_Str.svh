@@ -1,5 +1,5 @@
 //=============================================================================
-//  @brief  
+//  @brief  Implementations (bodies) of extern functions in class Str
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //

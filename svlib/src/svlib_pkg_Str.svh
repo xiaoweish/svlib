@@ -1,5 +1,5 @@
 //=============================================================================
-//  @brief  
+//  @brief  Package of classes and functions for Str operations
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //
@@ -29,18 +29,40 @@
 //   Str object, possibly returning a result and possibly
 //   modifying the stored object.
 //
+//=============================================================================
+
+//=============================================================================
+// Class definitions
 class Str extends svlibBase;
 
   typedef enum {NONE, LEFT, RIGHT, BOTH} side_enum;
   typedef enum {START, END} origin_enum;
 
-  // Protect the constructor so that users can't call it
-  protected function new(); endfunction
+ 
+  //-----------------------------------------------------------------------------
+  // Protected functions and members
+
+  // constructor so that users can't call it
+  protected function new(); 
+            endfunction: new
   
   protected function void purge();
-    setClean("");
-  endfunction
+              setClean("");
+            endfunction: purge
   
+  protected string value;
+  protected function void setClean(string s);
+            // Zap all to initial state except for "value"
+              value = s;
+            endfunction: setClean
+
+  extern protected function void get_range_positions(
+                     int p, int n, origin_enum origin=START,
+                     output int L, output int R
+                   );
+  extern protected function void clip_to_bounds(inout int n);
+
+  //-----------------------------------------------------------------------------
   // Save a string as an object so that further manipulations can
   // be performed on it.  Get and set the object's string value.
   extern static  function Str    create(string s = "");
@@ -93,58 +115,60 @@ class Str extends svlibBase;
   // Pad a string to width with spaces on left/right/both
   extern virtual function void   pad   (int width, side_enum side=BOTH);
 
-  protected string value;
-  protected function void setClean(string s);
-    // Zap all to initial state except for "value"
-    value = s;
-  endfunction
 
-  extern protected function void get_range_positions(
-    int p, int n, origin_enum origin=START,
-    output int L, output int R
-  );
-  extern protected function void clip_to_bounds(inout int n);
+endclass: Str
 
-endclass
+//=============================================================================
 
 
+//=============================================================================
+// Function definitions that are not class-based
+
+
+// isSpace ====================================================================
 function automatic bit isSpace(byte unsigned ch);
   return (ch inside {"\t", "\n", " ", 13, 160});  // CR, nbsp
-endfunction
+endfunction: isSpace
 
+// str_sjoin ==================================================================
 function automatic string str_sjoin(qs elements, string joiner);
   Str str = Obstack#(Str)::obtain();
   str.set(joiner);
   str_sjoin = str.sjoin(elements);
   Obstack#(Str)::relinquish(str);
-endfunction
+endfunction: str_sjoin
 
+// str_repeat =================================================================
 function automatic string str_repeat(string s, int n);
   if (n<=0) return "";
   return {n{s}};
-endfunction
+endfunction: str_repeat
 
+// str_trim ===================================================================
 function automatic string str_trim(string s, Str::side_enum side=Str::BOTH);
   Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.trim(side);
   str_trim = str.get();
   Obstack#(Str)::relinquish(str);
-endfunction
+endfunction: str_trim
 
+// str_pad ====================================================================
 function automatic string str_pad(string s, int width, Str::side_enum side=Str::BOTH);
   Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.pad(width, side);
   str_pad = str.get();
   Obstack#(Str)::relinquish(str);
-endfunction
+endfunction: str_pad
 
+// str_quote ==================================================================
 function automatic string str_quote(string s);
   // IMPERFECT IMPLEMENTATION - need to escape quotes and backslashes
   return $sformatf("\"%s\"", s);
-endfunction
+endfunction: str_quote
 
+// str_replace ================================================================
   // Replace the range p/n with some other string, not necessarily same length.
   // If n==0 this is an insert operation.
 function automatic string str_replace(string s, string rs, int p, int n,
@@ -154,8 +178,9 @@ function automatic string str_replace(string s, string rs, int p, int n,
   str.replace(rs, p, n, origin);
   str_replace = str.get();
   Obstack#(Str)::relinquish(str);
-endfunction
+endfunction: str_replace
 
-/////////////////////// IMPLEMENTATIONS OF EXTERN METHODS ///////////////////
+// ============================================================================
+/////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////
 
 `include "svlib_impl_Str.svh"

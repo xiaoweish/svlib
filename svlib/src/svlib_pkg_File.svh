@@ -1,5 +1,5 @@
 //=============================================================================
-//  @brief  
+//  @brief  class and methods for pathnames
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //
@@ -21,7 +21,24 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //=============================================================================
+
 class Pathname extends svlibBase;
+
+  //-----------------------------------------------------------------------------
+  // Protected functions and members
+
+  // forbid construction
+  protected function new(); 
+            endfunction: new
+
+  extern protected virtual function void   purge();
+  extern protected virtual function string render(int first, int last);
+
+  protected qs  comps;
+  protected bit absolute;
+  static protected Str separator = Str::create("/");
+
+  //-----------------------------------------------------------------------------
 
   extern static function Pathname create(string s = "");
 
@@ -38,44 +55,43 @@ class Pathname extends svlibBase;
   extern virtual function void     append        (string tail);
   extern virtual function void     appendPN      (Pathname tailPN);
   
-  // forbid construction
-  protected function new(); endfunction
-  extern protected virtual function void   purge();
-  extern protected virtual function string render(int first, int last);
+endclass: Pathname
 
-  protected qs  comps;
-  protected bit absolute;
-  static protected Str separator = Str::create("/");
+//=============================================================================
+// Function definitions that are not class-based
 
-endclass
 
-/////////////////////////////////////////////////////////////////////////////
-
+// file_mTime =================================================================
 function automatic longint file_mTime(string path, bit asLink=0);
   sys_fileStat_s stat = sys_fileStat(path, asLink);
   return stat.mtime;
-endfunction
+endfunction: file_mTime
 
+// file_aTime =================================================================
 function automatic longint file_aTime(string path, bit asLink=0);
   sys_fileStat_s stat = sys_fileStat(path, asLink);
   return stat.atime;
-endfunction
+endfunction: file_aTime
 
+// file_cTime =================================================================
 function automatic longint file_cTime(string path, bit asLink=0);
   sys_fileStat_s stat = sys_fileStat(path, asLink);
   return stat.ctime;
-endfunction
+endfunction: file_cTime
 
+// file_size ==================================================================
 function automatic longint file_size(string path, bit asLink=0);
   sys_fileStat_s stat = sys_fileStat(path, asLink);
   return stat.size;
-endfunction
+endfunction: file_size
 
+// file_mode ==================================================================
 function automatic longint file_mode(string path, bit asLink=0);
   sys_fileStat_s stat = sys_fileStat(path, asLink);
   return stat.mode;
-endfunction
+endfunction: file_mode
 
+// file_accessible ============================================================
 function automatic bit file_accessible(string path, ACCESS_MODE_E mode);
   int ok;
   svlibErrorManager errorManager = error_getManager();
@@ -101,8 +117,9 @@ function automatic bit file_accessible(string path, ACCESS_MODE_E mode);
   end
 
   return ok;
-endfunction
+endfunction: file_accessible
 
+// ============================================================================
+/////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////
 
 `include "svlib_impl_File.svh"
-

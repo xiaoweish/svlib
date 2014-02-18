@@ -1,5 +1,5 @@
-//=============================================================================
-//  @brief  
+// =============================================================================
+//  @brief  Private collection of functionality used in svlib Do Not Import!
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //
@@ -20,21 +20,21 @@
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
-//=============================================================================
-// -------------------------------------------------------------
+// =============================================================================
+// 
 // This file defines svlib_private_base_pkg, a collection of
 // functionality that is required by other parts of svLib.
 // It also imports all the DPI functions that are required by
 // other parts of the package.
-// -------------------------------------------------------------
-
-// -------------------------------------------------------------
+// =============================================================================
+//
+// =============================================================================
 //                       IMPORTANT NOTE
-// -------------------------------------------------------------
+// =============================================================================
 // USER CODE SHOULD *NOT* IMPORT THIS PACKAGE. In this way,
 // user code does not have access directly to the DPI functions,
 // allowing svLib to take full control of the SV/C interaction.
-// -------------------------------------------------------------
+// =============================================================================
 
 package svlib_private_base_pkg;
 
@@ -84,7 +84,8 @@ package svlib_private_base_pkg;
     local static int put_calls_ = 0;
 
     // forbid construction
-    protected function new(); endfunction
+    protected function new(); 
+              endfunction
 
     static function T obtain();
       T result;
@@ -156,7 +157,8 @@ package svlib_private_base_pkg;
     `endif
 
     // forbid construction
-    protected function new(); endfunction
+    protected function new(); 
+              endfunction
 
     protected int    valuePerProcess   [INDEX_T];
     protected bit    pendingPerProcess [INDEX_T];
@@ -318,12 +320,12 @@ package svlib_private_base_pkg;
     
   endclass
 
-  //--------------------------------------------------------------
+  // =============================================================================
   // function scanUint64: not for public API! Assumes that the 
   // radix letter is OK, and the value-string has been stripped
   // of spaces and is reasonably sane. No handling of -ve numbers.
   // Result is always zero-filled to 64 bits.
-  //--------------------------------------------------------------
+  // =============================================================================
   // This function reads from a string representation into a 64-bit value.
   // X/Z values are supported. Underscores are ignored. Otherwise, illegal
   // digits cause an error (0) to be returned and the result is undefined.

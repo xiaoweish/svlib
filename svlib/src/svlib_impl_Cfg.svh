@@ -1,5 +1,5 @@
 //=============================================================================
-//  @brief  
+//  @brief  Implementations (bodies) of extern functions cfg objects
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //
