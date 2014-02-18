@@ -92,14 +92,14 @@ function automatic longint file_mode(string path, bit asLink=0);
 endfunction: file_mode
 
 // file_accessible ============================================================
-function automatic bit file_accessible(string path, ACCESS_MODE_E mode);
+function automatic bit file_accessible(string path, ACCESS_MODE_ENUM mode);
   int ok;
   svlibErrorManager errorManager = error_getManager();
   int err = svlib_dpi_imported_access(path, mode, ok);
   if (err) begin
     qs modes;
-    ACCESS_MODE_E all_modes[$];
-    all_modes = EnumUtils#(ACCESS_MODE_E)::all_values();
+    ACCESS_MODE_ENUM all_modes[$];
+    all_modes = EnumUtils#(ACCESS_MODE_ENUM)::all_values();
     foreach(all_modes[i]) begin
       if (mode & all_modes[i]) begin
         modes.push_back(all_modes[i].name);

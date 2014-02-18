@@ -1,5 +1,5 @@
 /*=============================================================================
- *  @brief  
+ *  @brief  These enum typedefs are valid syntax in both C and SV
  *  @author Jonathan Bromley, Verilab (www.verilab.com)
  * =============================================================================
  *
@@ -27,7 +27,7 @@
  *  fields of some C struct and elements of an SV array.
  */
 
-/*  STAT_INDEX_E
+/*  STAT_INDEX_ENUM
  *  Represents the stat struct returned by the fileStat DPI call.
  */
 typedef enum {
@@ -39,9 +39,9 @@ typedef enum {
   statSIZE,
   statMODE,
   statARRAYSIZE /* must always be the last one */
-} STAT_INDEX_E;
+} STAT_INDEX_ENUM;
 
-/*  TM_INDEX_E
+/*  TM_INDEX_ENUM
  *  Represents the broken-down time struct used by 
  *  localtime() and related functions
  */
@@ -57,9 +57,9 @@ typedef enum {
   tmISDST,    /* daylight saving time */
   tmISLY,     /* is it a leap year    */
   tmARRAYSIZE /* must always be the last one */
-} TM_INDEX_E;
+} TM_INDEX_ENUM;
 
-/*  REGEX_OPTIONS_E
+/*  REGEX_OPTIONS_ENUM
  *  Represents the various options that can be set on a regex.
  *  The values of this enum are a bitmap, so that multiple
  *  options can be encoded by ORing together the values.
@@ -67,9 +67,9 @@ typedef enum {
 typedef enum {
   regexNOCASE  = 1,
   regexNOLINE  = 2
-} REGEX_OPTIONS_E;
+} REGEX_OPTIONS_ENUM;
 
-/*  ACCESS_MODE_E
+/*  ACCESS_MODE_ENUM
  *  Bitmap to represent the various kinds of access (RWX) that
  *  can be made to a file, for access() checking.
  */
@@ -78,4 +78,4 @@ typedef enum {
   accessREAD   = 4,
   accessWRITE  = 2,
   accessEXEC   = 1
-} ACCESS_MODE_E;
+} ACCESS_MODE_ENUM;
