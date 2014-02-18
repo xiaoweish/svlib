@@ -249,7 +249,7 @@ module node_test;
       walltime = sys_clockResolution();
       $display("clock resolution = %0d nanoseconds", walltime);
       foreach(manytime[i]) begin
-        manytime[i] = sys_nanoSeconds();
+        manytime[i] = sys_nsTime();
       end
       walltime = manytime[0];
       foreach(manytime[i]) begin
@@ -260,14 +260,14 @@ module node_test;
       m = 100;
       re = Regex::create("'([a-z]+),([a-z]+)'");
       haystack = Str::create();
-      walltime = sys_nanoSeconds();
+      walltime = sys_nsTime();
       
       repeat (m) haystack.append("abc'def,ghi'jkl");
       repeat (100) begin
         n = re.substAll(haystack, "'$2,$1'");
         assert (n==m);
       end
-      $display("time taken = %8.6f sec", (sys_nanoSeconds() - walltime)/1.0e9);
+      $display("time taken = %8.6f sec", (sys_nsTime() - walltime)/1.0e9);
     end
     
     begin
@@ -280,9 +280,9 @@ module node_test;
       for (int unsigned x=0; x<25; x++) begin
         int f;
         longint t;
-        t = sys_nanoSeconds();
+        t = sys_nsTime();
         f = first_factor(x);
-        t = sys_nanoSeconds() - t;
+        t = sys_nsTime() - t;
         $display("Computed in %10.6f seconds", t/1.0e9);
         if (f < 0)
           $display("%0d is prime", x);
