@@ -9,7 +9,7 @@ module mtime;
   endfunction
   
   initial begin
-    fileStats("mtime.f");
+    fileStats("svlib.f");
     fileStats("..");
   end
   

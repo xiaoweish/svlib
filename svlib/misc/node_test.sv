@@ -151,7 +151,7 @@ module node_test;
         end
         node = root.lookup(path);
         if (node == null) begin
-          cfgError_e err;
+          cfgError_enum err;
           err = root.getLastError();
           $display("lookup fail, error = %s", err.name);
         end
@@ -165,7 +165,7 @@ module node_test;
     begin
     
       cfgFileINI fi;
-      cfgError_e err;
+      cfgError_enum err;
       TrialSerializableTop tst;
       cfgNode nd;
       cfgNodeMap mp;
