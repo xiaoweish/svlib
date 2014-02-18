@@ -87,7 +87,7 @@ function automatic longint unsigned sys_clockResolution();
   return 1e9*seconds + nanoseconds;
 endfunction
 
-function automatic longint unsigned sys_nanoSeconds();
+function automatic longint unsigned sys_nsTime();
   longint seconds, nanoseconds;
   svlib_dpi_imported_hiResTime(0, seconds, nanoseconds);
   return 1e9*seconds + nanoseconds;
