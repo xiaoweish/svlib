@@ -100,9 +100,9 @@ module Regex_unit_test;
   result = re.test(str, 0);
   `FAIL_UNLESS(result==0)
 
-  re = regexMatch(.haystack("yes, we have no bananas"), .needle("A"), .options(0));
+  re = regex_match(.haystack("yes, we have no bananas"), .needle("A"), .options(0));
   `FAIL_UNLESS(re==null)
-  re = regexMatch(.haystack("yes, we have no bananas"), .needle("A"), .options(Regex::NOCASE));
+  re = regex_match(.haystack("yes, we have no bananas"), .needle("A"), .options(Regex::NOCASE));
   `FAIL_UNLESS(re!=null)
   begin
     int L, len;
@@ -147,12 +147,12 @@ module Regex_unit_test;
   
   `SVTEST_END
   
-  `SVTEST(regexMatch_fail_check)
+  `SVTEST(regex_match_fail_check)
   
-  re = regexMatch("yes, we have no bananas", "z");
+  re = regex_match("yes, we have no bananas", "z");
   `FAIL_UNLESS(re == null)
   
-  re = regexMatch("yes, we have no bananas", "x(z");
+  re = regex_match("yes, we have no bananas", "x(z");
   `FAIL_UNLESS(re == null)
   
   `SVTEST_END

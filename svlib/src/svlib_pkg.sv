@@ -38,6 +38,7 @@ package svlib_pkg;
   `include "svlib_pkg_Sys.svh"
   `include "svlib_pkg_File.svh"
   `include "svlib_pkg_Cfg.svh"
+  `include "svlib_pkg_Sim.svh"
 
 endpackage
 

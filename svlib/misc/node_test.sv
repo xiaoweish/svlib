@@ -110,7 +110,7 @@ module node_test;
 
         //path = ".babar[ 78 ] root  . completely fubar ";
         path = s;
-        pathRE = regexMatch(path, re);
+        pathRE = regex_match(path, re);
         if (pathRE==null) begin
           $display("  failed to match anything");
         end
@@ -302,7 +302,7 @@ module node_test;
 
   function automatic int first_factor(int unsigned N);
     string n_ones = str_repeat("1", N);
-    Regex re = regexMatch(n_ones, "^1?$|^(11+)(\\1+)$");
+    Regex re = regex_match(n_ones, "^1?$|^(11+)(\\1+)$");
     if (re == null || (N>1 && re.getMatchLength(0)==0))
       return -1; // N is prime
     else begin

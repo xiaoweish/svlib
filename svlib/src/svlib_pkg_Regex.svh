@@ -47,6 +47,9 @@ class Regex extends svlibBase;
   protected function new(); 
             endfunction: new
 
+  extern protected virtual function void   purge();
+  extern protected virtual function int    match_subst(string substStr);
+
   //-----------------------------------------------------------------------------
 
   extern static  function Regex  create (string s = "", int options=0);
@@ -93,23 +96,20 @@ class Regex extends svlibBase;
   extern virtual function int    subst(Str s, string substStr, int startPos = 0);
   extern virtual function int    substAll(Str s, string substStr, int startPos = 0);
 
-  extern protected virtual function void   purge();
-  extern protected virtual function int    match_subst(string substStr);
-
 endclass: Regex
 
 //=============================================================================
 // Function definitions that are not part of classes
 
-// regexMatch =================================================================
-function automatic Regex regexMatch(string haystack, string needle, int options=0);
+// regex_match =================================================================
+function automatic Regex regex_match(string haystack, string needle, int options=0);
   Regex re;
   Str   s;
   bit   found;
   re  = Obstack#(Regex)::obtain();
   re.setRE(needle);
   re.setOpts(options);
-  regexMatch_check_RE_valid: 
+  regex_match_check_RE_valid: 
     assert (re.getError()==0) else
       $error("Bad RE \"%s\": %s", needle, re.getErrorString());
   s   = Str::create(haystack);
@@ -119,7 +119,7 @@ function automatic Regex regexMatch(string haystack, string needle, int options=
   // Return the unwanted Regex object to the obstack
   Obstack#(Regex)::relinquish(re);
   return null;
-endfunction: regexMatch
+endfunction: regex_match
 
 // scanVerilogInt =============================================================
 function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result);

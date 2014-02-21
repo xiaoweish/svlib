@@ -62,3 +62,5 @@ import "DPI-C" function int     svlib_dpi_imported_access(
                                               input int mode,
                                               output int ok);
   
+import "DPI-C" context function chandle svlib_dpi_imported_getVlogInfo(output string product, output string version);
+import "DPI-C"         function string  svlib_dpi_imported_getVlogInfoNext(inout chandle hnd);

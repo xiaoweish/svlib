@@ -32,8 +32,10 @@
 #include <glob.h>
 #include <time.h>
 #include <regex.h>
+#include <assert.h>
 
 #include <veriuser.h>
+#include <vpi_user.h>
 #include <svdpi.h>
 
 #define STRINGIFY(x) MACROHASH(x)
@@ -99,7 +101,7 @@ static size_t getLibStringBufferSize() {
  * A function such as 'glob' whose main result is an array of strings
  * will construct such an array in internal storage here, then return
  * a chandle pointing to the sa_buf_struct that records the array of strings
- * and the SvLib's progress through collecting them.
+ * and svlib's progress through collecting them.
  * Subsequent calls to svlib_dpi_imported_saBufNext with this chandle will then
  * serve up the strings one by one, finally returning with the chandle set
  * to null to indicate that all the strings have been consumed and the 
@@ -110,10 +112,12 @@ static size_t getLibStringBufferSize() {
 typedef void (*freeFunc_decl)(saBuf_p);
 
 typedef struct saBuf {
-  char        ** scan;         /* pointer to the current array element */
-  freeFunc_decl  freeFunc;     /* function to call on exhaustion       */
-  void         * data_ptr;     /* pointer to app-specific data         */
-  struct saBuf * sanity_check; /* pointer-to-self for checking         */
+  char        ** scan;         /* pointer to the current array element       */
+  freeFunc_decl  freeFunc;     /* function to call on exhaustion             */
+  void         * pAppData;     /* pointer to app-specific data               */
+  int            userData;     /* general-purpose int, not used by saBufNext */
+  struct saBuf * link;         /* general-purpose link ptr                   */
+  struct saBuf * sanity_check; /* pointer-to-self for checking               */
 } saBuf_s, *saBuf_p;
 
 static int32_t saBufCreate(size_t dataBytes, freeFunc_decl ff, saBuf_p *created) {
@@ -122,15 +126,17 @@ static int32_t saBufCreate(size_t dataBytes, freeFunc_decl ff, saBuf_p *created)
   if (sa == NULL) {
     return ENOMEM;
   }
-  sa->data_ptr = malloc(dataBytes);
-  if (sa->data_ptr == NULL) {
+  sa->pAppData = malloc(dataBytes);
+  if (sa->pAppData == NULL) {
     free(sa);
     return ENOMEM;
   }
   sa->sanity_check = sa;
-  sa->freeFunc = ff;
-  sa->scan = NULL;
-  *created = sa;
+  sa->link         = NULL;
+  sa->freeFunc     = ff;
+  sa->scan         = NULL;
+  sa->userData     = 0;
+  *created         = sa;
   return 0;
 }
 
@@ -157,6 +163,115 @@ extern int32_t svlib_dpi_imported_saBufNext(void **h, const char **s) {
   }
   return 0;
 }
+
+
+/*-------------------------------------------------------------------------------
+ * import "DPI-C" function chandle svlib_dpi_imported_getVlogInfo(
+ *                              output string product, output string version);
+ *-------------------------------------------------------------------------------
+ * Function to set up the results of vpi_get_vlog_info() ready for consumption.
+ *-------------------------------------------------------------------------------
+ */
+
+extern void * svlib_dpi_imported_getVlogInfo(
+      char   ** product,
+      char   ** version
+    ) {
+  int             status;
+  s_vpi_vlog_info info;
+  
+  /* Ensure result values are zero for easy error handling */
+  *version = NULL;
+  *product = NULL;
+  
+  status = vpi_get_vlog_info(&info);
+  if (!status) { /*1=ok, 0=fail*/
+    /*
+     * Error: get_vlog_info failed for some reason.
+     * This is unlikely, but there's nothing we can do about it.
+     * Just report it.
+     */
+    return NULL;
+  }
+  *version = info.version;
+  *product = info.product;
+  return (void*) info.argv;  
+}
+
+#define ARGV_STACK_PTR_SIZE 32
+
+/*-------------------------------------------------------------------------------
+ * import "DPI-C" function string svlib_dpi_imported_getVlogInfoNext(inout chandle hnd);
+ *-------------------------------------------------------------------------------
+ * Function to get successive strings from already-setup vlog_info
+ *-------------------------------------------------------------------------------
+ * Some parts taken, with small modifications, from Accellera's UVM DPI code.
+ * Accellera's authorship is acknowledged. The functionality is slightly 
+ * different from Accellera's, in that all nested -f response files are
+ * flattened so that all arguments appear as if on a single command line.
+ * This lowest-common-denominator behaviour matches some existing tools.
+ *-------------------------------------------------------------------------------
+ */
+
+extern const char * svlib_dpi_imported_getVlogInfoNext (void** info_argv) {
+  static char*** argv_stack = NULL;
+  static int argv_stack_ptr = 0; // stack ptr
+
+  if(argv_stack == NULL)
+  {
+    argv_stack = (char***) malloc (sizeof(char**)*ARGV_STACK_PTR_SIZE);
+    argv_stack[0] = (char**)*info_argv;
+  }
+
+  // until we have returned a value
+  while (1)
+  {
+    // at end of current array?, pop stack
+    if (*argv_stack[argv_stack_ptr]  == NULL)
+    {
+      // stack empty?
+      if (argv_stack_ptr == 0)
+      {
+        // reset stack for next time
+        argv_stack = NULL;
+        argv_stack_ptr = 0;
+        // return completion
+        *info_argv = NULL;
+        return NULL;
+      }
+      // pop stack
+      --argv_stack_ptr;
+      continue;
+    }
+    else
+    {
+      // check for -f indicating pointer to new array
+      if(0==strcmp(*argv_stack[argv_stack_ptr], "-f") ||
+         0==strcmp(*argv_stack[argv_stack_ptr], "-F") )
+      {
+        // bump past -f at current level
+        ++argv_stack[argv_stack_ptr]; 
+        // push -f array argument onto stack
+        argv_stack[argv_stack_ptr+1] = (char **)*argv_stack[argv_stack_ptr];
+        // bump past -f argument at current level
+        ++argv_stack[argv_stack_ptr]; 
+        // update stack pointer
+        ++argv_stack_ptr;
+        // skip over filename string at start of new -f argument
+        ++argv_stack[argv_stack_ptr]; 
+        assert(argv_stack_ptr < ARGV_STACK_PTR_SIZE);
+      }
+      else
+      {      
+        // return current and move to next
+        char *r = *argv_stack[argv_stack_ptr];
+        ++argv_stack[argv_stack_ptr];
+        return r;
+      }
+    }
+  }
+}
+
 
 /*-------------------------------------------------------------------
  * import "DPI-C" function string svlib_dpi_imported_getCErrStr(input int errnum);
@@ -293,7 +408,7 @@ extern int32_t svlib_dpi_imported_timeFormatST(int64_t epochSeconds, const char 
   while (1) {
     buf    = getLibStringBuffer(bSize);
     bSize  = getLibStringBufferSize();
-	  nChars = snprintf(buf, bSize, "Stardate %2d%03d.%01d",
+    nChars = snprintf(buf, bSize, "Stardate %2d%03d.%01d",
                (timeParts.tm_year - 46),
                (((timeParts.tm_yday) * 1000) /
                 (365 + isLeapYear(timeParts.tm_year+1900))),
@@ -320,7 +435,7 @@ extern int32_t svlib_dpi_imported_timeFormatST(int64_t epochSeconds, const char 
  */
 static void glob_freeFunc(saBuf_p p) {
   if (p==NULL) return;
-  globfree((glob_t*)(p->data_ptr));
+  globfree((glob_t*)(p->pAppData));
   free(p);
 }
 
@@ -333,7 +448,7 @@ extern int32_t svlib_dpi_imported_globStart(const char *pattern, void **h, uint3
   if (result) {
     return result;
   }
-  result = glob(pattern, GLOB_ERR | GLOB_MARK, NULL, sa->data_ptr);
+  result = glob(pattern, GLOB_ERR | GLOB_MARK, NULL, sa->pAppData);
   switch (result) {
     case GLOB_NOSPACE:
       glob_freeFunc(sa);
@@ -347,8 +462,8 @@ extern int32_t svlib_dpi_imported_globStart(const char *pattern, void **h, uint3
       glob_freeFunc(sa);
       return 0;
     case 0:
-      sa->scan = ((glob_t*)(sa->data_ptr))->gl_pathv;
-      *number  = ((glob_t*)(sa->data_ptr))->gl_pathc;
+      sa->scan = ((glob_t*)(sa->pAppData))->gl_pathv;
+      *number  = ((glob_t*)(sa->pAppData))->gl_pathc;
       *h = (void*) sa;
       return 0;
     default:
