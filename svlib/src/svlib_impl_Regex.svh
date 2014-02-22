@@ -8,13 +8,13 @@
 // @File: svlib_impl_Regex.svh
 //
 // Copyright 2014 Verilab, Inc.
-// 
+//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
-// 
+//
 //        http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -101,7 +101,7 @@ function int    Regex::retest(int startPos);
   nMatches = -1;  // pessimistic, means "nothing done yet"
 
   lastError = svlib_dpi_imported_regexRun(
-    .re(text), .str(runStr.get()), .options(options), .startPos(startPos), 
+    .re(text), .str(runStr.get()), .options(options), .startPos(startPos),
     .matchCount(nMatches), .matchList(matchList));
   assert (lastError == 0) else $error("whoops, RE error %0d (%s)", lastError,
   getErrorString());
@@ -145,7 +145,7 @@ endfunction
 function int Regex::getError();
   if (lastError < 0) begin
     lastError = svlib_dpi_imported_regexRun(
-      .re(text), .str(""), .options(options), .startPos(0), 
+      .re(text), .str(""), .options(options), .startPos(0),
       .matchCount(nMatches), .matchList(matchList));
   end
   return lastError;
@@ -161,7 +161,7 @@ function string Regex::getErrorString();
 endfunction
 
 function int Regex::subst(Str s, string substStr, int startPos = 0);
-  if (test(s, startPos)) begin 
+  if (test(s, startPos)) begin
     startPos = match_subst(substStr);
     return 1;
   end
@@ -180,10 +180,15 @@ function int Regex::substAll(Str s, string substStr, int startPos = 0);
 endfunction
 
 // Internal "works" of subst for a single match, assumed already matched.
-// Replaces $0..$9 with the corresponding submatches; $ followed by any 
+// Replaces $0..$9 with the corresponding submatches; $ followed by any
 // other character is replaced with the second character literally. $ at
 // the very end of the replacement string acts as a literal $, as if it
-// were doubled. $_ and $& are treated as synonyms for $0.
+// were doubled. $_ and $& are treated as synonyms for $0
+// Returns the character position from which the next regex match should
+// start, if we are doing global search-and-replace.
+//
+// NOTE: This implementation is rather inefficient in various ways,
+//       and will be reworked for the production release.
 //
 function int Regex::match_subst(string substStr);
   qs  parts;
@@ -201,7 +206,7 @@ function int Regex::match_subst(string substStr);
       i++;
       if (parts[i] inside {["0":"9"], "&", "_"}) begin
         int m;
-        if (parts[i] inside {"_", "&"}) 
+        if (parts[i] inside {"_", "&"})
           m = 0; // $& and $_ are synonyms for $0
         else
           m = parts[i].atoi();
