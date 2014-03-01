@@ -30,16 +30,16 @@ typedef struct packed {
   bit r;
   bit w;
   bit x;
-} sysFileRWX_s;
+} sys_fileRWX_s;
 
 typedef struct packed {
   bit          setUID;
   bit          setGID;
   bit          sticky;
-  sysFileRWX_s owner;
-  sysFileRWX_s group;
-  sysFileRWX_s others;
-} sysFilePermissions_s;
+  sys_fileRWX_s owner;
+  sys_fileRWX_s group;
+  sys_fileRWX_s others;
+} sys_filePermissions_s;
 
 typedef enum bit [3:0] {
   fTypeFifo    = 4'h1,
@@ -49,12 +49,12 @@ typedef enum bit [3:0] {
   fTypeFile    = 4'h8,
   fTypeSymLink = 4'hA,
   fTypeSocket  = 4'hC
-} sysFileType_enum;
+} sys_fileType_enum;
 
 typedef struct packed {
-  sysFileType_enum     fType;
-  sysFilePermissions_s fPermissions;
-} sysFileMode_s;
+  sys_fileType_enum     fType;
+  sys_filePermissions_s fPermissions;
+} sys_fileMode_s;
 
 typedef struct {
   longint       mtime;
@@ -63,7 +63,7 @@ typedef struct {
   longint       size;
   int unsigned  uid;
   int unsigned  gid;
-  sysFileMode_s mode;
+  sys_fileMode_s mode;
 } sys_fileStat_s;
 
 //=============================================================================
