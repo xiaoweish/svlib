@@ -19,23 +19,23 @@ module test_forenum;
       bit [1:0] v;
       string s;
       TwobitEnum tbe;
-      bit   has_name;
-      bit  has_value;
+      bit   hasName;
+      bit  hasValue;
       v = e;
       s = e.name;
       tbe = TBE::from_name(s);
-      has_name = TBE::has_name(s);
-      has_value = TBE::has_value(v);
+      hasName = TBE::hasName(s);
+      hasValue = TBE::hasValue(v);
       $display("Twobit[%0d]=%s(%0d)", i, e.name, e);
-      $display("  map(%s) = %s(%d), has_value(2'b%b)=%b, has_name(%s)=%b",
-                      s,  tbe.name, tbe, v, has_value, s, has_name);
+      $display("  map(%s) = %s(%d), hasValue(2'b%b)=%b, hasName(%s)=%b",
+                      s,  tbe.name, tbe, v, hasValue, s, hasName);
     end
     allTBE = TBE::all_values();
     $display($typename(allTBE));
 //    foreach (allTBE[i]) $display("allTBE[%0d] = %s", i, allTBE[i].name);
-    for (int i=0; i<4; i++) $display("TBE::has_value(%0d) = %b", i, TBE::has_value(i));
-    $display("TBE::has_name(foo) = %b", TBE::has_name("foo"));
-    $display("TBE::has_name() = %b", TBE::has_name(""));
+    for (int i=0; i<4; i++) $display("TBE::hasValue(%0d) = %b", i, TBE::hasValue(i));
+    $display("TBE::hasName(foo) = %b", TBE::hasName("foo"));
+    $display("TBE::hasName() = %b", TBE::hasName(""));
     
     $display();
     `foreach_enum(TwobitEnum,ee) $display("ee=%s('b%b)", ee.name, ee);
