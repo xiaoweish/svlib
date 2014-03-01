@@ -32,11 +32,12 @@ function void EnumUtils::m_build();
   ENUM e = e.first;
   m_maxNameLength = 0;
   for (int pos=0; pos<e.num; pos++) begin
+    string nm = e.name;
     m_all_values.push_back(e);
-    m_map[e.name] = e;
+    m_map[nm] = e;
     m_pos[e] = pos;
-    if (e.name.len > m_maxNameLength)
-      m_maxNameLength = e.name.len;
+    if (nm.len > m_maxNameLength)
+      m_maxNameLength = nm.len;
     e = e.next;
   end
   m_built = 1;
