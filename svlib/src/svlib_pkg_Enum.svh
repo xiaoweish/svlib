@@ -36,6 +36,7 @@ class EnumUtils #(type ENUM = int) extends svlibBase;
 
   typedef ENUM qe[$];
   typedef logic [$bits(ENUM)-1:0] BASE;
+  typedef bit [2*$bits(ENUM)-1:0] INDEX;
 
   //-----------------------------------------------------------------------------
   // Protected functions and members
@@ -43,11 +44,12 @@ class EnumUtils #(type ENUM = int) extends svlibBase;
   // List of all values, lazy-evaluated
   protected static qe   m_all_values;
   protected static ENUM m_map[string];
-  protected static int  m_pos[BASE];
+  protected static int  m_pos[INDEX];
   protected static bit  m_built;
   protected static int  m_maxNameLength;
   
   protected function void purge(); endfunction : purge
+  extern protected static function INDEX index(BASE b);
   
   // The lazy-evaluator
   extern protected static function void m_build();

@@ -31,8 +31,9 @@ module test_forenum;
                       s,  tbe.name, tbe, v, hasValue, s, hasName);
     end
     allTBE = TBE::allValues();
-    $display($typename(allTBE));
-//    foreach (allTBE[i]) $display("allTBE[%0d] = %s", i, allTBE[i].name);
+//    $display($typename(allTBE));
+    foreach (allTBE[i]) $display("allTBE[%0d] = %s", i, allTBE[i].name);
+    foreach (allTBE[i]) $display("allTBE[%0d] pos = %0d", i, TBE::pos(allTBE[i]));
     for (int i=0; i<4; i++) $display("TBE::hasValue(%0d) = %b", i, TBE::hasValue(i));
     $display("TBE::hasName(foo) = %b", TBE::hasName("foo"));
     $display("TBE::hasName() = %b", TBE::hasName(""));

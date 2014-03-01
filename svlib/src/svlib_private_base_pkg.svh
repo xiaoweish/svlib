@@ -206,17 +206,15 @@ package svlib_private_base_pkg;
       if (!has(idx)) begin
         newIndex(idx, err, details);
       end
-      else begin
-        svlibBase_check_unhandledError: assert (!pendingPerProcess[idx]) else
-          $error("Previous error not yet handled before next errorable call:\n  %s",
-                            getFullMessage()
-          );
-        update(idx, err, details);
-        if (!userPerProcess[idx]) begin
-          pendingPerProcess[idx] = 0;
-          assert (err == 0) else
-            $error(getFullMessage());
-        end
+      svlibBase_check_unhandledError: assert (!pendingPerProcess[idx]) else
+        $error("Previous error not yet handled before next errorable call:\n  %s",
+                          getFullMessage()
+        );
+      update(idx, err, details);
+      if (!userPerProcess[idx]) begin
+        pendingPerProcess[idx] = 0;
+        assert (err == 0) else
+          $error(getFullMessage());
       end
     endfunction
 
