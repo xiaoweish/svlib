@@ -32,7 +32,7 @@
 //=============================================================================
 // class definitions
 
-class EnumUtils #(type ENUM = int);
+class EnumUtils #(type ENUM = int) extends svlib_Base;
 
   typedef ENUM qe[$];
   typedef logic [$bits(ENUM)-1:0] BASE;
@@ -45,19 +45,23 @@ class EnumUtils #(type ENUM = int);
   protected static ENUM m_map[string];
   protected static int  m_pos[BASE];
   protected static bit  m_built;
+  protected static int  m_maxNameLength;
+  
+  protected function void purge(); endfunction : purge
+  
   // The lazy-evaluator
   extern protected static function void m_build();
 
   // forbid construction
-  protected function new(); 
-            endfunction: new
+  protected function new(); endfunction: new
 
-  extern static function ENUM from_name  (string s);
-  extern static function int  pos        (BASE   b);
-  extern static function bit  has_name   (string s);
-  extern static function bit  has_value  (BASE   b);
-  extern static function qe   all_values ();
-  extern static function ENUM match      (BASE   b, bit requireUnique = 0);
+  extern static function ENUM fromName     (string s);
+  extern static function int  pos          (BASE   b);
+  extern static function bit  hasName      (string s);
+  extern static function int  maxNameLength();
+  extern static function bit  hasValue     (BASE   b);
+  extern static function qe   allValues    ();
+  extern static function ENUM match        (BASE   b, bit requireUnique = 0);
 
 endclass: EnumUtils
 
