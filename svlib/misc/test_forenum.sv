@@ -23,14 +23,14 @@ module test_forenum;
       bit  hasValue;
       v = e;
       s = e.name;
-      tbe = TBE::from_name(s);
+      tbe = TBE::fromName(s);
       hasName = TBE::hasName(s);
       hasValue = TBE::hasValue(v);
       $display("Twobit[%0d]=%s(%0d)", i, e.name, e);
       $display("  map(%s) = %s(%d), hasValue(2'b%b)=%b, hasName(%s)=%b",
                       s,  tbe.name, tbe, v, hasValue, s, hasName);
     end
-    allTBE = TBE::all_values();
+    allTBE = TBE::allValues();
     $display($typename(allTBE));
 //    foreach (allTBE[i]) $display("allTBE[%0d] = %s", i, allTBE[i].name);
     for (int i=0; i<4; i++) $display("TBE::hasValue(%0d) = %b", i, TBE::hasValue(i));

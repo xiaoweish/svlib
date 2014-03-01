@@ -181,7 +181,6 @@ package svlib_private_base_pkg;
     static svlibErrorManager singleton = null;
     static function svlibErrorManager getInstance();
       if (singleton == null) begin
-        $display("Making the error manager");
         singleton = Obstack#(svlibErrorManager)::obtain();
       end
       return singleton;
