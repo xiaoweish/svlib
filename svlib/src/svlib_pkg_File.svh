@@ -99,7 +99,7 @@ function automatic bit file_accessible(string path, ACCESS_MODE_ENUM mode);
   if (err) begin
     qs modes;
     ACCESS_MODE_ENUM all_modes[$];
-    all_modes = EnumUtils#(ACCESS_MODE_ENUM)::all_values();
+    all_modes = EnumUtils#(ACCESS_MODE_ENUM)::allValues();
     foreach(all_modes[i]) begin
       if (mode & all_modes[i]) begin
         modes.push_back(all_modes[i].name);

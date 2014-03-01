@@ -32,7 +32,7 @@
 //=============================================================================
 // class definitions
 
-class EnumUtils #(type ENUM = int) extends svlib_Base;
+class EnumUtils #(type ENUM = int) extends svlibBase;
 
   typedef ENUM qe[$];
   typedef logic [$bits(ENUM)-1:0] BASE;
