@@ -86,7 +86,7 @@ function automatic longint file_size(string path, bit asLink=0);
 endfunction: file_size
 
 // file_mode ==================================================================
-function automatic longint file_mode(string path, bit asLink=0);
+function automatic sys_fileMode_s file_mode(string path, bit asLink=0);
   sys_fileStat_s stat = sys_fileStat(path, asLink);
   return stat.mode;
 endfunction: file_mode
