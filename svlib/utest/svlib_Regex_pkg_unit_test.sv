@@ -161,23 +161,24 @@ module Regex_unit_test;
   int count;
   str.set("yes, we have no bananas");
   re = Regex::create("we");
-  count = re.subst(str, "you");
+  re.setStr(str);
+  count = re.subst("you");
   `FAIL_UNLESS_EQUAL(count,1)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you have no bananas")
   
   re.setRE("a(.)");
-  count = re.substAll(str, "a$1$$$1");
+  count = re.substAll("a$1$$$1");
   `FAIL_UNLESS_EQUAL(count,4)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you hav$ve no ban$nan$nas$s")
   
   re.setRE("(.)\\$\\1");
-  count = re.substAll(str, "$1");
+  count = re.substAll("$1");
   `FAIL_UNLESS_EQUAL(count,4)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you have no bananas")
   
   re.setRE("A.");
   re.setOpts(Regex::NOCASE);
-  count = re.substAll(str, "$[$2$_$0$&$1$]");
+  count = re.substAll("$[$2$_$0$&$1$]");
   `FAIL_UNLESS_EQUAL(count,4)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you h[avavav]e no b[ananan][ananan][asasas]")
   

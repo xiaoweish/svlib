@@ -93,8 +93,8 @@ class Regex extends svlibBase;
   // Extract a given match from the sample string, returns "" if no match
   extern virtual function string getMatchString(int match);
 
-  extern virtual function int    subst(Str s, string substStr, int startPos = 0);
-  extern virtual function int    substAll(Str s, string substStr, int startPos = 0);
+  extern virtual function int    subst(string substStr, int startPos = 0);
+  extern virtual function int    substAll(string substStr, int startPos = 0);
 
 endclass: Regex
 

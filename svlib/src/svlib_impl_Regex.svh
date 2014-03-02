@@ -160,8 +160,8 @@ function string Regex::getErrorString();
   endcase
 endfunction
 
-function int Regex::subst(Str s, string substStr, int startPos = 0);
-  if (test(s, startPos)) begin
+function int Regex::subst(string substStr, int startPos = 0);
+  if (retest(startPos)) begin
     startPos = match_subst(substStr);
     return 1;
   end
@@ -170,9 +170,9 @@ function int Regex::subst(Str s, string substStr, int startPos = 0);
   end
 endfunction
 
-function int Regex::substAll(Str s, string substStr, int startPos = 0);
+function int Regex::substAll(string substStr, int startPos = 0);
   int n = 0;
-  while (test(s, startPos)) begin
+  while (retest(startPos)) begin
     startPos = match_subst(substStr);
     n++;
   end
