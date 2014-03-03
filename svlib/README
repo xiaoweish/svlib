@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
-svlib PRE-PRE-PRE-ALPHA release, for consumption only amongst consenting adults
+              svlib release 0.2 (DVCon, 04 March 2014)
 -------------------------------------------------------------------------------
 
 INSTRUCTIONS:
 
-- unzip the archive somewhere convenient (you already did that, otherwise
+- unzip the archive somewhere convenient (you already did that, else
   you wouldn't be reading this file)
 
 - write your SV code, using the following spells as required:
@@ -13,8 +13,8 @@ INSTRUCTIONS:
     module WHATEVER_YOU_LIKE;
       import svlib_pkg::*;
 
-- Write code using svlib features, taking your cue from the sketchy
-  documentation in the paper and slides
+- Write code using svlib features, taking your cues from the user guide 
+  in the doc/ directory, and documentation in the paper and slides
   
 - Compile, preferably using your tool's one-step compile such as
   qverilog, irun, vcs. If <dir> is the place where you find this file,
@@ -24,11 +24,10 @@ INSTRUCTIONS:
 - Additionally, for VCS only, you will need not only "-R -sverilog" but also
     -LDFLAGS -lrt
 
-There is still a lot of functionality missing or incomplete - the file
-pathname manipulations are particularly iffy. Some other stuff, notably 
-regular expressions and INI file reading, should be good to go.
-
-Good luck and please tell me about EVERYTHING that goes wrong!
+Good luck and please tell us about what goes wrong and what goes well!
 
 thanks
-Jonathan
+Jonathan Bromley
+
+svlib@verilab.com
+
