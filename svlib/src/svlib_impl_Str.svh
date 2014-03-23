@@ -210,8 +210,8 @@ endfunction
 //
 function void Str::quote();
   string original = value;
-  set("\"");
   int runStart = 0;
+  set("\"");
   foreach (original[i]) begin
     bit [7:0] ch = original[i];
     if (ch inside {[0:31], "\\", "\"", [127:255]}) begin
@@ -222,8 +222,8 @@ function void Str::quote();
         0   :    ; // don't allow a null into the string in any way
         "\n":    append("\\n");
         "\t":    append("\\t");
-        "\\":    append("\\\"");
-        "\"":    append("\\\\");
+        "\\":    append("\\\\");
+        "\"":    append("\\\"");
         "\v":    append("\\v");
         "\f":    append("\\f");
         "\a":    append("\\a");
