@@ -389,7 +389,9 @@ module Str_unit_test;
   `FAIL_UNLESS_STR_EQUAL("\"\"", str_quote("") )
   `FAIL_UNLESS_STR_EQUAL("\"abc\"", str_quote("abc") )
   `FAIL_UNLESS_STR_EQUAL("\"a\\\"c\"", str_quote("a\"c") )
-
+  `FAIL_UNLESS_STR_EQUAL("\"\\n\"", str_quote("\n") )
+  `FAIL_UNLESS_STR_EQUAL("\"\\n\\a\\t\\f\\v\\\\\\\"\"", str_quote("\n\a\t\f\v\\\"") )
+  `FAIL_UNLESS_STR_EQUAL("\"\\xffabcd\\xfe\"", str_quote("\377abcd\376"))
   `SVTEST_END
 
 
