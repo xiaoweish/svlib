@@ -384,6 +384,15 @@ module Str_unit_test;
   `SVTEST_END
 
 
+  `SVTEST(Str_quote_check)
+
+  `FAIL_UNLESS_STR_EQUAL("\"\"", str_quote("") )
+  `FAIL_UNLESS_STR_EQUAL("\"abc\"", str_quote("abc") )
+  `FAIL_UNLESS_STR_EQUAL("\"a\\\"c\"", str_quote("a\"c") )
+
+  `SVTEST_END
+
+
   `SVUNIT_TESTS_END
 
 endmodule

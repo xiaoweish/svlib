@@ -8,13 +8,13 @@
 // @File: svlib_pkg_Str.svh
 //
 // Copyright 2014 Verilab, Inc.
-// 
+//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
-// 
+//
 //        http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,18 +38,18 @@ class Str extends svlibBase;
   typedef enum {NONE, LEFT, RIGHT, BOTH} side_enum;
   typedef enum {START, END} origin_enum;
 
- 
+
   //-----------------------------------------------------------------------------
   // Protected functions and members
 
   // constructor so that users can't call it
-  protected function new(); 
+  protected function new();
             endfunction: new
-  
+
   protected function void purge();
               setClean("");
             endfunction: purge
-  
+
   protected string value;
   protected function void setClean(string s);
             // Zap all to initial state except for "value"
@@ -84,7 +84,7 @@ class Str extends svlibBase;
   // Split a string on every occurrence of a given character
   extern virtual function qs     split (string splitset="", bit keepSplitters=0);
 
-  // Use the Str object's contents to join adjacent elements of the 
+  // Use the Str object's contents to join adjacent elements of the
   // queue of strings into a single larger string. For example, if the
   // Str object 's' contains "XX" then
   //    s.sjoin({"a", "b", "c"})
@@ -93,8 +93,8 @@ class Str extends svlibBase;
 
   // Get a range (substring). The starting position 'p' is an anchor point,
   // like an I-beam cursor, just to the left of the specified character.
-  // If 'origin' is START, count 'p' from the left end of the string, 
-  // with its value increasing towards the right. If 'origin' is END, 
+  // If 'origin' is START, count 'p' from the left end of the string,
+  // with its value increasing towards the right. If 'origin' is END,
   // count 'p' from the right end of the string, with its value increasing
   // towards the left.
   // The range size 'n' specifies a count of characters to the right of 'p',
@@ -114,6 +114,11 @@ class Str extends svlibBase;
 
   // Pad a string to width with spaces on left/right/both
   extern virtual function void   pad   (int width, side_enum side=BOTH);
+
+  // Quote a string so that it becomes a valid SystemVerilog string literal,
+  // complete with its enclosing double-quotes. All special characters in
+  // the string are backslash-escaped appropriately.
+  extern virtual function void   quote ();
 
 
 endclass: Str
@@ -164,8 +169,11 @@ endfunction: str_pad
 
 // str_quote ==================================================================
 function automatic string str_quote(string s);
-  // IMPERFECT IMPLEMENTATION - need to escape quotes and backslashes
-  return $sformatf("\"%s\"", s);
+  Str str = Obstack#(Str)::obtain();
+  str.set(s);
+  str.quote();
+  str_quote = str.get();
+  Obstack#(Str)::relinquish(str);
 endfunction: str_quote
 
 // str_replace ================================================================

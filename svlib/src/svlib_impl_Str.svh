@@ -83,7 +83,10 @@ function void Str::set(string s);
 endfunction
 
 function void Str::append(string s);
-  replace(s, 0, 0, END);
+  // The pretty way to do it is...
+  // replace(s, 0, 0, END);
+  // but the practical and efficient way is...
+  value = {value, s};
 endfunction
 
 
@@ -200,4 +203,39 @@ function string Str::sjoin(qs strings);
   end
   return result;
 endfunction
+
+// Quote a string so that it becomes a valid SystemVerilog string literal,
+// complete with its enclosing double-quotes. All special characters in
+// the string are backslash-escaped appropriately.
+//
+function void Str::quote();
+  string original = value;
+  set("\"");
+  int runStart = 0;
+  foreach (original[i]) begin
+    bit [7:0] ch = original[i];
+    if (ch inside {[0:31], "\\", "\"", [127:255]}) begin
+      if (runStart < i) begin
+        append(original.substr(runStart, i-1));
+      end
+      case(ch)
+        0   :    ; // don't allow a null into the string in any way
+        "\n":    append("\\n");
+        "\t":    append("\\t");
+        "\\":    append("\\\"");
+        "\"":    append("\\\\");
+        "\v":    append("\\v");
+        "\f":    append("\\f");
+        "\a":    append("\\a");
+        default: append($sformatf("\\x%02x", ch));
+      endcase
+      runStart = i+1;
+    end
+  end
+  if (runStart < original.len()) begin
+    append(original.substr(runStart, original.len()-1));
+  end
+  append("\"");
+endfunction
+
 
