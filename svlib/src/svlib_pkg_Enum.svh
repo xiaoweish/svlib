@@ -3,7 +3,7 @@
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
 // =============================================================================
 //
-//                      svlib SystemVerilab Utilities Library
+//                      svlib SystemVerilog Utilities Library
 //
 // @File: svlib_pkg_Enum.svh
 //
