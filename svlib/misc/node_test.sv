@@ -264,7 +264,7 @@ module node_test;
       
       repeat (m) haystack.append("abc'def,ghi'jkl");
       repeat (100) begin
-        n = re.substAll(haystack, "'$2,$1'");
+        n = re.substAll("'$2,$1'");
         assert (n==m);
       end
       $display("time taken = %8.6f sec", (sys_nsTime() - walltime)/1.0e9);
