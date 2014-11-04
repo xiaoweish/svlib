@@ -43,7 +43,7 @@ endfunction
 
 function Pathname Pathname::create(string s = "");
   Pathname p = Obstack#(Pathname)::obtain();
-  p.purge();
+  p.set(s);
   return p;
 endfunction
 

@@ -24,8 +24,6 @@ module File_unit_test;
   //===================================
   function void build();
     svunit_ut = new(name);
-
-    my_PN = Pathname::create(/* New arguments if needed */);
   endfunction
 
 
@@ -66,7 +64,7 @@ module File_unit_test;
   
   `SVTEST(File_create_check)
 
-    my_PN.set("/a/b/c/d///e");
+    my_PN=Pathname::create("/a/b/c/d///e");
     `FAIL_UNLESS_STR_EQUAL(my_PN.get(), "/a/b/c/d/e")
     `FAIL_UNLESS_EQUAL(my_PN.isAbsolute(), 1)
     my_PN.set(my_PN.tail(4));
