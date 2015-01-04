@@ -8,13 +8,13 @@
 // @File: svlib_pkg_Cfg.svh
 //
 // Copyright 2014 Verilab, Inc.
-// 
+//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
-// 
+//
 //        http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@
 
 
 //=============================================================================
-// Type definitions 
+// Type definitions
 
 typedef enum {
   NODE_SCALAR, NODE_SEQUENCE, NODE_MAP,
@@ -88,127 +88,69 @@ typedef enum int {
 // Abstract class definitions
 
 virtual class svlibCfgBase extends svlibBase;
+
   //-----------------------------------------------------------------------------
-  // Pure methods 
+  // Public interface
 
   pure virtual function cfgObjKind_enum kind();
+  extern virtual function string        getName();
+  extern virtual function string        getLastErrorDetails();
+  extern virtual function cfgError_enum getLastError();
+  extern virtual function string        kindStr();
 
   //-----------------------------------------------------------------------------
   // Protected functions and members
 
-  protected string     name;
+  protected string        name;
   protected cfgError_enum lastError;
-  protected string     lastErrorDetails;
-  protected virtual function void purge();
-                      name = "";
-                      lastError = CFG_OK;
-                      lastErrorDetails = "";
-                     endfunction: purge
-
-  protected virtual function void cfgObjError(cfgError_enum err);
-                      if (err == CFG_OK) return;
-                      // There was an error. Set up the error information:
-                      lastError = err;
-                      lastErrorDetails = errorDetails(err);
-                      // and throw the (optional) assertion error
-                      cfgNode_check_validity : 
-                        assert (err == CFG_OK) else
-                          $error("%s \"%s\": %s",
-                           kindStr(), name, lastErrorDetails);
-                    endfunction: cfgObjError
-
-  protected virtual function string errorDetails(cfgError_enum err);
-                      return $sformatf("operation failed because %s", err.name);
-                    endfunction: errorDetails
-
-  //-----------------------------------------------------------------------------
-
-  virtual function string     getName();             
-    return name;             
-  endfunction: getName
-
-  virtual function string     getLastErrorDetails(); 
-    return lastErrorDetails; 
-  endfunction: getLastErrorDetails
-
-  virtual function cfgError_enum getLastError();        
-    return lastError;        
-  endfunction: getLastError
-
-  virtual function string kindStr();
-    cfgObjKind_enum k = kind();
-    return k.name;
-  endfunction: kindStr
+  protected string        lastErrorDetails;
+  extern protected virtual function void   purge();
+  extern protected virtual function void   cfgObjError(cfgError_enum err);
+  extern protected virtual function string errorDetails(cfgError_enum err);
 
 endclass: svlibCfgBase
 
+//=============================================================================
+
 virtual class cfgScalar extends svlibCfgBase;
-  //-----------------------------------------------------------------------------
-  // Pure methods 
 
   pure virtual function string       str();
   pure virtual function bit          scan(string s);
 
-  //-----------------------------------------------------------------------------
-
 endclass: cfgScalar
 
+//=============================================================================
+
 virtual class cfgNode extends svlibCfgBase;
-  //-----------------------------------------------------------------------------
-  // Pure methods 
 
-  pure virtual function string       sformat(int indent = 0);
-  pure virtual function cfgNode      childByName(string idx);
-
-  //-----------------------------------------------------------------------------
+  pure   virtual function string  sformat(int indent = 0);
+  pure   virtual function cfgNode childByName(string idx);
+  extern virtual function cfgNode lookup(string path);
+  extern virtual function void    addNode(cfgNode nd);
+  extern virtual function cfgNode getFoundNode();
+  extern virtual function string  getFoundPath();
+  extern virtual function cfgNode getParent();
 
   string comments[$];
   string serializationHint;
 
-  //-----------------------------------------------------------------------------
-  // Protected functions and members
+  protected cfgNode parent;
+  protected cfgNode foundNode;
+  protected string  foundPath;
+  extern protected virtual function void purge();
 
-  protected cfgNode          parent;
-  protected cfgNode          foundNode;
-  protected string           foundPath;
-  protected virtual function void purge();
-                      super.purge();
-                      comments.delete();
-                      serializationHint = "";
-                      parent = null;
-                    endfunction: purge
-
-  //-----------------------------------------------------------------------------
-
-
-  extern virtual function cfgNode lookup(string path);
-
-  virtual function void addNode(cfgNode nd);
-    cfgObjError(CFG_ADDNODE_CANNOT_ADD);
-  endfunction: addNode
-
-  virtual function cfgNode    getFoundNode(); 
-    return foundNode;   
-  endfunction: getFoundNode
-
-  virtual function string     getFoundPath(); 
-    return foundPath;   
-  endfunction: getFoundPath
-
-  virtual function cfgNode    getParent();    
-    return parent;      
-  endfunction: getParent
 endclass: cfgNode
 
+//=============================================================================
+
 virtual class cfgSerDes extends svlibCfgBase;
-  //-----------------------------------------------------------------------------
-  // Pure methods 
 
   pure virtual function cfgError_enum serialize  (cfgNode node, int options=0);
-  pure virtual function cfgNode    deserialize(int options=0);
+  pure virtual function cfgNode       deserialize(int options=0);
 
-  //-----------------------------------------------------------------------------
 endclass: cfgSerDes
+
+//=============================================================================
 
 virtual class cfgFile extends cfgSerDes;
   //-----------------------------------------------------------------------------
@@ -236,24 +178,24 @@ virtual class cfgFile extends cfgSerDes;
 
   //-----------------------------------------------------------------------------
 
-  virtual function string getFilePath(); 
-    return filePath;     
+  virtual function string getFilePath();
+    return filePath;
   endfunction: getFilePath
 
-  virtual function string getMode();     
-    return mode;         
+  virtual function string getMode();
+    return mode;
   endfunction: getMode
 
-  virtual function int    getFD();       
-    return fd;           
+  virtual function int    getFD();
+    return fd;
   endfunction: getFD
 
-  virtual function cfgError_enum openW(string fp); 
-    return open(fp, "w"); 
+  virtual function cfgError_enum openW(string fp);
+    return open(fp, "w");
   endfunction: openW
 
-  virtual function cfgError_enum openR(string fp); 
-    return open(fp, "r"); 
+  virtual function cfgError_enum openR(string fp);
+    return open(fp, "r");
   endfunction: openR
 
   virtual function cfgError_enum close();
@@ -272,235 +214,114 @@ endclass: cfgFile
 
 //=============================================================================
 // Concrete class definitions extended from cfgNode
+//=============================================================================
 
 class cfgNodeScalar extends cfgNode;
-  cfgScalar value;
 
-  //-----------------------------------------------------------------------------
-  // Protected functions and members
+  extern function string sformat(int indent = 0);
+  extern function cfgObjKind_enum kind();
+  extern function cfgNode childByName(string idx);
+
+  cfgScalar value;
 
   // protected constructor via macro
   `SVLIB_CFG_NODE_UTILS(cfgNodeScalar)
-  protected virtual function void purge();
-    super.purge();
-    value = null;
-  endfunction: purge
 
-  //-----------------------------------------------------------------------------
+  extern protected virtual function void purge();
 
-  function string sformat(int indent = 0);
-    return $sformatf("%s%s", str_repeat(" ", indent), value.str());
-  endfunction: sformat
-
-
-  function cfgObjKind_enum kind(); 
-    return NODE_SCALAR; 
-  endfunction: kind
-
-  function cfgNode childByName(string idx); 
-    return null; 
-  endfunction: childByName
 endclass: cfgNodeScalar
 
+//=============================================================================
+
 class cfgNodeSequence extends cfgNode;
+
+  extern function string sformat(int indent = 0);
+  extern function cfgObjKind_enum kind();
+  extern virtual function void addNode(cfgNode nd);
+  extern function cfgNode childByName(string idx);
+
   cfgNode value[$];
 
   //-----------------------------------------------------------------------------
   // Protected functions and members
 
-  // protected constructor via macro
   `SVLIB_CFG_NODE_UTILS(cfgNodeSequence)
+  extern protected virtual function void purge();
 
-  protected virtual function void purge();
-    super.purge();
-    value.delete();
-  endfunction: purge
-
-  //-----------------------------------------------------------------------------
-
-  function string sformat(int indent = 0);
-    foreach (value[i]) begin
-      if (i != 0) sformat = {sformat, "\n"};
-      sformat = {sformat, str_repeat(" ", indent), "- \n", value[i].sformat(indent+1)};
-    end
-  endfunction: sformat
-
-  function cfgObjKind_enum kind(); 
-    return NODE_SEQUENCE; 
-  endfunction: kind
-
-  virtual function void addNode(cfgNode nd);
-    if (nd == null) begin
-      cfgObjError(CFG_ADDNODE_NULL);
-      return;
-    end
-    nd.parent = this;
-    value.push_back(nd);
-    cfgObjError(CFG_OK);
-  endfunction: addNode
-
-  function cfgNode childByName(string idx);
-    int n = idx.atoi();
-    if (n >= value.size() || n<0)
-      return null;
-    else
-      return value[n];
-  endfunction: childByName
 endclass: cfgNodeSequence
 
+//=============================================================================
+
 class cfgNodeMap extends cfgNode;
-  //-----------------------------------------------------------------------------
-  // Protected functions and members
 
-  // protected constructor via macro
-
-  `SVLIB_CFG_NODE_UTILS(cfgNodeMap)
-  protected virtual function void purge();
-    super.purge();
-    value.delete();
-  endfunction: purge
-
-  //-----------------------------------------------------------------------------
+  extern function string sformat(int indent = 0);
+  extern function cfgObjKind_enum kind();
+  extern virtual function void addNode(cfgNode nd);
+  extern function cfgNode childByName(string idx);
 
   cfgNode value[string];
 
-  function string sformat(int indent = 0);
-    bit first = 1;
-    foreach (value[s]) begin
-      if (first)
-        first = 0;
-      else
-        sformat = {sformat, "\n"};
-      sformat = {sformat, str_repeat(" ", indent), s, " : \n", value[s].sformat(indent+1)};
-    end
-  endfunction: sformat
+  //-----------------------------------------------------------------------------
+  // Protected functions and members
 
-  function cfgObjKind_enum kind(); 
-    return NODE_MAP; 
-  endfunction: kind
-
-  virtual function void addNode(cfgNode nd);
-    if (nd == null) begin
-      cfgObjError(CFG_ADDNODE_NULL);
-      return;
-    end
-    if (value.exists(nd.getName())) begin
-      cfgObjError(CFG_ADDNODE_DUPLICATE_KEY);
-    end
-    nd.parent = this;
-    value[nd.getName()] = nd;
-    cfgObjError(CFG_OK);
-  endfunction: addNode
-
-  function cfgNode childByName(string idx);
-    if (!value.exists(idx))
-      return null;
-    else
-      return value[idx];
-  endfunction: childByName
+  `SVLIB_CFG_NODE_UTILS(cfgNodeMap)
+  extern protected virtual function void purge();
 
 endclass: cfgNodeMap
 
 //=============================================================================
-// Special abstract class definition
+// Parameterized scalar class for specialization
+//=============================================================================
 
 virtual class cfgTypedScalar #(type T = int) extends cfgScalar;
+
   T value;
+
   protected virtual function void purge();
     T tmp;  // initializes itself
     super.purge();
     value = tmp;
   endfunction: purge
 
-  virtual function T    get();    
-    return value; 
+  virtual function T get();
+    return value;
   endfunction: get
 
-  virtual function void set(T v); 
-    value = v;    
+  virtual function void set(T v);
+    value = v;
   endfunction: set
+
 endclass: cfgTypedScalar
 
 //=============================================================================
-// Concrete class definitions extended from cfgTypedScalar
+// Concrete class definitions extended from cfgScalar via cfgTypedScalar
+//=============================================================================
 
 class cfgScalarInt extends cfgTypedScalar#(logic signed [63:0]);
-  //-----------------------------------------------------------------------------
-  // Protected functions and members
 
   // forbid construction
-  protected function new(); 
-            endfunction: new
+  protected function new(); endfunction
 
-  //-----------------------------------------------------------------------------
-
-  function string str();
-    if (!$isunknown(value)) begin
-      return $sformatf("%0d", value);
-    end
-    else if (value < 0) begin
-      // Has X/Z but is known to be -ve
-      return $sformatf("-'h%0h", -value);
-    end
-    else begin
-      // Has X/Z but is not -ve
-      return $sformatf("'h%0h", value);
-    end
-  endfunction: str
-
+  extern function string str();
   extern function bit scan(string s);
-
-  function cfgObjKind_enum kind(); 
-    return SCALAR_INT; 
-  endfunction: kind
-
-  static function cfgScalarInt create(T v = 0);
-    create = Obstack#(cfgScalarInt)::obtain();
-    create.name = "";
-    create.value = v;
-  endfunction: create 
-  static function cfgNodeScalar createNode(string name, T v = 0);
-    cfgNodeScalar ns = cfgNodeScalar::create(name);
-    ns.value = cfgScalarInt::create(v);
-    return ns;
-  endfunction: createNode
+  extern function cfgObjKind_enum kind();
+  extern static function cfgScalarInt create(T v = 0);
+  extern static function cfgNodeScalar createNode(string name, T v = 0);
 
 endclass: cfgScalarInt
 
+//=============================================================================
+
 class cfgScalarString extends cfgTypedScalar#(string);
-  //-----------------------------------------------------------------------------
-  // Protected functions and members
 
   // forbid construction
-  protected function new(); 
-            endfunction: new
+  protected function new(); endfunction
 
-  //-----------------------------------------------------------------------------
-
-  function string str();
-    return get();
-  endfunction:str
-
-  function bit scan(string s);
-    set(s);
-    return 1;
-  endfunction: scan
-
-  function cfgObjKind_enum kind(); 
-   return SCALAR_STRING; 
-  endfunction: kind
-
-  static function cfgScalarString create(string v = "");
-    create = Obstack#(cfgScalarString)::obtain();
-    create.name = "";
-    create.value = v;
-  endfunction: create
-
-  static function cfgNodeScalar createNode(string name, string v = "");
-    cfgNodeScalar ns = cfgNodeScalar::create(name);
-    ns.value = cfgScalarString::create(v);
-    return ns;
-  endfunction: createNode
+  extern function string str();
+  extern function bit scan(string s);
+  extern function cfgObjKind_enum kind();
+  extern static function cfgScalarString create(string v = "");
+  extern static function cfgNodeScalar createNode(string name, string v = "");
 
 endclass: cfgScalarString
 
@@ -512,7 +333,7 @@ class cfgFileINI extends cfgFile;
   // Protected functions and members
 
   // forbid construction
-  protected function new(); 
+  protected function new();
             endfunction: new
 
   protected virtual function void writeComments(cfgNode node);
@@ -568,8 +389,8 @@ class cfgFileINI extends cfgFile;
 
   //-----------------------------------------------------------------------------
 
-  function cfgObjKind_enum kind(); 
-    return FILE_INI; 
+  function cfgObjKind_enum kind();
+    return FILE_INI;
   endfunction: kind
 
   static function cfgFileINI create(string name = "INI_FILE");
@@ -595,7 +416,7 @@ class cfgFileINI extends cfgFile;
         if (err != CFG_OK) return err;
       end
     end
-    // Then write out all the maps - one level deep only!  
+    // Then write out all the maps - one level deep only!
     foreach (root.value[key]) begin
       case (root.value[key].kind())
         NODE_SCALAR: ; // we've done those already
@@ -698,8 +519,7 @@ class cfgFileYAML extends cfgFile;
   // Protected functions and members
 
   // forbid construction
-  protected function new(); 
-            endfunction: new
+  protected function new(); endfunction
 
   protected function void purge();
     super.purge();
@@ -707,8 +527,8 @@ class cfgFileYAML extends cfgFile;
 
   //-----------------------------------------------------------------------------
 
-  function cfgObjKind_enum kind(); 
-    return FILE_YAML; 
+  function cfgObjKind_enum kind();
+    return FILE_YAML;
   endfunction: kind
 
   static function cfgFileYAML create(string name = "YAML_FILE");
