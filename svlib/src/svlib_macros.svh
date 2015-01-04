@@ -1,20 +1,20 @@
 //=============================================================================
 //  @brief macro definitions
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
 // @File: svlib_macros.svh
 //
 // Copyright 2014 Verilab, Inc.
-// 
+//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
-// 
+//
 //        http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,12 +25,12 @@
 `define SVLIB_MACROS__DEFINED
 
 //=============================================================================
-// This file defines various macros for svLib. Users should 
+// This file defines various macros for svLib. Users should
 // `include this file in any source file that uses any of these
 // macros.  Doing so will NOT compile or import any of the svLib
 // packages, which must be compiled separately and imported into
 // user code as required.
-// Note that the macros should normally be `include-d at the 
+// Note that the macros should normally be `include-d at the
 // outermost level, whereas packages should always be imported
 // into a module, interface or package.
 //=============================================================================
@@ -83,10 +83,10 @@
 //   locally within the loop, which will hold the line number
 //   of the current line within the file.
 // * The optional fourth argument 'start' is the starting value
-//   of the 'linenum' counter. It defaults to 1, but you can 
+//   of the 'linenum' counter. It defaults to 1, but you can
 //   replace it to account for the possibility that some lines of
 //   the open file might already have been consumed by other code.
-// On each trip around the loop, the next line in the file is 
+// On each trip around the loop, the next line in the file is
 // made available in 'line'. The line includes its trailing newline
 // character.
 // As with `forenum, this macro acts as a normal loop construct.

@@ -1,7 +1,7 @@
 //=============================================================================
-//  @brief  Implementations (bodies) of extern functions cfg objects
+//  @brief  Implementations (bodies) of extern functions for cfgScalar classes
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //

@@ -1,7 +1,7 @@
 //=============================================================================
-//  @brief  types and classes for Config file processing
+//  @brief  types and classes for config file and DOM processing
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
