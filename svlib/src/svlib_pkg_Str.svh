@@ -116,9 +116,9 @@ class Str extends svlibBase;
   extern virtual function void   pad   (int width, side_enum side=BOTH);
 
   // Quote a string so that it becomes a valid SystemVerilog string literal,
-  // complete with its enclosing double-quotes. All special characters in
-  // the string are backslash-escaped appropriately.
-  extern virtual function void   quote ();
+  // complete with enclosing double-quotes unless the "suppress" arg is set.
+  // All special characters in the string are backslash-escaped appropriately.
+  extern virtual function void   quote (bit suppressEnclosingQuotes = 0);
 
 
 endclass: Str
@@ -168,10 +168,10 @@ function automatic string str_pad(string s, int width, Str::side_enum side=Str::
 endfunction: str_pad
 
 // str_quote ==================================================================
-function automatic string str_quote(string s);
+function automatic string str_quote(string s, bit suppressEnclosingQuotes = 0);
   Str str = Obstack#(Str)::obtain();
   str.set(s);
-  str.quote();
+  str.quote(suppressEnclosingQuotes);
   str_quote = str.get();
   Obstack#(Str)::relinquish(str);
 endfunction: str_quote

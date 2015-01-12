@@ -394,6 +394,7 @@ module Str_unit_test;
   //`FAIL_UNLESS_STR_EQUAL("\"\\n\\a\\t\\f\\v\\\\\\\"\"", str_quote("\n\a\t\f\v\\\"") )
   `FAIL_UNLESS_STR_EQUAL("\"\\n\\007\\t\\014\\013\\\\\\\"\"", str_quote("\n\007\t\014\013\\\"") )
   `FAIL_UNLESS_STR_EQUAL("\"\\377abcd\\376\"", str_quote("\377abcd\376"))
+  `FAIL_UNLESS_STR_EQUAL("\\377abcd\\376", str_quote("\377abcd\376", 1))
   `SVTEST_END
 
 

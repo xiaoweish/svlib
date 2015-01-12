@@ -208,10 +208,15 @@ endfunction
 // complete with its enclosing double-quotes. All special characters in
 // the string are backslash-escaped appropriately.
 //
-function void Str::quote();
+function void Str::quote(bit suppressEnclosingQuotes = 0);
   string original = value;
   int runStart = 0;
-  set("\"");
+  if (!suppressEnclosingQuotes) begin
+    set("\"");
+  end
+  else begin
+    set("");
+  end
   foreach (original[i]) begin
     bit [7:0] ch = original[i];
     if (ch inside {[0:31], "\\", "\"", [127:255]}) begin
@@ -233,7 +238,9 @@ function void Str::quote();
   if (runStart < original.len()) begin
     append(original.substr(runStart, original.len()-1));
   end
-  append("\"");
+  if (!suppressEnclosingQuotes) begin
+    append("\"");
+  end
 endfunction
 
 
