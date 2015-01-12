@@ -1,7 +1,7 @@
 //=============================================================================
 //  @brief  Package of classes and functions for Str operations
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
@@ -39,7 +39,7 @@ class Str extends svlibBase;
   typedef enum {START, END} origin_enum;
 
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
 
   // constructor so that users can't call it
@@ -62,7 +62,7 @@ class Str extends svlibBase;
                    );
   extern protected function void clip_to_bounds(inout int n);
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Save a string as an object so that further manipulations can
   // be performed on it.  Get and set the object's string value.
   extern static  function Str    create(string s = "");
@@ -188,7 +188,7 @@ function automatic string str_replace(string s, string rs, int p, int n,
   Obstack#(Str)::relinquish(str);
 endfunction: str_replace
 
-// ============================================================================
+//=============================================================================
 /////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////
 
 `include "svlib_impl_Str.svh"

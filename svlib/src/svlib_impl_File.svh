@@ -1,7 +1,7 @@
 //=============================================================================
 //  @brief  Implementations (bodies) of extern functions of Pathname
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //

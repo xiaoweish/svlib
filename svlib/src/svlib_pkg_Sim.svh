@@ -1,7 +1,7 @@
 //=============================================================================
 //  @brief  Simulator interaction classes and functions
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //

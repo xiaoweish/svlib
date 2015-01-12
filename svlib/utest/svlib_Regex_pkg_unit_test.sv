@@ -184,6 +184,39 @@ module Regex_unit_test;
   
   `SVTEST_END
   
+  `SVTEST(regsub_emptymatch_check)
+  int count;
+  re.setRE("");
+  re.setOpts(0);
+  re.setStrContents("abc");
+  count = re.substAll(",");
+  `FAIL_UNLESS_EQUAL(count,4)
+  `FAIL_UNLESS_STR_EQUAL(str.get(), ",a,b,c,")
+  count = re.substAll("");
+  `FAIL_UNLESS_EQUAL(count,8)
+  `FAIL_UNLESS_STR_EQUAL(str.get(), ",a,b,c,")
+  count = re.substAll(".");
+  `FAIL_UNLESS_EQUAL(count,8)
+  `FAIL_UNLESS_STR_EQUAL(str.get(), ".,.a.,.b.,.c.,.")
+  re.setRE(",|$");
+  count = re.substAll("");
+  `FAIL_UNLESS_EQUAL(count,5)
+  `FAIL_UNLESS_STR_EQUAL(str.get(), "..a..b..c..")
+  re.setRE("\\.|");
+  count = re.substAll("");
+  `FAIL_UNLESS_EQUAL(count,12)
+  `FAIL_UNLESS_STR_EQUAL(str.get(), "abc")
+  re.setRE("a|");
+  count = re.substAll("#");
+  `FAIL_UNLESS_EQUAL(count,4)
+  `FAIL_UNLESS_STR_EQUAL(str.get(), "##b#c#")
+  re.setStrContents("");
+  re.setRE("a|");
+  count = re.substAll("#");
+  `FAIL_UNLESS_EQUAL(count,1)
+  `FAIL_UNLESS_STR_EQUAL(str.get(), "#")
+  `SVTEST_END
+  
   `SVUNIT_TESTS_END
 
 endmodule

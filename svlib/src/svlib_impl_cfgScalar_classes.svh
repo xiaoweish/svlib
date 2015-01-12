@@ -86,7 +86,7 @@ function cfgScalarString cfgScalarString::create(string v = "");
   create.value = v;
 endfunction: create
 
-function cfgNodeScalar ccfgScalarString::reateNode(string name, string v = "");
+function cfgNodeScalar cfgScalarString::createNode(string name, string v = "");
   cfgNodeScalar ns = cfgNodeScalar::create(name);
   ns.value = cfgScalarString::create(v);
   return ns;

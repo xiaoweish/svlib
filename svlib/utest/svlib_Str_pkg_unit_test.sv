@@ -390,8 +390,10 @@ module Str_unit_test;
   `FAIL_UNLESS_STR_EQUAL("\"abc\"", str_quote("abc") )
   `FAIL_UNLESS_STR_EQUAL("\"a\\\"c\"", str_quote("a\"c") )
   `FAIL_UNLESS_STR_EQUAL("\"\\n\"", str_quote("\n") )
-  `FAIL_UNLESS_STR_EQUAL("\"\\n\\a\\t\\f\\v\\\\\\\"\"", str_quote("\n\a\t\f\v\\\"") )
-  `FAIL_UNLESS_STR_EQUAL("\"\\xffabcd\\xfe\"", str_quote("\377abcd\376"))
+  // esc seqs for \a, \f, \v, \xNN don't work in IUS and VCS.
+  //`FAIL_UNLESS_STR_EQUAL("\"\\n\\a\\t\\f\\v\\\\\\\"\"", str_quote("\n\a\t\f\v\\\"") )
+  `FAIL_UNLESS_STR_EQUAL("\"\\n\\007\\t\\014\\013\\\\\\\"\"", str_quote("\n\007\t\014\013\\\"") )
+  `FAIL_UNLESS_STR_EQUAL("\"\\377abcd\\376\"", str_quote("\377abcd\376"))
   `SVTEST_END
 
 

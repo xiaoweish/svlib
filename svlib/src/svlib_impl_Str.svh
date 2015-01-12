@@ -1,7 +1,7 @@
 //=============================================================================
 //  @brief  Implementations (bodies) of extern functions in class Str
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
@@ -224,10 +224,8 @@ function void Str::quote();
         "\t":    append("\\t");
         "\\":    append("\\\\");
         "\"":    append("\\\"");
-        "\v":    append("\\v");
-        "\f":    append("\\f");
-        "\a":    append("\\a");
-        default: append($sformatf("\\x%02x", ch));
+        // esc seqs for \a, \f, \v, \xNN don't work in IUS and VCS - use octal esecapes.
+        default: append($sformatf("\\%03o", ch));
       endcase
       runStart = i+1;
     end

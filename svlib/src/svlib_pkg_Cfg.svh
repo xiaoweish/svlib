@@ -89,7 +89,7 @@ typedef enum int {
 
 virtual class svlibCfgBase extends svlibBase;
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Public interface
 
   pure virtual function cfgObjKind_enum kind();
@@ -98,7 +98,7 @@ virtual class svlibCfgBase extends svlibBase;
   extern virtual function cfgError_enum getLastError();
   extern virtual function string        kindStr();
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
 
   protected string        name;
@@ -153,7 +153,7 @@ endclass: cfgSerDes
 //=============================================================================
 
 virtual class cfgFile extends cfgSerDes;
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
 
   protected string filePath;
@@ -176,7 +176,7 @@ virtual class cfgFile extends cfgSerDes;
     return (mode != "") ? CFG_OK : CFG_OPEN_NO_FILE;
   endfunction: open
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 
   virtual function string getFilePath();
     return filePath;
@@ -242,7 +242,7 @@ class cfgNodeSequence extends cfgNode;
 
   cfgNode value[$];
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
 
   `SVLIB_CFG_NODE_UTILS(cfgNodeSequence)
@@ -261,7 +261,7 @@ class cfgNodeMap extends cfgNode;
 
   cfgNode value[string];
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
 
   `SVLIB_CFG_NODE_UTILS(cfgNodeMap)
@@ -329,7 +329,7 @@ endclass: cfgScalarString
 // Concrete class definitions extended from cfgFile
 
 class cfgFileINI extends cfgFile;
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
 
   // forbid construction
@@ -387,7 +387,7 @@ class cfgFileINI extends cfgFile;
       it = cfgNodeMap::create("deserialized_INI_file");
   endfunction: getRoot
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 
   function cfgObjKind_enum kind();
     return FILE_INI;
@@ -515,7 +515,7 @@ class cfgFileINI extends cfgFile;
 endclass: cfgFileINI
 
 class cfgFileYAML extends cfgFile;
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
 
   // forbid construction
@@ -525,7 +525,7 @@ class cfgFileYAML extends cfgFile;
     super.purge();
   endfunction: purge
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 
   function cfgObjKind_enum kind();
     return FILE_YAML;
@@ -547,7 +547,7 @@ class cfgFileYAML extends cfgFile;
 
 endclass: cfgFileYAML
 
-// ============================================================================
+//============================================================================
 /////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////
 
 `include "svlib_impl_Cfg.svh"

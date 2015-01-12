@@ -1,7 +1,7 @@
 /*=============================================================================
  *  @brief  These enum typedefs are valid syntax in both C and SV
  *  @author Jonathan Bromley, Verilab (www.verilab.com)
- * =============================================================================
+ *=============================================================================
  *
  *                      svlib SystemVerilog Utilities Library
  *

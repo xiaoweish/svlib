@@ -1,7 +1,7 @@
 //=============================================================================
 //  @brief  Implementations (bodies) of extern functions in class Regex
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
@@ -172,7 +172,11 @@ endfunction
 
 function int Regex::substAll(string substStr, int startPos = 0);
   int n = 0;
-  while (retest(startPos)) begin
+  // Fix for defect #23: don't allow matching beyond end of string.
+  // But we need to allow starting at end-of-string, just once, to 
+  // allow for an empty match at the end of the string, hence the
+  // test for <=len(), rather than <len() as you might expect.
+  while ((startPos <= runStr.len()) && retest(startPos)) begin
     startPos = match_subst(substStr);
     n++;
   end
@@ -220,6 +224,8 @@ function int Regex::match_subst(string substStr);
   end
   runStr.replace(realSubst.get(), getMatchStart(0), getMatchLength(0));
   result = getMatchStart(0) + realSubst.len();
+  // Fix for defect #23: skip forward one char if RE matched zero-length string
+  if (getMatchLength(0) == 0) result++;
   Obstack#(Str)::relinquish(realSubst);
   return result;
 endfunction

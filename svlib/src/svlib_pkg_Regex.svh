@@ -1,7 +1,7 @@
 //=============================================================================
 //  @brief  Regex class and methods
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
@@ -29,7 +29,7 @@ class Regex extends svlibBase;
 
   typedef enum {NOCASE=regexNOCASE, NOLINE=regexNOLINE} regexOptions;
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
 
   protected int nMatches;
@@ -50,7 +50,7 @@ class Regex extends svlibBase;
   extern protected virtual function void   purge();
   extern protected virtual function int    match_subst(string substStr);
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 
   extern static  function Regex  create (string s = "", int options=0);
   // Set the regular expression string
@@ -101,7 +101,7 @@ endclass: Regex
 //=============================================================================
 // Function definitions that are not part of classes
 
-// regex_match =================================================================
+// regex_match ================================================================
 function automatic Regex regex_match(string haystack, string needle, int options=0);
   Regex re;
   Str   s;
@@ -181,7 +181,7 @@ function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result
   
 endfunction: scanVerilogInt
 
-// ============================================================================
+//=============================================================================
 /////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////
 
 `include "svlib_impl_Regex.svh"

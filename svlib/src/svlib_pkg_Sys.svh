@@ -1,7 +1,7 @@
-//==============================================================================
+//=============================================================================
 //  @brief  Package of sys types and functions
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
@@ -158,7 +158,7 @@ function automatic qs sys_fileGlob(string wildPath);
   return paths;
 endfunction: sys_fileGlob
 
-// sys_getEnv ==================================================================
+// sys_getEnv =================================================================
 function automatic string sys_getEnv(string envVar);
   string envStr;
   if (svlib_dpi_imported_getenv(envVar, envStr) == 0) begin
@@ -169,13 +169,13 @@ function automatic string sys_getEnv(string envVar);
   end
 endfunction: sys_getEnv
 
-// sys_hasEnv ==================================================================
+// sys_hasEnv =================================================================
 function automatic bit    sys_hasEnv(string envVar);
   string envStr;
   return (svlib_dpi_imported_getenv(envVar, envStr) == 0);
 endfunction: sys_hasEnv
 
-// sys_getCwd ==================================================================
+// sys_getCwd =================================================================
 function automatic string sys_getCwd();
   string cwd;
   int err;

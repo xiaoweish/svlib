@@ -1,7 +1,7 @@
-// =============================================================================
+//=============================================================================
 //  @brief  Private collection of functionality used in svlib Do Not Import!
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
@@ -20,21 +20,21 @@
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
-// =============================================================================
+//=============================================================================
 // 
 // This file defines svlib_private_base_pkg, a collection of
 // functionality that is required by other parts of svLib.
 // It also imports all the DPI functions that are required by
 // other parts of the package.
-// =============================================================================
+//=============================================================================
 //
-// =============================================================================
+//=============================================================================
 //                       IMPORTANT NOTE
-// =============================================================================
+//=============================================================================
 // USER CODE SHOULD *NOT* IMPORT THIS PACKAGE. In this way,
 // user code does not have access directly to the DPI functions,
 // allowing svLib to take full control of the SV/C interaction.
-// =============================================================================
+//=============================================================================
 
 package svlib_private_base_pkg;
 
@@ -50,8 +50,8 @@ package svlib_private_base_pkg;
   // supplied by some earlier DPI call, referencing the C string array data.
   // This function repeatedly calls svlib_dpi_imported_saBufNext to retrieve
   // one string from the C array and bump the handle variable on to the next.
-  // Flag ~keep_ss~ set: function appends to existing contents of ss.
-  //    ~keep_ss~ clear: function deletes existing contents of ss before starting.
+  //   ~keep_ss~ set: function appends to existing contents of ss.
+  // ~keep_ss~ clear: function deletes existing contents of ss before starting.
   //
   function automatic int svlib_private_getQS(input chandle hnd, ref qs ss, input bit keep_ss=0);
     int result;
@@ -317,12 +317,12 @@ package svlib_private_base_pkg;
     
   endclass
 
-  // =============================================================================
+  //===========================================================================
   // function scanUint64: not for public API! Assumes that the 
   // radix letter is OK, and the value-string has been stripped
   // of spaces and is reasonably sane. No handling of -ve numbers.
   // Result is always zero-filled to 64 bits.
-  // =============================================================================
+  //===========================================================================
   // This function reads from a string representation into a 64-bit value.
   // X/Z values are supported. Underscores are ignored. Otherwise, illegal
   // digits cause an error (0) to be returned and the result is undefined.

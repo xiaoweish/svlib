@@ -1,7 +1,7 @@
 //=============================================================================
 //  @brief  Class to provide utility services for an enum.
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
@@ -38,7 +38,7 @@ class EnumUtils #(type ENUM = int) extends svlibBase;
   typedef logic [$bits(ENUM)-1:0] BASE;
   typedef bit [2*$bits(ENUM)-1:0] INDEX;
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
   
   // List of all values, lazy-evaluated
@@ -67,7 +67,7 @@ class EnumUtils #(type ENUM = int) extends svlibBase;
 
 endclass: EnumUtils
 
-// ============================================================================
+//=============================================================================
 /////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////
 
 `include "svlib_impl_Enum.svh"

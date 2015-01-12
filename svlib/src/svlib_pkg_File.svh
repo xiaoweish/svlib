@@ -1,7 +1,7 @@
 //=============================================================================
 //  @brief  class and methods for pathnames
 //  @author Jonathan Bromley, Verilab (www.verilab.com)
-// =============================================================================
+//=============================================================================
 //
 //                      svlib SystemVerilog Utilities Library
 //
@@ -24,7 +24,7 @@
 
 class Pathname extends svlibBase;
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Protected functions and members
 
   // forbid construction
@@ -38,7 +38,7 @@ class Pathname extends svlibBase;
   protected bit absolute;
   static protected Str separator = Str::create("/");
 
-  //-----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
 
   extern static function Pathname create(string s = "");
 
@@ -119,7 +119,7 @@ function automatic bit file_accessible(string path, sys_fileRWX_s mode = 0);
   return ok;
 endfunction: file_accessible
 
-// ============================================================================
+//============================================================================
 /////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////
 
 `include "svlib_impl_File.svh"
