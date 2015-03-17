@@ -112,6 +112,10 @@ class Str extends svlibBase;
   // Trim a string (remove leading and/or trailing whitespace)
   extern virtual function void   trim  (side_enum side=BOTH);
 
+  // Strips the string of any character found in the ~chars~ string. If ~chars~
+  // is not present, all blanks are removed from the string."
+  extern virtual function void   strip (string chars=" ");
+     
   // Pad a string to width with spaces on left/right/both
   extern virtual function void   pad   (int width, side_enum side=BOTH);
 
@@ -157,6 +161,15 @@ function automatic string str_trim(string s, Str::side_enum side=Str::BOTH);
   str_trim = str.get();
   Obstack#(Str)::relinquish(str);
 endfunction: str_trim
+
+// str_strip ===================================================================
+function automatic string str_strip(string s, string chars=" ");
+  Str str = Obstack#(Str)::obtain();
+  str.set(s);
+  str.strip(chars);
+  str_strip = str.get();
+  Obstack#(Str)::relinquish(str);
+endfunction: str_strip
 
 // str_pad ====================================================================
 function automatic string str_pad(string s, int width, Str::side_enum side=Str::BOTH);

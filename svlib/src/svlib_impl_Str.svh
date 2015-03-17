@@ -143,6 +143,26 @@ function void Str::trim(side_enum side=BOTH);
   value = value.substr(first, last);
 endfunction
 
+// Strip a string of any character found in the supplied ~chars~ string. 
+function void Str::strip(string chars=" ");
+  int first;
+  int last;
+  string new_value;
+    
+  first = 0;
+  last  = value.len;
+  new_value = "";
+  for (int unsigned s = first; s < last; s++) begin
+    foreach (chars[i]) begin
+      if (value[s] != chars[i]) begin 
+         new_value = { new_value, value[s] };
+         break;
+      end
+    end
+  end
+  value = new_value;
+endfunction
+
 // Pad a string to ~width~ with spaces on left/right/both
 function void Str::pad(int width, side_enum side=BOTH);
   int n, n2;
