@@ -145,21 +145,22 @@ endfunction
 
 // Strip a string of any character found in the supplied ~chars~ string. 
 function void Str::strip(string chars=" ");
-  int first;
-  int last;
+  byte unsigned stripchars[$];
   string new_value;
-    
-  first = 0;
-  last  = value.len;
-  new_value = "";
-  for (int unsigned s = first; s < last; s++) begin
-    foreach (chars[i]) begin
-      if (value[s] != chars[i]) begin 
-         new_value = { new_value, value[s] };
-         break;
-      end
-    end
+
+  foreach (chars[i]) begin
+     stripchars.push_back(chars[i]);
   end
+   
+  new_value = "";
+  foreach (value[i]) begin
+     // If the current character does not match anything in the strip chars,
+     // then add it to the new string. 
+     if (!(value[i] inside {stripchars})) begin
+        new_value = { new_value, value[i] };
+     end
+  end
+   
   value = new_value;
 endfunction
 
