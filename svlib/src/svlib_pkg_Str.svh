@@ -114,7 +114,7 @@ class Str extends svlibBase;
 
   // Strips the string of any character found in the ~chars~ string. If ~chars~
   // is not present, all blanks are removed from the string."
-  extern virtual function void   strip (string chars=" ");
+  extern virtual function void   strip (string chars=" \t\n\10\11");
      
   // Pad a string to width with spaces on left/right/both
   extern virtual function void   pad   (int width, side_enum side=BOTH);
@@ -163,7 +163,9 @@ function automatic string str_trim(string s, Str::side_enum side=Str::BOTH);
 endfunction: str_trim
 
 // str_strip ===================================================================
-function automatic string str_strip(string s, string chars=" ");
+// Default characters to strip are: \t (tab), \n (CarriageReturn),
+//  \10 (LineFeed) and \11 (VerticalTab)
+function automatic string str_strip(string s, string chars=" \t\n\10\11");
   Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.strip(chars);

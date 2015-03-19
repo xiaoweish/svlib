@@ -144,7 +144,9 @@ function void Str::trim(side_enum side=BOTH);
 endfunction
 
 // Strip a string of any character found in the supplied ~chars~ string. 
-function void Str::strip(string chars=" ");
+// Default characters to strip are: \t (tab), \n (CarriageReturn),
+//  \10 (LineFeed) and \11 (VerticalTab)
+function void Str::strip(string chars=" \t\n\10\11");
   byte unsigned stripchars[$];
   string new_value;
 
