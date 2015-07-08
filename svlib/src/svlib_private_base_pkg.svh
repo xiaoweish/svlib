@@ -84,8 +84,7 @@ package svlib_private_base_pkg;
     local static int put_calls_ = 0;
 
     // forbid construction
-    protected function new(); 
-              endfunction
+    protected function new(); endfunction
 
     static function T obtain();
       T result;
@@ -94,9 +93,17 @@ package svlib_private_base_pkg;
         result = new();
         `else
         process p = get_running_process();
-        string randstate = p.get_randstate();
-        result = new();
-        p.set_randstate(randstate);
+        ast_obtain_from_valid_process:
+          assert (p != null) else
+            $warning("svlib object created from null process");
+        if (p == null) begin
+          result = new();
+        end
+        else begin
+          string randstate = p.get_randstate();
+          result = new();
+          p.set_randstate(randstate);
+        end
         `endif
         constructed_++;
       end
