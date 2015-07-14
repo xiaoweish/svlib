@@ -144,26 +144,28 @@ function void Str::trim(side_enum side=BOTH);
 endfunction
 
 // Strip a string of any character found in the supplied ~chars~ string. 
-// Default characters to strip are: \t (tab), \n (CarriageReturn),
-//  \10 (LineFeed) and \11 (VerticalTab)
-function void Str::strip(string chars=" \t\n\10\11");
+// Default characters to strip are: space, \t (tab=x09), \n (newline=x0A),
+//  \13 (vertical-tab=x0B), \14 (formfeed=x0C), \15 (carriage-return=x0D),
+//  \240 (nonbreaking-space=160=xA0), \177 (rubout=x7F)
+function void Str::strip(string chars=" \t\n\13\14\15\240\177");
   byte unsigned stripchars[$];
-  string new_value;
+  int destination = 0;  // position in string to which a char must be moved
 
   foreach (chars[i]) begin
      stripchars.push_back(chars[i]);
   end
    
-  new_value = "";
   foreach (value[i]) begin
      // If the current character does not match anything in the strip chars,
      // then add it to the new string. 
      if (!(value[i] inside {stripchars})) begin
-        new_value = { new_value, value[i] };
+        value[destination] = value[i];
+        destination++;
      end
   end
-   
-  value = new_value;
+
+  value = value.substr(0, destination-1);
+
 endfunction
 
 // Pad a string to ~width~ with spaces on left/right/both

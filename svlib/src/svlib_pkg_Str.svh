@@ -163,9 +163,11 @@ function automatic string str_trim(string s, Str::side_enum side=Str::BOTH);
 endfunction: str_trim
 
 // str_strip ===================================================================
-// Default characters to strip are: \t (tab), \n (CarriageReturn),
-//  \10 (LineFeed) and \11 (VerticalTab)
-function automatic string str_strip(string s, string chars=" \t\n\10\11");
+// Strip a string of any character found in the supplied ~chars~ string. 
+// Default characters to strip are: space, \t (tab=x09), \n (newline=x0A),
+//  \13 (vertical-tab=x0B), \14 (formfeed=x0C), \15 (carriage-return=x0D),
+//  \240 (nonbreaking-space=160=xA0), \177 (rubout=x7F)
+function automatic string str_strip(string s, string chars=" \t\n\13\14\15\240\177");
   Str str = Obstack#(Str)::obtain();
   str.set(s);
   str.strip(chars);
