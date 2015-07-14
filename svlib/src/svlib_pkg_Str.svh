@@ -114,7 +114,10 @@ class Str extends svlibBase;
 
   // Strips the string of any character found in the ~chars~ string. If ~chars~
   // is not present, all blanks are removed from the string."
-  extern virtual function void   strip (string chars=" \t\n\10\11");
+  // Default characters to strip are: space, \t (tab=x09), \n (newline=x0A),
+  //  \13 (vertical-tab=x0B), \14 (formfeed=x0C), \15 (carriage-return=x0D),
+  //  \240 (nonbreaking-space=160=xA0), \177 (rubout=x7F)
+  extern virtual function void   strip (string chars=" \t\n\13\14\15\240\177");
      
   // Pad a string to width with spaces on left/right/both
   extern virtual function void   pad   (int width, side_enum side=BOTH);

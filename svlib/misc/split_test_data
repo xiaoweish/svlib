@@ -12,3 +12,7 @@ this  ; that;   and the other;
 this  ; that;   and the other;   
 \s+
 this  ; "that";   and the other;
+
+
+\s*([+=-])\s*
+sum  =  first +second- third

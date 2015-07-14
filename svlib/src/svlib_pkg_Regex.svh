@@ -129,18 +129,18 @@ function automatic Regex regex_match(string haystack, string needle, int options
 endfunction: regex_match
 
 // regex_split =================================================================
-function automatic qs regex_split(string splitter, string source, int limit=0);
+function automatic qs regex_split(string pattern, string source, int limit=0);
   Regex re;
   Str   s;
   qs    result;
   re  = Obstack#(Regex)::obtain();
   s   = Obstack#(Str)::obtain();
   s.set(source);
-  re.setRE(splitter);
+  re.setRE(pattern);
   re.setStr(s);
   regex_split_check_RE_valid: 
     assert (re.getError()==0) else
-      $error("Bad RE \"%s\": %s", splitter, re.getErrorString());
+      $error("Bad RE \"%s\": %s", pattern, re.getErrorString());
   result = re.split(limit);
   Obstack#(Str)::relinquish(s);
   Obstack#(Regex)::relinquish(re);
