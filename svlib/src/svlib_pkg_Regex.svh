@@ -87,11 +87,11 @@ class Regex extends svlibBase;
   // The whole match counts as 1; each submatch/group adds one.
   extern virtual function int    getMatchCount ();
   // For a given match (0=full) get the start position of that match
-  extern virtual function int    getMatchStart (int match);
+  extern virtual function int    getMatchStart (int match = 0);
   // For a given match (0=full) get the length of that match
-  extern virtual function int    getMatchLength(int match);
+  extern virtual function int    getMatchLength(int match = 0);
   // Extract a given match from the sample string, returns "" if no match
-  extern virtual function string getMatchString(int match);
+  extern virtual function string getMatchString(int match = 0);
 
   extern virtual function int    subst(string substStr, int startPos = 0);
   extern virtual function int    substAll(string substStr, int startPos = 0);

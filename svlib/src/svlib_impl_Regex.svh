@@ -114,7 +114,7 @@ function int    Regex::getMatchCount();
   return nMatches;
 endfunction
 
-function int    Regex::getMatchStart(int match);
+function int    Regex::getMatchStart(int match = 0);
   if (match>nMatches || match<0) begin
     return -1;
   end
@@ -123,7 +123,7 @@ function int    Regex::getMatchStart(int match);
   end
 endfunction
 
-function int    Regex::getMatchLength(int match);
+function int    Regex::getMatchLength(int match = 0);
   if (match>nMatches || match<0) begin
     return 0;
   end
@@ -132,7 +132,7 @@ function int    Regex::getMatchLength(int match);
   end
 endfunction
 
-function string    Regex::getMatchString(int match);
+function string    Regex::getMatchString(int match = 0);
   int L, len;
   L = getMatchStart(match);
   if (L<0) return "";
@@ -167,7 +167,7 @@ function qs Regex::split(int limit = 0);
   while (((limit <= 0) || (fields < limit)) && (position <= runStr.len())) begin
     bit matched;
     matched = retest(position);
-    if (matched && (getMatchLength(0) == 0) && (getMatchStart(0) == position)) begin
+    if (matched && (getMatchLength() == 0) && (getMatchStart() == position)) begin
       // Special case: if zero-length match at anchor point, ignore it and try again one character ahead.
       matched = retest(position+1);
     end
@@ -178,7 +178,7 @@ function qs Regex::split(int limit = 0);
     end
     else begin
       // We have a match. Grab everything up to the match.
-      int matchStart = getMatchStart(0);
+      int matchStart = getMatchStart();
       int nMatches = getMatchCount();
       result.push_back(runStr.range(position, matchStart-position));
       fields++;
@@ -186,7 +186,7 @@ function qs Regex::split(int limit = 0);
       for (int i=1; i < nMatches; i++) begin
         result.push_back(getMatchString(i));
       end
-      position = matchStart + getMatchLength(0);
+      position = matchStart + getMatchLength();
     end
   end
   if (limit == 0) begin
