@@ -24,13 +24,6 @@ ENHANCEMENTS IMPLEMENTED IN THIS RELEASE:
 
 #24: Add Perl-style regex-based split
 ------------------------------------
-Regex::split method, and package-level function re_split, implemented
-and documented.
+Regex::split method, and package-level function regex_split,
+implemented and documented.
 
-#30: Add sys_setEnv function
----------------------------
-Package-level function sys_setEnv now implemented, allowing environment
-variables in the current running Linux process (the simulator) to be
-set. This is not recommended practice, but may occasionally be useful
-to set up an environment before launching some other program using a
-$system() call.
