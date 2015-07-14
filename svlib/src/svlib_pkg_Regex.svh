@@ -95,6 +95,10 @@ class Regex extends svlibBase;
 
   extern virtual function int    subst(string substStr, int startPos = 0);
   extern virtual function int    substAll(string substStr, int startPos = 0);
+  
+  // Like Perl's split. Leaves string contents untouched;
+  // returns queue of split strings
+  extern virtual function qs     split(int limit = 0);
 
 endclass: Regex
 
@@ -107,19 +111,41 @@ function automatic Regex regex_match(string haystack, string needle, int options
   Str   s;
   bit   found;
   re  = Obstack#(Regex)::obtain();
+  s   = Obstack#(Str)::obtain();
+  s.set(haystack);
   re.setRE(needle);
+  re.setStr(s);
   re.setOpts(options);
   regex_match_check_RE_valid: 
     assert (re.getError()==0) else
       $error("Bad RE \"%s\": %s", needle, re.getErrorString());
-  s   = Str::create(haystack);
-  found = re.test(s);
+  found = re.retest(0);
   if (found)
     return re;
-  // Return the unwanted Regex object to the obstack
+  // Return the unwanted objects to their obstacks
+  Obstack#(Str)::relinquish(s);
   Obstack#(Regex)::relinquish(re);
   return null;
 endfunction: regex_match
+
+// regex_split =================================================================
+function automatic qs regex_split(string splitter, string source, int limit=0);
+  Regex re;
+  Str   s;
+  qs    result;
+  re  = Obstack#(Regex)::obtain();
+  s   = Obstack#(Str)::obtain();
+  s.set(source);
+  re.setRE(splitter);
+  re.setStr(s);
+  regex_split_check_RE_valid: 
+    assert (re.getError()==0) else
+      $error("Bad RE \"%s\": %s", splitter, re.getErrorString());
+  result = re.split(limit);
+  Obstack#(Str)::relinquish(s);
+  Obstack#(Regex)::relinquish(re);
+  return result;
+endfunction : regex_split
 
 // scanVerilogInt =============================================================
 function automatic bit scanVerilogInt(string s, inout logic signed [63:0] result);

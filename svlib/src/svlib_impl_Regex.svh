@@ -160,6 +160,49 @@ function string Regex::getErrorString();
   endcase
 endfunction
 
+function qs Regex::split(int limit = 0);
+  int fields = 0;
+  int position = 0;
+  qs  result;
+  while (((limit <= 0) || (fields < limit)) && (position <= runStr.len())) begin
+    bit matched;
+    matched = retest(position);
+    if (matched && (getMatchLength(0) == 0) && (getMatchStart(0) == position)) begin
+      // Special case: if zero-length match at anchor point, ignore it and try again one character ahead.
+      matched = retest(position+1);
+    end
+    if (!matched) begin
+      // No match. Grab everything up to end-of-string and return.
+      result.push_back(runStr.range(position, runStr.len()));
+      break;
+    end
+    else begin
+      // We have a match. Grab everything up to the match.
+      int matchStart = getMatchStart(0);
+      int nMatches = getMatchCount();
+      result.push_back(runStr.range(position, matchStart-position));
+      fields++;
+      // Any subexpressions to capture?
+      for (int i=1; i < nMatches; i++) begin
+        result.push_back(getMatchString(i));
+      end
+      position = matchStart + getMatchLength(0);
+    end
+  end
+  if (limit == 0) begin
+    // Strip trailing empty fields
+    for (int i = result.size()-1; i>=0; i--) begin
+      if (result[i] == "") begin
+        void'(result.pop_back());
+      end
+      else begin
+        break;
+      end
+    end
+  end
+  return result;
+endfunction
+
 function int Regex::subst(string substStr, int startPos = 0);
   if (retest(startPos)) begin
     startPos = match_subst(substStr);

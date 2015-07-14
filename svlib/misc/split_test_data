@@ -1,0 +1,14 @@
+,
+foo,bar
+,
+,,foo,bar,,
+
+foobar
+ *(;) *
+this  ; that;   and the other;   
+grok
+this  ; that;   and the other;   
+\s+
+this  ; that;   and the other;   
+\s+
+this  ; "that";   and the other;

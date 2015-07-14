@@ -91,11 +91,12 @@
 // character.
 // As with `forenum, this macro acts as a normal loop construct.
 //-------------------------------------------------------------------
-`define foreach_line(fid,line,linenum,start=1)                      \
-  for ( int linenum=start, string line="";                          \
-        $fgets(line, fid) > 0;                                      \
-        linenum++                                                   \
-      )
+`define foreach_line(fid,line,linenum,start=1)                        \
+  for (                                                               \
+    int \macro%%FILE%%ID =(fid), int linenum=(start), string line=""; \
+        $fgets(line, \macro%%FILE%%ID ) > 0;                          \
+        linenum++                                                     \
+  )
 //-------------------------------------------------------------------
 
 
