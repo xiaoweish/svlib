@@ -129,7 +129,7 @@ function automatic Regex regex_match(string haystack, string needle, int options
 endfunction: regex_match
 
 // regex_split =================================================================
-function automatic qs regex_split(string pattern, string source, int limit=0);
+function automatic qs regex_split(string source, string pattern, int limit=0);
   Regex re;
   Str   s;
   qs    result;
