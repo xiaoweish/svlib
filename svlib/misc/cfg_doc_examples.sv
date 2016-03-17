@@ -27,8 +27,9 @@ module node_test;
     cfg_DOM = cfg.toDOM("cfg");  // Copy user object to DOM representation
     err = cfg_file.openW("user_file.ini");  // Open the file for writing
     err = cfg_file.serialize(cfg_DOM);      // Write the DOM to the file
+    $display("serialize, err = %s", err.name);
     err = cfg_file.close();                 // finalize the file
-    $display("done, err = %s", err.name);
+    $display("close, err = %s", err.name);
 
   end
   
