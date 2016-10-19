@@ -189,6 +189,7 @@ endfunction
 
 // Split a string on every occurrence of a given character
 function qs Str::split(string splitset="", bit keepSplitters=0);
+  bit splitAtWhitespace = 0; 
   split = {};
   if (splitset == "") begin
     for (int i=0; i<value.len(); i++) begin
@@ -198,17 +199,24 @@ function qs Str::split(string splitset="", bit keepSplitters=0);
   else begin
     byte unsigned splitchars[$];
     int anchor = 0;
+    int i;
     foreach (splitset[i]) begin
       splitchars.push_back(splitset[i]);
+      if (isSpace(splitset[i]))
+        splitAtWhitespace = 1;
     end
-    foreach (value[i]) begin
-      if (value[i] inside {splitchars}) begin
+    i = 0; 
+    while(i<value.len()) begin
+      if (value[i] inside {splitchars}) begin 
         split.push_back(value.substr(anchor, i-1));
         if (keepSplitters) begin
           split.push_back(value.substr(i,i));
         end
-        anchor = i+1;
+        while (splitAtWhitespace && i<value.len()-1 && isSpace(value[i+1])) // leap over extra whitespaces
+          i = i + 1;
+        anchor = i + 1;
       end
+      i = i + 1; 
     end
     split.push_back(value.substr(anchor, value.len()-1));
   end
@@ -254,7 +262,7 @@ function void Str::quote(bit suppressEnclosingQuotes = 0);
         "\t":    append("\\t");
         "\\":    append("\\\\");
         "\"":    append("\\\"");
-        // esc seqs for \a, \f, \v, \xNN don't work in IUS and VCS - use octal esecapes.
+        // esc seqs for \a, \f, \v, \xNN don't work in IUS and VCS - use octal escapes.
         default: append($sformatf("\\%03o", ch));
       endcase
       runStart = i+1;

@@ -86,7 +86,7 @@ class Str extends svlibBase;
 
   // Use the Str object's contents to join adjacent elements of the
   // queue of strings into a single larger string. For example, if the
-  // Str object 's' contains "XX" then
+  // Str object 's' contains ", " then
   //    s.sjoin({"a", "b", "c"})
   // would yield the string "a, b, c"
   extern virtual function string sjoin (qs strings);
@@ -150,6 +150,19 @@ function automatic string str_sjoin(qs elements, string joiner);
   Obstack#(Str)::relinquish(str);
 endfunction: str_sjoin
 
+
+// str_split ==================================================================
+// Split a string into a list of strings using each character in ~splitset~ as
+// delimiter. If ~keepSplitters~ is set, it will add the delimiters as
+// elements in the resulting list.
+// Note: this version does not support a regexp for splitset (see regex_split())
+function automatic qs str_split(string s, string splitset="", bit keepSplitters=0);
+  Str str = Obstack#(Str)::obtain();
+  str.set(s);
+  str_split = str.split(splitset,  keepSplitters);
+  Obstack#(Str)::relinquish(str); 
+endfunction: str_split
+   
 // str_repeat =================================================================
 function automatic string str_repeat(string s, int n);
   if (n<=0) return "";

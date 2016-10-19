@@ -699,11 +699,12 @@ extern int32_t svlib_dpi_imported_access(char *path, int mode, int *ok) {
   }
   
   err = access(path, flag);
-  *ok = (err == 0);
-  if ((err == EACCES) || (err == EROFS)) err = 0;
-  
+  *ok = (err == 0) ? 1 : 0;
+  if (err == -1) {
+    if ((errno == EACCES) || (errno == EROFS) || (errno == ENOENT)) 
+      err = 0;
+  }
   return err;
-
 }
 
 
