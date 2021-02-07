@@ -1,52 +1,43 @@
-RELEASE NOTES for svlib version 0.5p1
+# RELEASE NOTES for svlib
 
-#########################################
-DEFECTS FIXED FOR THIS RELEASE:
-#########################################
+All notable changes to this project will be documented in this file.
 
-#35: file_accessible throws if file not accessible
---------------------------------------------------
+From version 1.0.0 on, the format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - not released yet
+
+### Changed
+- moved repository to bitbucket
+- changed informational files to markdown
+- changed RELEASE_NOTES to use semantic versioning and Keep-A-Changelog
+
+## [0.5.1] - 2020-11-23
+
+### Fixed
+
+- Trac #35: file_accessible throws if file not accessible.
 Fixed (thorsten).
-
-#########################################
-ENHANCEMENTS IMPLEMENTED IN THIS RELEASE:
-#########################################
-
-#36: Change Str::split() to exhibit behaviour of Perl/Awk regarding whitespace
-------------------------------------------------------------------------------
+- Trac #36: Change Str::split() to exhibit behaviour of Perl/Awk regarding whitespace.
 Done, not yet documented (thorsten).
 
-#34: Add split package-level function
--------------------------------------
+### Added
+- Trac #34: Add split package-level function
 Added str_split(), not yet documented (thorsten).
 
+## [0.5.0] - 2015-02-15
 
-RELEASE NOTES for svlib version 0.5
-
-#########################################
-DEFECTS FIXED FOR RELEASE 0.5
-#########################################
-
-#28: Str::create can cause runtime crash
----------------------------------------
+### Fixed
+- Trac #28: Str::create can cause runtime crash
 Obstack::obtain now checks for null process handle before interrogating
 process::get_randstate().
-
-#29: Add regex_match to documentation
-------------------------------------
-This package-level function is now documented.
-
-#31: File descriptor argument to foreach_line macro evaluated repeatedly
-------------------------------------------------------------------------
+- Trac #31: File descriptor argument to foreach_line macro evaluated repeatedly
 This defect has been fixed so that the following idiom works as expected:
-  `foreach_line($fopen("MYFILE.TXT","r"), lineVar, lineNumVar) ...
+  `` `foreach_line($fopen("MYFILE.TXT","r"), lineVar, lineNumVar) ...``
 
-#########################################
-ENHANCEMENTS IMPLEMENTED IN RELEASE 0.5:
-#########################################
-
-#24: Add Perl-style regex-based split
-------------------------------------
+### Added
+- Trac #29: Add regex_match to documentation
+This package-level function is now documented.
+- Trac #24: Add Perl-style regex-based split
 Regex::split method, and package-level function regex_split,
 implemented and documented.
-

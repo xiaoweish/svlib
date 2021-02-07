@@ -1,29 +1,9 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+Top-level of svlib repository. Contains the source directory and releases.
 
-### What is this repository for? ###
+Find out more about it in
+* svlib/README.md
+* svlib/RELEASE_NOTES
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+Repo contact info@verilab.com
