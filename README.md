@@ -6,4 +6,4 @@ Find out more about it in
 * svlib/README.md
 * svlib/RELEASE_NOTES
 
-Repo contact info@verilab.com
+Repo contact svlib@verilab.com
