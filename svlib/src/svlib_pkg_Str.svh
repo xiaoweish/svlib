@@ -118,7 +118,7 @@ class Str extends svlibBase;
   //  \13 (vertical-tab=x0B), \14 (formfeed=x0C), \15 (carriage-return=x0D),
   //  \240 (nonbreaking-space=160=xA0), \177 (rubout=x7F)
   extern virtual function void   strip (string chars=" \t\n\13\14\15\240\177");
-     
+
   // Pad a string to width with spaces on left/right/both
   extern virtual function void   pad   (int width, side_enum side=BOTH);
 
@@ -160,9 +160,9 @@ function automatic qs str_split(string s, string splitset="", bit keepSplitters=
   Str str = Obstack#(Str)::obtain();
   str.set(s);
   str_split = str.split(splitset,  keepSplitters);
-  Obstack#(Str)::relinquish(str); 
+  Obstack#(Str)::relinquish(str);
 endfunction: str_split
-   
+
 // str_repeat =================================================================
 function automatic string str_repeat(string s, int n);
   if (n<=0) return "";
@@ -179,7 +179,7 @@ function automatic string str_trim(string s, Str::side_enum side=Str::BOTH);
 endfunction: str_trim
 
 // str_strip ===================================================================
-// Strip a string of any character found in the supplied ~chars~ string. 
+// Strip a string of any character found in the supplied ~chars~ string.
 // Default characters to strip are: space, \t (tab=x09), \n (newline=x0A),
 //  \13 (vertical-tab=x0B), \14 (formfeed=x0C), \15 (carriage-return=x0D),
 //  \240 (nonbreaking-space=160=xA0), \177 (rubout=x7F)
@@ -220,6 +220,14 @@ function automatic string str_replace(string s, string rs, int p, int n,
   str_replace = str.get();
   Obstack#(Str)::relinquish(str);
 endfunction: str_replace
+
+// str_range ================================================================
+function automatic string str_range(string s, int p, int n, origin_enum origin=START);
+  Str str = Obstack#(Str)::obtain();
+  str.set(s);
+  str_range = str.range(p, n, origin);
+  Obstack#(Str)::relinquish(str);
+endfunction : str_range
 
 //=============================================================================
 /////////////////// IMPLEMENTATIONS OF EXTERN CLASS METHODS ///////////////////

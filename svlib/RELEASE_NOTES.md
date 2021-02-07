@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - moved repository to bitbucket
 - changed informational files to markdown
 - changed RELEASE_NOTES to use semantic versioning and Keep-A-Changelog
+- added missing documentation for package-level functions
+- added str_range() package-level function
 
 ## [0.5.1] - 2020-11-23
 
