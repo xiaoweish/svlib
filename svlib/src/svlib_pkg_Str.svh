@@ -222,7 +222,7 @@ function automatic string str_replace(string s, string rs, int p, int n,
 endfunction: str_replace
 
 // str_range ================================================================
-function automatic string str_range(string s, int p, int n, origin_enum origin=START);
+function automatic string str_range(string s, int p, int n, Str::origin_enum origin=Str::START);
   Str str = Obstack#(Str)::obtain();
   str.set(s);
   str_range = str.range(p, n, origin);
