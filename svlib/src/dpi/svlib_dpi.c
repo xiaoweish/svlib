@@ -1,5 +1,5 @@
 /*=============================================================================
- *  @brief C implementation of DPI methods 
+ *  @brief C implementation of DPI methods
  *  @author Jonathan Bromley, Verilab (www.verilab.com)
  * =============================================================================
  *
@@ -8,13 +8,13 @@
  * @File: svlib_dpi.c
  *
  * Copyright 2014 Verilab, Inc.
- * 
+ *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
  *    You may obtain a copy of the License at
- * 
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *    Unless required by applicable law or agreed to in writing, software
  *    distributed under the License is distributed on an "AS IS" BASIS,
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -68,7 +68,7 @@ static size_t libStringBufferSize = 0;
  * there is already a buffer, return it. If size<0
  * and there is already a buffer, double its existing
  * size and then return it.
- */ 
+ */
 static char* getLibStringBuffer(size_t size) {
   if (size<=0) {
     if (libStringBuffer==NULL) {
@@ -110,12 +110,13 @@ static size_t getLibStringBufferSize() {
  * and svlib's progress through collecting them.
  * Subsequent calls to svlib_dpi_imported_saBufNext with this chandle will then
  * serve up the strings one by one, finally returning with the chandle set
- * to null to indicate that all the strings have been consumed and the 
+ * to null to indicate that all the strings have been consumed and the
  * C-side internal storage has been freed and is no longer accessible.
  */
 
 /* Each different data source will require its own mem-free callback. */
-typedef void (*freeFunc_decl)(saBuf_p);
+struct saBuf;
+typedef void (*freeFunc_decl)(struct saBuf *p);
 
 typedef struct saBuf {
   char        ** scan;         /* pointer to the current array element       */
@@ -185,11 +186,11 @@ extern void * svlib_dpi_imported_getVlogInfo(
     ) {
   int             status;
   s_vpi_vlog_info info;
-  
+
   /* Ensure result values are zero for easy error handling */
   *version = NULL;
   *product = NULL;
-  
+
   status = vpi_get_vlog_info(&info);
   if (!status) { /*1=ok, 0=fail*/
     /*
@@ -201,7 +202,7 @@ extern void * svlib_dpi_imported_getVlogInfo(
   }
   *version = info.version;
   *product = info.product;
-  return (void*) info.argv;  
+  return (void*) info.argv;
 }
 
 #define ARGV_STACK_PTR_SIZE 32
@@ -212,7 +213,7 @@ extern void * svlib_dpi_imported_getVlogInfo(
  * Function to get successive strings from already-setup vlog_info
  *-------------------------------------------------------------------------------
  * Some parts taken, with small modifications, from Accellera's UVM DPI code.
- * Accellera's authorship is acknowledged. The functionality is slightly 
+ * Accellera's authorship is acknowledged. The functionality is slightly
  * different from Accellera's, in that all nested -f response files are
  * flattened so that all arguments appear as if on a single command line.
  * This lowest-common-denominator behaviour matches some existing tools.
@@ -256,19 +257,19 @@ extern const char * svlib_dpi_imported_getVlogInfoNext (void** info_argv) {
          0==strcmp(*argv_stack[argv_stack_ptr], "-F") )
       {
         // bump past -f at current level
-        ++argv_stack[argv_stack_ptr]; 
+        ++argv_stack[argv_stack_ptr];
         // push -f array argument onto stack
         argv_stack[argv_stack_ptr+1] = (char **)*argv_stack[argv_stack_ptr];
         // bump past -f argument at current level
-        ++argv_stack[argv_stack_ptr]; 
+        ++argv_stack[argv_stack_ptr];
         // update stack pointer
         ++argv_stack_ptr;
         // skip over filename string at start of new -f argument
-        ++argv_stack[argv_stack_ptr]; 
+        ++argv_stack[argv_stack_ptr];
         assert(argv_stack_ptr < ARGV_STACK_PTR_SIZE);
       }
       else
-      {      
+      {
         // return current and move to next
         char *r = *argv_stack[argv_stack_ptr];
         ++argv_stack[argv_stack_ptr];
@@ -304,7 +305,7 @@ extern int32_t svlib_dpi_imported_getcwd(char ** p_result) {
       return 0;
     } else if (errno==ERANGE) {
       if (bSize >= SVLIB_STRING_BUFFER_LONGEST_PATHNAME) {
-        *p_result = "Working directory pathname exceeds maximum buffer length " 
+        *p_result = "Working directory pathname exceeds maximum buffer length "
                     STRINGIFY(SVLIB_STRING_BUFFER_LONGEST_PATHNAME);
         return errno;
       } else {
@@ -339,7 +340,7 @@ extern int32_t svlib_dpi_imported_getenv(char *envVar, char ** p_result) {
  *                            output int     timeItems[tmARRAYSIZE]);
  *----------------------------------------------------------------
  */
- 
+
 static int isLeapYear(int year) {
   return ((year%4==0) && (year%100!=0)) || (year%400==0);
 }
@@ -365,26 +366,26 @@ extern int32_t svlib_dpi_imported_localTime(int64_t epochSeconds, int *timeItems
 
 /*----------------------------------------------------------------
  * import "DPI-C" function int svlib_dpi_imported_timeFormat(
- *                                       input  longint epochSeconds, 
- *                                       input  string  format, 
+ *                                       input  longint epochSeconds,
+ *                                       input  string  format,
  *                                       output string  formatted);
  *----------------------------------------------------------------
  */
 extern int32_t svlib_dpi_imported_timeFormat(int64_t epochSeconds, const char *format, const char **formatted) {
-  
+
   size_t bSize = SVLIB_STRING_BUFFER_START_SIZE;
   char * buf;
   time_t t = epochSeconds;  /* to keep C library time functions happy */
-  
+
   struct tm timeParts;        /* broken-down time */
-  
+
   /* Make the result an empty string iff user's fmt is an empty string */
   if (strlen(format)==0) {
     *formatted = "";
   }
-  
+
   (void) localtime_r(&t, &timeParts);
-  
+
   while (1) {
     buf   = getLibStringBuffer(bSize);
     bSize = getLibStringBufferSize();
@@ -392,7 +393,7 @@ extern int32_t svlib_dpi_imported_timeFormat(int64_t epochSeconds, const char *f
       *formatted = buf;
       return 0;
     } else if (bSize >= SVLIB_STRING_BUFFER_LONGEST_PATHNAME) {
-      *formatted = "timeFormat result exceeds maximum buffer length " 
+      *formatted = "timeFormat result exceeds maximum buffer length "
                   STRINGIFY(SVLIB_STRING_BUFFER_LONGEST_PATHNAME);
       return ERANGE;
     } else {
@@ -401,16 +402,16 @@ extern int32_t svlib_dpi_imported_timeFormat(int64_t epochSeconds, const char *f
   }
 }
 extern int32_t svlib_dpi_imported_timeFormatST(int64_t epochSeconds, const char **timeST) {
-  
+
   size_t bSize = SVLIB_STRING_BUFFER_START_SIZE;
   char * buf;
   int    nChars;
   time_t t = epochSeconds;  /* to keep C library time functions happy */
-  
+
   struct tm timeParts;        /* broken-down time */
 
   (void) localtime_r(&t, &timeParts);
-  
+
   while (1) {
     buf    = getLibStringBuffer(bSize);
     bSize  = getLibStringBufferSize();
@@ -615,10 +616,10 @@ extern uint32_t svlib_dpi_imported_regexRun(
   uint32_t numMatches;
   uint32_t i;
   uint32_t cflags;
-  
+
   /* initialize result */
   *matchCount = 0;
-  
+
   /* result array checks */
   if (svDimensions(matchList) != 1) {
     io_printf("svDimensions=%d, should be 1\n", svDimensions(matchList));
@@ -646,7 +647,7 @@ extern uint32_t svlib_dpi_imported_regexRun(
     }
     matches = malloc(numMatches * sizeof(regmatch_t));
   }
-  
+
   cflags = REG_EXTENDED;
   if (options & regexNOCASE) cflags |= REG_ICASE;
   if (options & regexNOLINE) cflags |= REG_NEWLINE;
@@ -655,7 +656,7 @@ extern uint32_t svlib_dpi_imported_regexRun(
     regfree(&compiled);
     return result;
   }
-  
+
   *matchCount = compiled.re_nsub+1;
   result = regexec(&compiled, &(str[startPos]), numMatches, matches, 0);
   if (result == 0) {
@@ -688,20 +689,20 @@ extern uint32_t svlib_dpi_imported_regexRun(
 extern int32_t svlib_dpi_imported_access(char *path, int mode, int *ok) {
   int flag;
   int err;
-  
+
   if (mode == accessEXISTS) {
     flag = F_OK;
   } else {
     flag = 0;
-    if (mode & accessREAD)  flag |= R_OK; 
-    if (mode & accessWRITE) flag |= W_OK; 
+    if (mode & accessREAD)  flag |= R_OK;
+    if (mode & accessWRITE) flag |= W_OK;
     if (mode & accessEXEC)  flag |= X_OK;
   }
-  
+
   err = access(path, flag);
   *ok = (err == 0) ? 1 : 0;
   if (err == -1) {
-    if ((errno == EACCES) || (errno == EROFS) || (errno == ENOENT)) 
+    if ((errno == EACCES) || (errno == EROFS) || (errno == ENOENT))
       err = 0;
   }
   return err;
