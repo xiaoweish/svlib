@@ -8,20 +8,20 @@
 // @File: svlib_private_base_pkg.svh
 //
 // Copyright 2014 Verilab, Inc.
-// 
+//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
-// 
+//
 //        http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //=============================================================================
-// 
+//
 // This file defines svlib_private_base_pkg, a collection of
 // functionality that is required by other parts of svLib.
 // It also imports all the DPI functions that are required by
@@ -35,6 +35,13 @@
 // user code does not have access directly to the DPI functions,
 // allowing svLib to take full control of the SV/C interaction.
 //=============================================================================
+
+// IUS backward compat
+`ifndef XCELIUM
+  `ifdef INCA
+    `define XCELIUM
+  `endif
+`endif
 
 package svlib_private_base_pkg;
 
@@ -65,8 +72,8 @@ package svlib_private_base_pkg;
       ss.push_back(s);
     end
   endfunction
-  
-  
+
+
   // Mystery problem: Trying to call process::self() from a static
   // method of Obstack#(T) crashes the compiler in VCS 2013.06.
   // Providing this function seems to work around the problem OK.
@@ -151,7 +158,7 @@ package svlib_private_base_pkg;
   //
   class svlibErrorManager extends svlibBase;
 
-    `ifdef INCA
+    `ifdef XCELIUM
       typedef string INDEX_T;
       protected function INDEX_T indexFromProcess(process p);
         return $sformatf("%p", p);
@@ -164,7 +171,7 @@ package svlib_private_base_pkg;
     `endif
 
     // forbid construction
-    protected function new(); 
+    protected function new();
               endfunction
 
     protected int    valuePerProcess   [INDEX_T];
@@ -180,7 +187,7 @@ package svlib_private_base_pkg;
       detailsPerProcess.delete();
       defaultUserBit = 0;
     endfunction
-    
+
     protected function INDEX_T getIndex();
       return indexFromProcess(process::self());
     endfunction
@@ -304,14 +311,14 @@ package svlib_private_base_pkg;
         return "";
       end
     endfunction
-    
+
     protected virtual function string fullMessageByIndex(INDEX_T idx);
-      return $sformatf("%s (errno=%0d): %s", 
-               getText(valuePerProcess[idx]), 
-                 valuePerProcess[idx], 
+      return $sformatf("%s (errno=%0d): %s",
+               getText(valuePerProcess[idx]),
+                 valuePerProcess[idx],
                    detailsPerProcess[idx]);
     endfunction
-    
+
     virtual function string getFullMessage();
       INDEX_T idx = getIndex();
       if (has(idx)) begin
@@ -321,11 +328,11 @@ package svlib_private_base_pkg;
         return "Unknown process";
       end
     endfunction
-    
+
   endclass
 
   //===========================================================================
-  // function scanUint64: not for public API! Assumes that the 
+  // function scanUint64: not for public API! Assumes that the
   // radix letter is OK, and the value-string has been stripped
   // of spaces and is reasonably sane. No handling of -ve numbers.
   // Result is always zero-filled to 64 bits.
@@ -333,7 +340,7 @@ package svlib_private_base_pkg;
   // This function reads from a string representation into a 64-bit value.
   // X/Z values are supported. Underscores are ignored. Otherwise, illegal
   // digits cause an error (0) to be returned and the result is undefined.
-  // Unfortunately, sscanf can't be used because it doesn't tell us when 
+  // Unfortunately, sscanf can't be used because it doesn't tell us when
   // it stopped, so we can't detect bad characters.
   // We already know that the characters are sure to be underscores,
   // hex digits, or X/Z. Leading and trailing underscores have already
@@ -374,7 +381,7 @@ package svlib_private_base_pkg;
         return 1;
       end
       else begin
-      
+
         foreach (v[i]) begin
           if (v[i] == "_") begin
             continue;
@@ -403,7 +410,7 @@ package svlib_private_base_pkg;
         end
         if (v[i] == "X") begin
           digit = 'x;
-        end 
+        end
         else if (v[i] == "Z") begin
           digit = 'z;
         end
