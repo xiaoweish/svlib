@@ -36,6 +36,9 @@
 // allowing svLib to take full control of the SV/C interaction.
 //=============================================================================
 
+`ifndef SVLIB_PRIVATE_BASE_PKG_SVN
+`define SVLIB_PRIVATE_BASE_PKG_SVN
+
 // IUS backward compat
 `ifndef XCELIUM
   `ifdef INCA
@@ -449,3 +452,4 @@ package svlib_private_base_pkg;
   endfunction
 
 endpackage
+`endif
