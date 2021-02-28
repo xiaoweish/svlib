@@ -1,1 +1,2 @@
-../src/dpi/svlib_dpi.c
++incdir+$SVUNIT_USER_INCDIR
+-f ../src/svlib.f

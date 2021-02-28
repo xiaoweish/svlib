@@ -1,13 +1,11 @@
 `include "svunit_defines.svh"
+`include "svlib_macros.svh"
 
-`include "svlib_pkg.sv"
-
-module Str_unit_test;
-
-  import svunit_pkg::*;
+module Str_pkg_test_unit_test;
+  import svunit_pkg::svunit_testcase;
   import svlib_pkg::*;
 
-  string name = "Str_ut";
+  string name = "Str_pkg_test_ut";
   svunit_testcase svunit_ut;
 
 
@@ -15,8 +13,8 @@ module Str_unit_test;
   // This is the UUT that we're
   // running the Unit Tests on
   //===================================
-  Str my_Str;
 
+  Str    my_Str;
   string test_str;
 
   //===================================
@@ -24,7 +22,6 @@ module Str_unit_test;
   //===================================
   function void build();
     svunit_ut = new(name);
-
     my_Str = Str::create(/* New arguments if needed */);
   endfunction
 
@@ -35,6 +32,7 @@ module Str_unit_test;
   task setup();
     svunit_ut.setup();
     /* Place Setup Code Here */
+
   endtask
 
 
@@ -45,6 +43,7 @@ module Str_unit_test;
   task teardown();
     svunit_ut.teardown();
     /* Place Teardown Code Here */
+
   endtask
 
 
@@ -61,7 +60,6 @@ module Str_unit_test;
   //     <test code>
   //   `SVTEST_END
   //===================================
-
   function automatic string displayable(string q[$]);
     string result;
     foreach (q[i]) result = {result, " \"", q[i], "\""};

@@ -1,23 +1,21 @@
 `include "svunit_defines.svh"
+`include "svlib_macros.svh"
 
-`include "svlib_pkg.sv"
-
-module File_unit_test;
-
-  import svunit_pkg::*;
+module File_pkg_test_unit_test;
+  import svunit_pkg::svunit_testcase;
   import svlib_pkg::*;
 
-  string name = "File_ut";
+  string name = "File_pkg_test_ut";
   svunit_testcase svunit_ut;
 
 
   //===================================
-  // This is the UUT that we're 
+  // This is the UUT that we're
   // running the Unit Tests on
   //===================================
-  Pathname my_PN;
 
-  string test_str;
+  Pathname my_PN;
+  string   test_str;
 
   //===================================
   // Build
@@ -33,16 +31,18 @@ module File_unit_test;
   task setup();
     svunit_ut.setup();
     /* Place Setup Code Here */
+
   endtask
 
 
   //===================================
-  // Here we deconstruct anything we 
+  // Here we deconstruct anything we
   // need after running the Unit Tests
   //===================================
   task teardown();
     svunit_ut.teardown();
     /* Place Teardown Code Here */
+
   endtask
 
 
@@ -59,9 +59,8 @@ module File_unit_test;
   //     <test code>
   //   `SVTEST_END
   //===================================
-  
   `SVUNIT_TESTS_BEGIN
-  
+
   `SVTEST(File_create_check)
 
     my_PN=Pathname::create("/a/b/c/d///e");
@@ -70,8 +69,7 @@ module File_unit_test;
     my_PN.set(my_PN.tail(4));
     `FAIL_UNLESS_STR_EQUAL(my_PN.get(), "b/c/d/e")
     `FAIL_UNLESS_EQUAL(my_PN.isAbsolute(), 0)
-    
-    
+
   `SVTEST_END
 
   `SVTEST(File_append_check)
@@ -80,10 +78,10 @@ module File_unit_test;
     `FAIL_UNLESS_STR_EQUAL(my_PN.get(), "b/c/d/e/f/g")
     `FAIL_UNLESS_STR_EQUAL(my_PN.dirname(), "b/c/d/e/f");
     `FAIL_UNLESS_STR_EQUAL(my_PN.extension(), "")
-    
+
     my_PN.append("/q/r/stuff.it///");
     `FAIL_UNLESS_STR_EQUAL(my_PN.get(), "/q/r/stuff.it")
-    
+
   `SVTEST_END
 
   `SVTEST(File_tail_extn_check)
@@ -99,7 +97,7 @@ module File_unit_test;
     `FAIL_UNLESS_STR_EQUAL(my_PN.dirname(2), "/q");
     `FAIL_UNLESS_STR_EQUAL(my_PN.dirname(3), "/");
     `FAIL_UNLESS_STR_EQUAL(my_PN.dirname(4), "/");
-    
+
     my_PN.set(my_PN.tail(3));
     `FAIL_UNLESS_STR_EQUAL(my_PN.tail(), "stuff.it")
     `FAIL_UNLESS_STR_EQUAL(my_PN.tail(2), "r/stuff.it")
@@ -117,7 +115,6 @@ module File_unit_test;
 
   `SVTEST_END
 
-  
   `SVUNIT_TESTS_END
 
 endmodule

@@ -1,5 +1,18 @@
-TESTSUITES = ./.__testsuite.sv
-UNITTESTS = svlib_Str_pkg_unit_test.sv svlib_Regex_pkg_unit_test.sv svlib_File_pkg_unit_test.sv
+#- Makefile for unit-test invocation
+#-
 
--include svunit.mk
-include $(SVUNIT_INSTALL)/bin/cfg.mk
+.PHONY: ius vcs questa clean
+ius:
+	runSVUnit -s $@
+
+vcs:
+	runSVUnit -s $@
+
+questa:
+	runSVUnit -s $@
+
+clean:
+	-rm -f *.log *.history .svunit.f *.vstf
+	-rm -rf xcelium.d work
+
+# end

@@ -1,18 +1,16 @@
 `include "svunit_defines.svh"
+`include "svlib_macros.svh"
 
-`include "svlib_pkg.sv"
-
-module Regex_unit_test;
-
-  import svunit_pkg::*;
+module Regex_pkg_test_unit_test;
+  import svunit_pkg::svunit_testcase;
   import svlib_pkg::*;
 
-  string name = "Regex_ut";
+  string name = "Regex_pkg_test_ut";
   svunit_testcase svunit_ut;
 
 
   //===================================
-  // This is the UUT that we're 
+  // This is the UUT that we're
   // running the Unit Tests on
   //===================================
   Regex re;
@@ -25,7 +23,7 @@ module Regex_unit_test;
     svunit_ut = new(name);
     str = Str::create("");
     re  = Regex::create("");
-  endfunction
+ endfunction
 
 
   //===================================
@@ -34,16 +32,18 @@ module Regex_unit_test;
   task setup();
     svunit_ut.setup();
     /* Place Setup Code Here */
+
   endtask
 
 
   //===================================
-  // Here we deconstruct anything we 
+  // Here we deconstruct anything we
   // need after running the Unit Tests
   //===================================
   task teardown();
     svunit_ut.teardown();
     /* Place Teardown Code Here */
+
   endtask
 
 
@@ -60,19 +60,19 @@ module Regex_unit_test;
   //     <test code>
   //   `SVTEST_END
   //===================================
-  
   function automatic string displayable(string q[$]);
     string result;
     foreach (q[i]) result = {result, " \"", q[i], "\""};
     return result;
   endfunction
-  
+
+
   `SVUNIT_TESTS_BEGIN
-  
+
   `SVTEST(RE_check)
-  
+
   int result;
-  
+
   re.setRE("[A-Z]{3}");
   str.set("012ABC678");
   result = re.test(str, 0);
@@ -94,7 +94,7 @@ module Regex_unit_test;
   str.set("012345678");
   result = re.test(str, 0);
   `FAIL_IF(result)
-  
+
   re.setRE("a(bc");
   `FAIL_UNLESS(re.getError()!=0)
   result = re.test(str, 0);
@@ -123,7 +123,7 @@ module Regex_unit_test;
     `FAIL_UNLESS_EQUAL(L,17)
     `FAIL_UNLESS_EQUAL(len,1)
   end
-  
+
   re.setRE("(na)+");
   re.setOpts(0);
   result = re.test(.s(Str::create("yes, we have no bananas")),.startPos(17));
@@ -144,19 +144,19 @@ module Regex_unit_test;
     `FAIL_UNLESS_EQUAL(len,2)
     `FAIL_UNLESS_STR_EQUAL(match, "na")
   end
-  
+
   `SVTEST_END
-  
+
   `SVTEST(regex_match_fail_check)
-  
+
   re = regex_match("yes, we have no bananas", "z");
   `FAIL_UNLESS(re == null)
-  
+
   re = regex_match("yes, we have no bananas", "x(z");
   `FAIL_UNLESS(re == null)
-  
+
   `SVTEST_END
-  
+
   `SVTEST(RE_subst_check)
   int count;
   str.set("yes, we have no bananas");
@@ -165,25 +165,25 @@ module Regex_unit_test;
   count = re.subst("you");
   `FAIL_UNLESS_EQUAL(count,1)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you have no bananas")
-  
+
   re.setRE("a(.)");
   count = re.substAll("a$1$$$1");
   `FAIL_UNLESS_EQUAL(count,4)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you hav$ve no ban$nan$nas$s")
-  
+
   re.setRE("(.)\\$\\1");
   count = re.substAll("$1");
   `FAIL_UNLESS_EQUAL(count,4)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you have no bananas")
-  
+
   re.setRE("A.");
   re.setOpts(Regex::NOCASE);
   count = re.substAll("$[$2$_$0$&$1$]");
   `FAIL_UNLESS_EQUAL(count,4)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "yes, you h[avavav]e no b[ananan][ananan][asasas]")
-  
+
   `SVTEST_END
-  
+
   `SVTEST(regsub_emptymatch_check)
   int count;
   re.setRE("");
@@ -216,7 +216,8 @@ module Regex_unit_test;
   `FAIL_UNLESS_EQUAL(count,1)
   `FAIL_UNLESS_STR_EQUAL(str.get(), "#")
   `SVTEST_END
-  
+
+
   `SVUNIT_TESTS_END
 
 endmodule
