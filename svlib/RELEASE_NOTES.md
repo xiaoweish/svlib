@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - not released yet
 
 ### Changed
+- resolved issue #6
 - resolved issue #11: migrated utest/ to svunit 3.34 (https://github.com/tudortimi/svunit)
 - resolved issue #10
 - moved repository from Trac to bitbucket
