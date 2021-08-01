@@ -2,7 +2,7 @@
 
 This uses svunit Version 3.34.x from https://github.com/tudortimi/svunit
 
-## Prequisites (for bash): ##
+## Prerequisites (for bash): ##
 
 * expects simulator executable in ``PATH``
 * `` > . SourceMe`` (must be customized depending on svunit directory location)
